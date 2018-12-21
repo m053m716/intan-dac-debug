@@ -1,4 +1,4 @@
-function fig = plotDetectedSpikes(dac,dig,w,n_samples,th,COL)
+function fig = plotDetectedSpikes(dac,dig,w,th,COL)
 %% PLOTDETECTEDSPIKES   Plot spikes detected by DAC comparator
 %
 %  fig = PLOTDETECTEDSPIKES(dac,dig);
@@ -22,6 +22,8 @@ fsm_complete = find(dig.data(1,:));
 % Get some number of samples around the event of interest:
 ivec = -2:(n_samples+1);
 
+% Get max sample number for offset
+n_samples = max(max(w));
 
 %% FIND ALL SPIKES AND PLOT
 % Each DAC channel is the same amplifier channel, routed to a different

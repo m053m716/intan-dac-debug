@@ -27,14 +27,18 @@ amp = load(fullfile(BLOCK,[BLOCK REC '-AMPData.mat']));
 
 %% DO DATA CONVERSIONS
 w = convertFSMWindow(W); % Window "stop" is non-inclusive. Represent that.
-n_samples = max(max(w)); % Duration of FSM from onset to complete
 th = convertThresh(TH);  % Obtain threshold bit value
+th_uV = [TH, TH];        % Threshold (uV) for convenience
+
+% amp.filt = dac_HPF(amp.bits,300,fs);
+amp.filt = dac_HPF(amp.bits(1,1:2000),300,amp.fs);
 
 %% IDENTIFY TRIGGERS
-spikeFig = plotDetectedSpikes(dac,dig,w,n_samples,th,COL);
+% spikeFig = plotDetectedSpikes(dac,dig,w,th,COL);
 
 %% MAKE FIGURE FOR OVERALL PLOT
-[segmentFig,x] = plotLongSegment([4 7],dac,dig,th,COL);
+% [segmentFig,x] = plotLongSegment([0.05 0.10],dac,dig,th,COL,w);
+% [segmentFig,x] = plotLongSegment([0.05 0.10],amp,dig,th,COL,w,'PLOT_TYPE','filt');
 
 %% MAKE FIGURE FOR STREAM COMPARISON
 % [fig1,fig2] = plotTriggerStreams(amp.t,amp.data(1,:),dac.bits(1,:));
