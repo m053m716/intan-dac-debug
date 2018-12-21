@@ -36,10 +36,11 @@ end
 
 %% DAC VALUE STARTS FROM "wire [15:0] DAC_register"
 % DAC_register is fixed(data_in,unsigned,16 total bits,no fractional bits)
-DAC_register = fi(data_in,0,16,0);
+% DAC_register = fi(data_in,0,16,0);
 
 % Scaled input is a signed integer
-HPF_output = sfi(DAC_register);
+% HPF_output = sfi(DAC_register);
+data_out = data_in ./ 2;
 
 % 
 

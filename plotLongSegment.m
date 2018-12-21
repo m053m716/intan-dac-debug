@@ -72,7 +72,7 @@ subplot(2,1,1);
 % t_evt = dig.t(i_evt-w(2));
 % s_evt = t_evt((t_evt >= T(1)) & (t_evt <= T(2)));
 
-a_evt = dig.t(find(dig.data(2,:)>0)+w(3));
+a_evt = dig.t(find(dig.data(2,:)>0)-w(3));
 a_evt = a_evt((a_evt>=T(1)) & (a_evt <= T(2)));
 
 x = timeseries(data.(PLOT_TYPE)(1,t_idx),data.t(t_idx),...

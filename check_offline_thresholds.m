@@ -37,8 +37,8 @@ amp.filt = dac_HPF(amp.bits(1,1:2000),300,amp.fs);
 % spikeFig = plotDetectedSpikes(dac,dig,w,th,COL);
 
 %% MAKE FIGURE FOR OVERALL PLOT
-% [segmentFig,x] = plotLongSegment([0.05 0.10],dac,dig,th,COL,w);
-% [segmentFig,x] = plotLongSegment([0.05 0.10],amp,dig,th,COL,w,'PLOT_TYPE','filt');
+% [segmentFig,x] = plotLongSegment([0.050 0.075],dac,dig,th,COL,w);
+[segmentFig,x] = plotLongSegment([0.050 0.075],amp,dig,th,COL,w,'PLOT_TYPE','filt');
 
 %% MAKE FIGURE FOR STREAM COMPARISON
 % [fig1,fig2] = plotTriggerStreams(amp.t,amp.data(1,:),dac.bits(1,:));
