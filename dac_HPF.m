@@ -72,7 +72,7 @@ elseif (filterCoefficient > 65535) % If too large
    filterCoefficient = 65535;
 end
 
-HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+HPF_coefficient = fi(2*filterCoefficient,0,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
 % the 2* is for one left shift? sounds smart :)
      
      % word length = 18, OverflowAction=saturate but input wire [15:0] HPF_coefficient
@@ -86,9 +86,9 @@ HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,'SumWordL
 
 %% SPECIFY INPUT AND OUTPUT TYPES
 DAC_register = zeros(size(DAC_input),'uint16');
-DAC_input = fi(DAC_input,1,16,0,'ProductWordLength',36,...
+DAC_input = fi(DAC_input,0,16,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB');
-HPF_state = fi(HPF_state,0,32,0,'ProductWordLength',36,...
+HPF_state = fi(HPF_state,1,32,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32 bit words.
      
 
