@@ -39,6 +39,11 @@ function [DAC_register,HPF_new_state] = dac_HPF(DAC_input,fc,fs,HPF_state)
 FS = 30000; % Default sample rate is 20 kSamples/sec
 FC = 300;   % Default cutoff frequency
 
+%% other
+n_DAC_bits=16;
+n_DAC_levels=2^n_DAC_bits;
+V_per_bits=10.24*2/n_DAC_levels;
+
 %% PARSE INPUT
 switch nargin
    case 1
@@ -86,25 +91,19 @@ HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,...
 
 %% SPECIFY INPUT AND OUTPUT TYPES
 DAC_register = zeros(size(DAC_input),'uint16');
-DAC_input = fi(DAC_input,0,16,0,'ProductWordLength',36,...
+DAC_input = fi(DAC_input,1,16,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB');
 HPF_state = fi(HPF_state,0,32,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32 bit words.
      
-%% where are these guys ?
-% wire [15:0]    DAC_input_twos_comp, DAC_input_offset, DAC_register_pre, subtract_result, add_result;
-% reg  [15:0]    DAC_input_suppressed, DAC_input_scaled;
-% wire [15:0]		pre_ref_input_twos_comp, software_reference_twos_comp, input_minus_ref;
-% wire [16:0]		input_minus_ref_before_limit;
-% wire				negative_overflow_ref, positive_overflow_ref;
 
 %% RUN FILTER
 fprintf(1,'Filtering...000%%\n');
 pct = 0;
 N = length(DAC_input);
 for i = 1:N
-   HPF_input = preScaleForMultiply(DAC_input(i));
-   multiplier_in_before_limit = twosCompSubtract(HPF_input,HPF_state); % must be 19 bits (wire [18:0] 	multiplier_in_before_limit;). Now it's 20!
+   HPF_input = preScaleForMultiply(DAC_input(i)); % signed
+   multiplier_in_before_limit = twosCompSubtract(HPF_input,HPF_state); % must be 19 bits (wire [18:0] 	multiplier_in_before_limit;). 
    [negative_overflow,positive_overflow] = checkOverflow(HPF_input,HPF_state,multiplier_in_before_limit);
    if logical(positive_overflow)
       multiplier_in = fi(131071,1,18,0,...
@@ -124,16 +123,16 @@ for i = 1:N
    
    % Concatenate buffer zeros to make 18-bit word for multiplier
    multiplier_out = multiply18x18_36(multiplier_in,HPF_coefficient); %I kept the two numbers signed
-   multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),0,32,0,...
+   multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),1,32,0,...
          'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32-bit words.
-   HPF_new_state = HPF_state + multiplier_out_34_3; %word length is 33 now
+   HPF_new_state = HPF_state + multiplier_out_34_3; 
    HPF_output = bitsliceget(multiplier_in,18,3); % mult_in [17:2] %% back to 16 bits
    
    %% so far it's ok..
    DAC_register_pre = fi(bitconcat(bitcmp(getmsb(HPF_output)),bitsliceget(HPF_output,15,1)),0,16,0); % two's complement back to unsignedInt16
-   DAC_register(i) = cast(DAC_register_pre,'uint16');
-   HPF_state = bitsliceget(HPF_new_state,32,1); % ignore first bit (overflow) because of the 33 bit sum
+   DAC_register(i) = cast(DAC_register_pre,'uint16'); %% it saturates usually
+   HPF_state = HPF_new_state;  
    
 %% 	// Next, scale the input by a factor of 2^gain by left shifting, but preserving the
 %% 	// sign and saturating if the scaling exceeds the range of a 16-bit signed number.   
@@ -154,7 +153,7 @@ end
 %           'SumWordLength',32,...
 %           'SumMode','KeepMSB'); % this adds two zeros on the left going from 16 bits to 18 and now it's signed
        % this is wrong because you want to add two zeros on the right!!! {~DAC_input[15], DAC_input[14:0], 2'b00};
-       y = fi(bin2dec([x.bin '00']),0,18,0,'ProductWordLength',36,...
+       y = fi(x*4,1,18,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
      % now shift to the left of two positions. I kept it formally unsigned
      % even though it's a two's complement
@@ -162,9 +161,9 @@ end
 
     % ok
    function z = twosCompSubtract(x,y)
-      xb = fi(x,0,18,0,'ProductWordLength',36,...
-         'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); % i don't know but I put as unsigned
-      yb = fi(bitsliceget(y,32,15),0,18,0,'ProductWordLength',36,...
+      xb = fi(x,1,18,0,'ProductWordLength',36,...
+         'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+      yb = fi(bitsliceget(y,32,15),1,18,0,'ProductWordLength',36,...
          'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); % to me this must be unsigned otherwise when state=0, cmp(0)=1111 interpreted as -1 if yb was signed
       z = xb + bitcmp(yb) + 1; % multiplier_in_before_limit = HPF_input + ~HPF_state[31:14] + 1; // HPF_input - HPF_state
    end
