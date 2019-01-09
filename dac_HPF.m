@@ -39,11 +39,6 @@ function [DAC_register,HPF_new_state] = dac_HPF(DAC_input,fc,fs,HPF_state)
 FS = 30000; % Default sample rate is 20 kSamples/sec
 FC = 300;   % Default cutoff frequency
 
-%% other
-n_DAC_bits=16;
-n_DAC_levels=2^n_DAC_bits;
-V_per_bits=10.24*2/n_DAC_levels;
-
 %% PARSE INPUT
 switch nargin
    case 1
@@ -77,8 +72,8 @@ elseif (filterCoefficient > 65535) % If too large
    filterCoefficient = 65535;
 end
 
-HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); %the 2* is for one left shift? sounds smart :)
+HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+% the 2* is for one left shift? sounds smart :)
      
      % word length = 18, OverflowAction=saturate but input wire [15:0] HPF_coefficient
      % then it's used in multiplier18x18 adding 0 before and after. So in
@@ -101,89 +96,48 @@ HPF_state = fi(HPF_state,0,32,0,'ProductWordLength',36,...
 fprintf(1,'Filtering...000%%\n');
 pct = 0;
 N = length(DAC_input);
-for i = 1:N
-   HPF_input = preScaleForMultiply(DAC_input(i)); % signed
-   multiplier_in_before_limit = twosCompSubtract(HPF_input,HPF_state); % must be 19 bits (wire [18:0] 	multiplier_in_before_limit;). 
-   [negative_overflow,positive_overflow] = checkOverflow(HPF_input,HPF_state,multiplier_in_before_limit);
-   if logical(positive_overflow)
-      multiplier_in = fi(131071,1,18,0,...
-         'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % 2^17-1 = 20000
-   else
-      if logical(negative_overflow)
-         multiplier_in = fi(131072,1,18,0,...
-            'ProductWordLength',36,...
-            'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); %% 2^17 = 1ffff
-      else
-         multiplier_in = fi(multiplier_in_before_limit,1,18,0,...
-            'ProductWordLength',36,...
-            'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
-      end
-   end
-   
-   % Concatenate buffer zeros to make 18-bit word for multiplier
-   multiplier_out = multiply18x18_36(multiplier_in,HPF_coefficient); %I kept the two numbers signed
-   multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),1,32,0,...
-         'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32-bit words.
-   HPF_new_state = HPF_state + multiplier_out_34_3; 
-   HPF_output = bitsliceget(multiplier_in,18,3); % mult_in [17:2] %% back to 16 bits
-   
-   %% so far it's ok..
-   DAC_register_pre = fi(bitconcat(bitcmp(getmsb(HPF_output)),bitsliceget(HPF_output,15,1)),0,16,0); % two's complement back to unsignedInt16
-   DAC_register(i) = cast(DAC_register_pre,'uint16'); %% it saturates usually
-   HPF_state = HPF_new_state;  
-   
-%% 	// Next, scale the input by a factor of 2^gain by left shifting, but preserving the
-%% 	// sign and saturating if the scaling exceeds the range of a 16-bit signed number.   
-
-
-   % And update the status indicator in Command Window:
-   fraction_done = floor(100 * (i / N));
-   if fraction_done ~= pct
-      fprintf(1,'\b\b\b\b\b%.3d%%\n',fraction_done);
-      pct = fraction_done;
-   end
+for curr_sample = 1:N
+    DAC_input_two_comp(curr_sample) = bitset(DAC_input(curr_sample),16,bitcmp(bitget(DAC_input(curr_sample),16))); % still formally unsigned but with binary values in two's complement
+    HPF_input = fi(DAC_input_two_comp(curr_sample)*4,1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB');
+    % now shift to the left of two positions. I kept it formally unsigned
+    % even though it's a two's complement
+    
+    HPF_state_31_14 = fi(bitsliceget(HPF_state,32,15),1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); % to me this must be unsigned otherwise when state=0, cmp(0)=1111 interpreted as -1 if yb was signed
+    multiplier_in_before_limit = HPF_input + bitcmp(HPF_state_31_14) + 1; % multiplier_in_before_limit = HPF_input + ~HPF_state[31:14] + 1; // HPF_input - HPF_state
+    
+    negative_overflow = getmsb(HPF_input) & bitcmp(getmsb(HPF_state)) & bitcmp(bitget(multiplier_in_before_limit,18));
+    positive_overflow = bitcmp(getmsb(HPF_input)) & getmsb(HPF_state) & bitget(multiplier_in_before_limit,18);
+    
+    if logical(positive_overflow)
+        multiplier_in = fi(131071,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+        % 2^17-1 = 20000
+    else
+        if logical(negative_overflow)
+            multiplier_in = fi(131072,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+            % 2^17 = 1ffff
+        else
+            multiplier_in = fi(multiplier_in_before_limit,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+        end
+    end
+    
+    % Concatenate buffer zeros to make 18-bit word for multiplier
+    multiplier_out = multiplier_in*HPF_coefficient; %I kept the two numbers signed
+    multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),1,32,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); %
+    HPF_new_state = HPF_state + multiplier_out_34_3;
+    HPF_output = bitsliceget(multiplier_in,18,3); % mult_in [17:2] %% back to 16 bits
+    
+    %% so far it's ok..
+    DAC_register_pre = fi(bitconcat(bitcmp(getmsb(HPF_output)),bitsliceget(HPF_output,15,1)),0,16,0); % two's complement back to unsignedInt16
+    DAC_register(curr_sample) = cast(DAC_register_pre,'uint16'); %% it saturates usually
+    HPF_state = HPF_new_state;
+    
+    
+    %% And update the status indicator in Command Window:
+    fraction_done = floor(100 * (curr_sample / N));
+    if fraction_done ~= pct
+        fprintf(1,'\b\b\b\b\b%.3d%%\n',fraction_done);
+        pct = fraction_done;
+    end
 end
 
-%% SUB-FUNCTIONS TO STAY ORGANIZED
-   function y = preScaleForMultiply(x)
-      x = bitset(x,16,bitcmp(bitget(x,16))); % still formally unsigned but with binary values in two's complement
-%       y = fi(x,1,18,0,'ProductWordLength',36,...
-%           'SumWordLength',32,...
-%           'SumMode','KeepMSB'); % this adds two zeros on the left going from 16 bits to 18 and now it's signed
-       % this is wrong because you want to add two zeros on the right!!! {~DAC_input[15], DAC_input[14:0], 2'b00};
-       y = fi(x*4,1,18,0,'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
-     % now shift to the left of two positions. I kept it formally unsigned
-     % even though it's a two's complement
-   end
-
-    % ok
-   function z = twosCompSubtract(x,y)
-      xb = fi(x,1,18,0,'ProductWordLength',36,...
-         'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
-      yb = fi(bitsliceget(y,32,15),1,18,0,'ProductWordLength',36,...
-         'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); % to me this must be unsigned otherwise when state=0, cmp(0)=1111 interpreted as -1 if yb was signed
-      z = xb + bitcmp(yb) + 1; % multiplier_in_before_limit = HPF_input + ~HPF_state[31:14] + 1; // HPF_input - HPF_state
-   end
-    % ok 'cause it's working bit per bit
-   function [neg_ov,pos_ov] = checkOverflow(in,state,prelimit)
-%       neg_ov = getmsb(in) & bitcmp(getmsb(state)) & bitcmp(getmsb(prelimit)); %getmsb of prelimit is not correct for sure:
-      % in verilog: ~multiplier_in_before_limit[17] but it's a 19 bit wire
-      % so it's not the MSB!!
-%       pos_ov = bitcmp(getmsb(in)) & getmsb(state) & getmsb(prelimit);
-      
-      %% get bit 18 and not MSB from prelimit
-      neg_ov = getmsb(in) & bitcmp(getmsb(state)) & bitcmp(bitget(prelimit,18)); 
-      pos_ov = bitcmp(getmsb(in)) & getmsb(state) & bitget(prelimit,18);
-   end
-    
-   % not sure about this! we don't know what's going on in the multiplier_18x18 
-   function out = multiply18x18_36(in,coeff)
-      out =  in*coeff;
-   end
-
-
-    
 end
