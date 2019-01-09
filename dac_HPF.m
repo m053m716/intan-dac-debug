@@ -72,7 +72,7 @@ elseif (filterCoefficient > 65535) % If too large
    filterCoefficient = 65535;
 end
 
-HPF_coefficient = fi(2*filterCoefficient,0,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+HPF_coefficient = fi(2*filterCoefficient,0,18,0,'ProductWordLength',36,'ProductMode','KeepMSB','SumWordLength',19,'SumMode','KeepMSB');
 % the 2* is for one left shift? sounds smart :)
      
      % word length = 18, OverflowAction=saturate but input wire [15:0] HPF_coefficient
@@ -86,10 +86,8 @@ HPF_coefficient = fi(2*filterCoefficient,0,18,0,'ProductWordLength',36,'SumWordL
 
 %% SPECIFY INPUT AND OUTPUT TYPES
 DAC_register = zeros(size(DAC_input),'uint16');
-DAC_input = fi(DAC_input,0,16,0,'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB');
-HPF_state = fi(HPF_state,1,32,0,'ProductWordLength',36,...
-         'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32 bit words.
+DAC_input = fi(DAC_input,0,16,0,'SumWordLength',32,'SumMode','KeepMSB');
+HPF_state = fi(HPF_state,1,32,0); % I put 33 because otherwise we have a problem with the sum of 2 32 bit words.
      
 
 %% RUN FILTER
@@ -98,25 +96,25 @@ pct = 0;
 N = length(DAC_input);
 for curr_sample = 1:N
     DAC_input_two_comp(curr_sample) = bitset(DAC_input(curr_sample),16,bitcmp(bitget(DAC_input(curr_sample),16))); % still formally unsigned but with binary values in two's complement
-    HPF_input = fi(DAC_input_two_comp(curr_sample)*4,1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB');
+    HPF_input = fi(DAC_input_two_comp(curr_sample)*4,1,18,0,'SumWordLength',19,'SumMode','KeepMSB');
     % now shift to the left of two positions. I kept it formally unsigned
     % even though it's a two's complement
     
-    HPF_state_31_14 = fi(bitsliceget(HPF_state,32,15),1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB'); % to me this must be unsigned otherwise when state=0, cmp(0)=1111 interpreted as -1 if yb was signed
+    HPF_state_31_14 = fi(bitsliceget(HPF_state,32,15),1,18,0,'SumWordLength',19,'SumMode','KeepMSB'); % to me this must be unsigned otherwise when state=0, cmp(0)=1111 interpreted as -1 if yb was signed
     multiplier_in_before_limit = HPF_input + bitcmp(HPF_state_31_14) + 1; % multiplier_in_before_limit = HPF_input + ~HPF_state[31:14] + 1; // HPF_input - HPF_state
     
     negative_overflow = getmsb(HPF_input) & bitcmp(getmsb(HPF_state)) & bitcmp(bitget(multiplier_in_before_limit,18));
     positive_overflow = bitcmp(getmsb(HPF_input)) & getmsb(HPF_state) & bitget(multiplier_in_before_limit,18);
     
     if logical(positive_overflow)
-        multiplier_in = fi(131071,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+        multiplier_in = fi(131071,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB'); 
         % 2^17-1 = 20000
     else
         if logical(negative_overflow)
-            multiplier_in = fi(131072,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+            multiplier_in = fi(131072,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB'); 
             % 2^17 = 1ffff
         else
-            multiplier_in = fi(multiplier_in_before_limit,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+            multiplier_in = fi(multiplier_in_before_limit,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB');
         end
     end
     

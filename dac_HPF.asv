@@ -39,11 +39,6 @@ function [DAC_register,HPF_new_state] = dac_HPF(DAC_input,fc,fs,HPF_state)
 FS = 30000; % Default sample rate is 20 kSamples/sec
 FC = 300;   % Default cutoff frequency
 
-%% other
-n_DAC_bits=16;
-n_DAC_levels=2^n_DAC_bits;
-V_per_bits=10.24*2/n_DAC_levels;
-
 %% PARSE INPUT
 switch nargin
    case 1
@@ -77,7 +72,7 @@ elseif (filterCoefficient > 65535) % If too large
    filterCoefficient = 65535;
 end
 
-HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+HPF_coefficient = fi(2*filterCoefficient,0,18,0,'ProductWordLength',36,'ProductMode','KeepMSB');
 % the 2* is for one left shift? sounds smart :)
      
      % word length = 18, OverflowAction=saturate but input wire [15:0] HPF_coefficient
@@ -91,9 +86,9 @@ HPF_coefficient = fi(2*filterCoefficient,1,18,0,'ProductWordLength',36,'SumWordL
 
 %% SPECIFY INPUT AND OUTPUT TYPES
 DAC_register = zeros(size(DAC_input),'uint16');
-DAC_input = fi(DAC_input,1,16,0,'ProductWordLength',36,...
+DAC_input = fi(DAC_input,0,16,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB');
-HPF_state = fi(HPF_state,0,32,0,'ProductWordLength',36,...
+HPF_state = fi(HPF_state,1,32,0,'ProductWordLength',36,...
          'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); % I put 33 because otherwise we have a problem with the sum of 2 32 bit words.
      
 
@@ -101,9 +96,9 @@ HPF_state = fi(HPF_state,0,32,0,'ProductWordLength',36,...
 fprintf(1,'Filtering...000%%\n');
 pct = 0;
 N = length(DAC_input);
-for i = 1:N
-    DAC_input_two_comp(i) = bitset(DAC_input(i),16,bitcmp(bitget(DAC_input(i),16))); % still formally unsigned but with binary values in two's complement
-    HPF_input = fi(DAC_input_two_comp(i)*4,1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB');
+for curr_sample = 1:N
+    DAC_input_two_comp(curr_sample) = bitset(DAC_input(curr_sample),16,bitcmp(bitget(DAC_input(curr_sample),16))); % still formally unsigned but with binary values in two's complement
+    HPF_input = fi(DAC_input_two_comp(curr_sample)*4,1,18,0,'ProductWordLength',36,'SumWordLength',19,'SumMode','KeepMSB','ProductMode','KeepMSB');
     % now shift to the left of two positions. I kept it formally unsigned
     % even though it's a two's complement
     
@@ -114,14 +109,14 @@ for i = 1:N
     positive_overflow = bitcmp(getmsb(HPF_input)) & getmsb(HPF_state) & bitget(multiplier_in_before_limit,18);
     
     if logical(positive_overflow)
-        multiplier_in = fi(131071,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+        multiplier_in = fi(131071,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB'); 
         % 2^17-1 = 20000
     else
         if logical(negative_overflow)
-            multiplier_in = fi(131072,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB'); 
+            multiplier_in = fi(131072,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB'); 
             % 2^17 = 1ffff
         else
-            multiplier_in = fi(multiplier_in_before_limit,1,18,0,'ProductWordLength',36,'SumWordLength',32,'SumMode','KeepMSB','ProductMode','KeepMSB');
+            multiplier_in = fi(multiplier_in_before_limit,1,18,0,'ProductWordLength',36,'ProductMode','KeepMSB');
         end
     end
     
@@ -133,12 +128,12 @@ for i = 1:N
     
     %% so far it's ok..
     DAC_register_pre = fi(bitconcat(bitcmp(getmsb(HPF_output)),bitsliceget(HPF_output,15,1)),0,16,0); % two's complement back to unsignedInt16
-    DAC_register(i) = cast(DAC_register_pre,'uint16'); %% it saturates usually
+    DAC_register(curr_sample) = cast(DAC_register_pre,'uint16'); %% it saturates usually
     HPF_state = HPF_new_state;
     
     
     %% And update the status indicator in Command Window:
-    fraction_done = floor(100 * (i / N));
+    fraction_done = floor(100 * (curr_sample / N));
     if fraction_done ~= pct
         fprintf(1,'\b\b\b\b\b%.3d%%\n',fraction_done);
         pct = fraction_done;
