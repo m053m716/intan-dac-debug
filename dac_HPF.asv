@@ -127,7 +127,7 @@ for i = 1:N
    multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),0,32,0,...
          'MaxProductWordLength',36,...
          'MaxSumWordLength',33); % I put 33 because otherwise we have a problem with the sum of 2 32-bit words.
-   HPF_new_state = HPF_state + multiplier_out_34_3; 
+   HPF_new_state = HPF_state + multiplier_out_34_3; %word length is 33 now
    HPF_output = bitsliceget(multiplier_in,18,3); % mult_in [17:2] %% back to 16 bits
    
    %% so far it's ok..
@@ -170,10 +170,14 @@ end
    end
     % ok 'cause it's working bit per bit
    function [neg_ov,pos_ov] = checkOverflow(in,state,prelimit)
-      neg_ov = getmsb(in) & bitcmp(getmsb(state)) & bitcmp(getmsb(prelimit)); %getmsb of prelimit is not correct for sure:
+%       neg_ov = getmsb(in) & bitcmp(getmsb(state)) & bitcmp(getmsb(prelimit)); %getmsb of prelimit is not correct for sure:
       % in verilog: ~multiplier_in_before_limit[17] but it's a 19 bit wire
       % so it's not the MSB!!
-      pos_ov = bitcmp(getmsb(in)) & getmsb(state) & getmsb(prelimit);
+%       pos_ov = bitcmp(getmsb(in)) & getmsb(state) & getmsb(prelimit);
+      
+      %% get bit 18 and not MSB from prelimit
+      neg_ov = getmsb(in) & bitcmp(getmsb(state)) & bitcmp(bitget(prelimit,18)); 
+      pos_ov = bitcmp(getmsb(in)) & getmsb(state) & bitget(prelimit,18);
    end
     
    % not sure about this! we don't know what's going on in the multiplier_18x18 
