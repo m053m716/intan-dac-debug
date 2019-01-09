@@ -13,6 +13,9 @@ mV_per_uV=1e3*V_per_bits/0.195;
 % What is missing when you retrieve data is the gain that you set during
 % the experiment. 
 
+% Why 1.6: range DAC / range ADC (both of them are 16 bits
+(20.48*1e3)/(n_DAC_levels*0.195)
+% or the same: DAC_V_per_bits=312.5uV / ADC_V_per_bits=0.195uV = 1.602564102564103e+03
 %% quantization error ?
 figure
 h(1)=subplot(3,1,1);
