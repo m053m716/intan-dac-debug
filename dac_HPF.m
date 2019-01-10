@@ -130,7 +130,7 @@ for curr_sample = 1:N
     multiplier_in.fimath=F_sum_19_prod_36;
     % Concatenate buffer zeros to make 18-bit word for multiplier
     multiplier_out = multiplier_in*HPF_coefficient; %I kept the two numbers signed
-    multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),0,32,0); %
+    multiplier_out_34_3=fi(bitsliceget(multiplier_out,35,4),1,32,0); %
     multiplier_out_34_3.fimath=F_sum_32_prod_36;
     HPF_new_state = HPF_state + multiplier_out_34_3;
     HPF_output = bitsliceget(multiplier_in,18,3); % mult_in [17:2] %% back to 16 bits
