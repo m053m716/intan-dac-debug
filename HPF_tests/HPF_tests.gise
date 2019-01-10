@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<generated_project xmlns="http://www.xilinx.com/XMLSchema" xmlns:xil_pn="http://www.xilinx.com/XMLSchema">
+
+  <!--                                                          -->
+
+  <!--             For tool use only. Do not edit.              -->
+
+  <!--                                                          -->
+
+  <!-- ProjectNavigator created generated project file.         -->
+
+  <!-- For use in tracking generated file and other information -->
+
+  <!-- allowing preservation of process status.                 -->
+
+  <!--                                                          -->
+
+  <!-- Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved. -->
+
+  <version xmlns="http://www.xilinx.com/XMLSchema">11.1</version>
+
+  <sourceproject xmlns="http://www.xilinx.com/XMLSchema" xil_pn:fileType="FILE_XISE" xil_pn:name="HPF_tests.xise"/>
+
+  <files xmlns="http://www.xilinx.com/XMLSchema">
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="DAC_output_scalable_HPF_isim_beh.exe"/>
+    <file xil_pn:fileType="FILE_XST_PROJECT" xil_pn:name="DAC_output_scalable_HPF_stx_beh.prj"/>
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="DAC_tb_isim_beh.exe"/>
+    <file xil_pn:fileType="FILE_ISIM_MISC" xil_pn:name="DAC_tb_isim_beh.wdb"/>
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_ISIM_EXE" xil_pn:name="basic_and_tb_isim_beh.exe"/>
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_CMD" xil_pn:name="isim.cmd"/>
+    <file xil_pn:branch="BehavioralSim" xil_pn:fileType="FILE_INI" xil_pn:name="xilinxsim.ini"/>
+  </files>
+
+  <transforms xmlns="http://www.xilinx.com/XMLSchema">
+    <transform xil_pn:end_ts="1547130905" xil_pn:name="TRAN_copyInitialToAbstractSimulation" xil_pn:start_ts="1547130905">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1547136427" xil_pn:in_ck="3166034570581930502" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1547136427">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="DAC.v"/>
+      <outfile xil_pn:name="DAC_tb.v"/>
+      <outfile xil_pn:name="basic_and.v"/>
+      <outfile xil_pn:name="basic_and_tb.v"/>
+      <outfile xil_pn:name="multiplier_18x18.v"/>
+    </transform>
+    <transform xil_pn:end_ts="1547136289" xil_pn:name="TRAN_xawsToSimhdl" xil_pn:prop_ck="-5341420297845589470" xil_pn:start_ts="1547136289">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1547136289" xil_pn:name="TRAN_schematicsToHdlSim" xil_pn:prop_ck="-8054154398290913824" xil_pn:start_ts="1547136289">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1547130905" xil_pn:name="TRAN_regenerateCoresSim" xil_pn:prop_ck="7524765821439503342" xil_pn:start_ts="1547130905">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1547136427" xil_pn:in_ck="3166034570581930502" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1547136427">
+      <status xil_pn:value="SuccessfullyRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <outfile xil_pn:name="DAC.v"/>
+      <outfile xil_pn:name="DAC_tb.v"/>
+      <outfile xil_pn:name="basic_and.v"/>
+      <outfile xil_pn:name="basic_and_tb.v"/>
+      <outfile xil_pn:name="multiplier_18x18.v"/>
+    </transform>
+    <transform xil_pn:end_ts="1547136434" xil_pn:in_ck="3166034570581930502" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="-779650614344428605" xil_pn:start_ts="1547136427">
+      <status xil_pn:value="FailedRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+    </transform>
+    <transform xil_pn:end_ts="1547135510" xil_pn:in_ck="6625803093030872990" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="-9016892963071766614" xil_pn:start_ts="1547135510">
+      <status xil_pn:value="AbortedRun"/>
+      <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForProperties"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForced"/>
+      <outfile xil_pn:name="DAC_tb_isim_beh.wdb"/>
+      <outfile xil_pn:name="isim.cmd"/>
+    </transform>
+  </transforms>
+
+</generated_project>

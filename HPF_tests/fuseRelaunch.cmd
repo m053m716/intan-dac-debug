@@ -1,0 +1,1 @@
+-intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC_output_scalable_HPF_isim_beh.exe" -prj "C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC_output_scalable_HPF_beh.prj" "work.DAC_output_scalable_HPF" "work.glbl" 
