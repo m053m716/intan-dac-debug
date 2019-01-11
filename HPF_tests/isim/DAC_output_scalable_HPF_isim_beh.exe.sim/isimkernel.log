@@ -2,12 +2,12 @@ Command line:
    DAC_output_scalable_HPF_isim_beh.exe
      -simmode  gui
      -simrunnum  0
-     -socket  18011
+     -socket  22233
 
-Fri Jan 11 08:47:32 2019
+Fri Jan 11 18:04:30 2019
 
 
- Elaboration Time: 0.0624 sec
+ Elaboration Time: 0.0468 sec
 
  Current Memory Usage: 675.279 Meg
 
@@ -19,11 +19,11 @@ Fri Jan 11 08:47:32 2019
  Total Processes        : 148
  Total Traceable Variables  : 105
  Total Scalar Nets and Variables : 3245
-Total Line Count : 1075
+Total Line Count : 1076
 
  Total Simulation Time: 0.0624 sec
 
  Current Memory Usage: 675.279 Meg
 
-Fri Jan 11 08:47:51 2019
+Fri Jan 11 18:21:29 2019
 

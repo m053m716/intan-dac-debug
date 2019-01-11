@@ -107,7 +107,7 @@ module DAC_tb;
 
 	initial begin
 		$readmemb("ampl_data_bin.txt", data_stored); // read data from txt in binary format
-		f = $fopen("output.txt","w");
+		f = $fopen("output_1.txt","w");
 	end
 	
 	always
