@@ -1,10 +1,10 @@
-Running: C:\Xilinx\14.7\ISE_DS\ISE\bin\nt64\unwrapped\fuse.exe -intstyle ise -incremental -lib unisims_ver -lib unimacro_ver -lib xilinxcorelib_ver -lib secureip -o C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC_output_scalable_HPF_isim_beh.exe -prj C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC_output_scalable_HPF_beh.prj work.DAC_output_scalable_HPF work.glbl 
+Running: fuse.exe -relaunch -intstyle "ise" -incremental -lib "unisims_ver" -lib "unimacro_ver" -lib "xilinxcorelib_ver" -lib "secureip" -o "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/mult_tb_isim_beh.exe" -prj "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/mult_tb_beh.prj" "work.mult_tb" "work.glbl" 
 ISim P.20131013 (signature 0x7708f090)
 Number of CPUs detected in this system: 20
 Turning on mult-threading, number of parallel sub-compilation jobs: 40 
 Determining compilation order of HDL files
-Analyzing Verilog file "C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/multiplier_18x18.v" into library work
-Analyzing Verilog file "C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC.v" into library work
+Analyzing Verilog file "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/multiplier_18x18.v" into library work
+Analyzing Verilog file "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/mult_tb.v" into library work
 Analyzing Verilog file "C:/Xilinx/14.7/ISE_DS/ISE//verilog/src/glbl.v" into library work
 WARNING:HDLCompiler:687 - "C:/Xilinx/14.7/ISE_DS/ISE//verilog/src/glbl.v" Line 5: Illegal redeclaration of module <glbl>.
 Starting static elaboration
@@ -13,7 +13,10 @@ Compiling module VCC
 Compiling module GND
 Compiling module DSP48A1(A1REG=0,B1REG=0,CARRYINR...
 Compiling module multiplier_18x18
-Compiling module DAC_output_scalable_HPF
+Compiling module mult_tb
 Compiling module glbl
 Time Resolution for simulation is 1ps.
-ERROR:Simulator:904 - Unable to remove previous simulation file C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/DAC_output_scalable_HPF_isim_beh.exe. Please check if you have another instance of this simulation running on your system, terminate it and then recompile your design. System Error Message: boost::filesystem::remove: Accesso negato: "C:\Users\BuccelliLab\Desktop\Prova_intan\HPF_tests\DAC_output_scalable_HPF_isim_beh.exe"
+Compiled 6 Verilog Units
+Built simulation executable C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/mult_tb_isim_beh.exe
+Fuse Memory Usage: 44384 KB
+Fuse CPU Usage: 654 ms

@@ -21,7 +21,7 @@
 #include <malloc.h>
 #define alloca _alloca
 #endif
-static const char *ng0 = "C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/multiplier_18x18.v";
+static const char *ng0 = "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/multiplier_18x18.v";
 
 
 

@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <report-views version="2.0" >
  <header>
-  <DateModified>2019-01-10T16:39:25</DateModified>
+  <DateModified>2019-01-10T17:12:14</DateModified>
   <ModuleName>DAC_output_scalable_HPF</ModuleName>
   <SummaryTimeStamp>Unknown</SummaryTimeStamp>
-  <SavedFilePath>C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests/iseconfig/DAC_output_scalable_HPF.xreport</SavedFilePath>
-  <ImplementationReportsDirectory>C:/Users/BuccelliLab/Desktop/Prova_intan/HPF_tests</ImplementationReportsDirectory>
+  <SavedFilePath>C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/iseconfig/DAC_output_scalable_HPF.xreport</SavedFilePath>
+  <ImplementationReportsDirectory>C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests\</ImplementationReportsDirectory>
   <DateInitialized>2019-01-10T16:39:25</DateInitialized>
   <EnableMessageFiltering>false</EnableMessageFiltering>
  </header>

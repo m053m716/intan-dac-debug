@@ -82,15 +82,15 @@ module DAC_tb;
 		// Initialize Inputs
 		reset = 0;
 		dataclk = 0;
-		main_state = 0;
+		main_state = 1;
 		channel = 0;
 		DAC_input = 10;
 		DAC_sequencer_in = 150;
-		use_sequencer = 0;
+		use_sequencer = 1;
 		DAC_en = 1;
 		gain = 2;
 		noise_suppress = 0;
-		DAC_thrsh = 0;
+		DAC_thrsh = 1;
 		DAC_thrsh_pol = 0;
 		HPF_coefficient = 30;
 		HPF_en = 1;
@@ -114,7 +114,7 @@ module DAC_tb;
 	always
 		#5 dataclk =  ! dataclk;
 	always @(posedge dataclk) begin
-		DAC_en = ! DAC_en;
+		//DAC_en = ! DAC_en;
 		
 		$fwrite(f,"%b\n",   DAC_input); // write to output_file
 		
