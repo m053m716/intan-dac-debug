@@ -41,7 +41,7 @@ module DAC_tb;
 	reg HPF_en;
 	reg software_reference_mode;
 	reg [15:0] software_reference;
-	integer f;
+	integer f, count;
 	parameter WIDTH = 6001;
 	reg [15:0] data_stored [0:WIDTH-1]; //200001 16-bits words is the length of raw_data.txt
 	
@@ -80,26 +80,27 @@ module DAC_tb;
 
 	initial begin
 		// Initialize Inputs
-		reset = 0;
+		reset = 1;
 		dataclk = 0;
-		main_state = 1;
+		main_state = 99; // ms_wait
 		channel = 0;
-		DAC_input = 10;
+		DAC_input = 0;
 		DAC_sequencer_in = 150;
-		use_sequencer = 1;
+		use_sequencer = 0;
 		DAC_en = 1;
-		gain = 2;
+		gain = 0;
 		noise_suppress = 0;
 		DAC_thrsh = 1;
 		DAC_thrsh_pol = 0;
-		HPF_coefficient = 30;
+		HPF_coefficient = 3343; // 250Hz/30000kS
 		HPF_en = 1;
 		software_reference_mode = 0;
 		software_reference = 0;
-
+		count=0;
+		
 		// Wait 100 ns for global reset to finish
 		#100;
-        
+      reset = 0;  
 		// Add stimulus here
 
 	end
@@ -109,16 +110,36 @@ module DAC_tb;
 		f = $fopen("output.txt","w");
 	end
 	
-	
-   
 	always
-		#5 dataclk =  ! dataclk;
+		#2 
+		dataclk =  ! dataclk;
+
 	always @(posedge dataclk) begin
-		//DAC_en = ! DAC_en;
-		
-		$fwrite(f,"%b\n",   DAC_input); // write to output_file
-		
-		#3 $display ("Current value of DAC_register is %d", DAC_register);
-		end
+		case (main_state)
+			99 : #1 main_state <=100;
+			100: begin
+					DAC_input<=data_stored[count];
+					count=count+1;
+					#1 main_state <=135;
+					end
+			135: #1 main_state <=170;
+			170: begin 
+					#1 main_state <=205;
+					$fwrite(f,"%b\n",   DAC_register); // write to output_file
+					$display ("Current value of DAC_register is %d", DAC_register);
+					end
+			205: #1 main_state <=99;
+		endcase
+	end
+
 endmodule
 
+/*	parameter ms_wait  	= 99,   //state_clk =0
+   parameter ms_clk1_a 	= 100,  //state_clk =1 only when channel == 0 (update time in fsm) odd bits
+   parameter ms_clk9_d 	= 135,  //state_clk =0
+	parameter ms_clk18_c = 170,  //state_clk =1 only when channel == 0  even bits
+   parameter ms_clk27_b = 205*/ //state_clk =0
+	
+	// NOTE: in main.v
+	//  channel, channelMISO // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
+// sample clock goes high during channel 0 SPI command

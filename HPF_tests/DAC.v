@@ -109,7 +109,7 @@ module DAC_output_scalable_HPF #(
 	assign multiplier_in = positive_overflow ? 18'h1ffff : (negative_overflow ? 18'h20000 : multiplier_in_before_limit[17:0]); // limit subtractor output
 
 	// Multiplier with two 18-bit signed inputs and 36-bit output
-	multiplier_18x18 multiplier_1 (
+	multiplier_18x18 multiplier(
 		.clk	(dataclk),
 		.a		(multiplier_in),
 		.b		({1'b0, HPF_coefficient, 1'b0}),
@@ -215,6 +215,7 @@ module DAC_output_scalable_HPF #(
 			DAC_SCLK <= 1'b0;
 			DAC_DIN <= 1'b0;
 			state_clk <= 1'b0;
+			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 		end else begin
 			state_clk <= 1'b0;
 			case (main_state)
