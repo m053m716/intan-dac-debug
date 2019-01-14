@@ -92,7 +92,7 @@ module DAC_tb;
 		noise_suppress = 0;
 		DAC_thrsh = 1;
 		DAC_thrsh_pol = 0;
-		HPF_coefficient = 3343; // 250Hz/30000kS
+		HPF_coefficient = 30573; // 3000Hz/30000kS
 		HPF_en = 1;
 		software_reference_mode = 0;
 		software_reference = 0;
@@ -107,7 +107,7 @@ module DAC_tb;
 
 	initial begin
 		$readmemb("ampl_data_bin.txt", data_stored); // read data from txt in binary format
-		f = $fopen("output_1.txt","w");
+		f = $fopen("output_3.txt","w");
 	end
 	
 	always

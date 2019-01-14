@@ -1,5 +1,5 @@
 
-fileID = fopen('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\output_2.txt', 'r');
+fileID = fopen('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\output_4.txt', 'r');
 retrieved_bin_vector= fscanf(fileID, '%s');
 retrieved_bin_matrix= reshape(retrieved_bin_vector,16,[])';
 fclose(fileID);
@@ -8,8 +8,8 @@ fclose(fileID);
 retrieved_bin_matrix_dec=bin2dec(retrieved_bin_matrix(1:end,:)); % from 5 which is the clock rate, not the sample rate
 
 %% plot comparison
-start_sample=3.52*1e4;
-stop_sample=3.6*1e4;
+start_sample=1;
+stop_sample=6e3;
 figure
 h(1)=subplot(3,1,1);
 plot(retrieved_bin_matrix_dec)
