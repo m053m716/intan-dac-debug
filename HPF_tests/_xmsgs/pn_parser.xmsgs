@@ -8,13 +8,7 @@
 <!-- Copyright (c) 1995-2013 Xilinx, Inc.  All rights reserved.    -->
 
 <messages>
-<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/DAC.v&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/basic_and.v&quot; into library work</arg>
-</msg>
-
-<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/multiplier_18x18.v&quot; into library work</arg>
+<msg type="info" file="ProjectMgmt" num="1845" ><arg fmt="%s" index="1">Analyzing Verilog file &quot;C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/DAC_modified.v&quot; into library work</arg>
 </msg>
 
 </messages>

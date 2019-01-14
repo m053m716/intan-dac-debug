@@ -1,0 +1,10 @@
+Command line:
+   DAC_modified_tb_isim_beh.exe
+     -simmode  gui
+     -simrunnum  0
+     -socket  40068
+
+Mon Jan 14 16:55:37 2019
+
+
+ Elaboration Time: 0.0468 sec
