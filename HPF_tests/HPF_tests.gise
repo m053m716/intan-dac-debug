@@ -48,6 +48,11 @@
     <transform xil_pn:end_ts="1547480964" xil_pn:in_ck="1565286767391734606" xil_pn:name="TRAN_copyAbstractToPostAbstractSimulation" xil_pn:start_ts="1547480964">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputAdded"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="DAC.v"/>
       <outfile xil_pn:name="DAC_modified.v"/>
       <outfile xil_pn:name="DAC_modified_tb.v"/>
@@ -72,6 +77,11 @@
     <transform xil_pn:end_ts="1547480964" xil_pn:in_ck="1565286767391734606" xil_pn:name="TRAN_copyPostAbstractToPreSimulation" xil_pn:start_ts="1547480964">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="DAC.v"/>
       <outfile xil_pn:name="DAC_modified.v"/>
       <outfile xil_pn:name="DAC_modified_tb.v"/>
@@ -84,6 +94,11 @@
     <transform xil_pn:end_ts="1547480971" xil_pn:in_ck="1565286767391734606" xil_pn:name="TRAN_ISimulateBehavioralModelRunFuse" xil_pn:prop_ck="4297994146324231463" xil_pn:start_ts="1547480964">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForInputs"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="InputChanged"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="DAC_modified_tb_beh.prj"/>
       <outfile xil_pn:name="DAC_modified_tb_isim_beh.exe"/>
       <outfile xil_pn:name="fuse.log"/>
@@ -94,6 +109,9 @@
     <transform xil_pn:end_ts="1547480971" xil_pn:in_ck="7456306163588047591" xil_pn:name="TRAN_ISimulateBehavioralModel" xil_pn:prop_ck="3804060335094588010" xil_pn:start_ts="1547480971">
       <status xil_pn:value="SuccessfullyRun"/>
       <status xil_pn:value="ReadyToRun"/>
+      <status xil_pn:value="OutOfDateForPredecessor"/>
+      <status xil_pn:value="OutOfDateForOutputs"/>
+      <status xil_pn:value="OutputChanged"/>
       <outfile xil_pn:name="DAC_modified_tb_isim_beh.wdb"/>
       <outfile xil_pn:name="isim.cmd"/>
       <outfile xil_pn:name="isim.log"/>
