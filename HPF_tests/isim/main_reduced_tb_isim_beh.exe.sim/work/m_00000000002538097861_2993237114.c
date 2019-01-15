@@ -96,7 +96,7 @@ LAB4:    xsi_set_current_line(103, ng0);
     t3 = (t0 + 4624);
     xsi_vlogvar_assign_value(t3, t2, 0, 0, 1);
     xsi_set_current_line(115, ng0);
-    t2 = ((char*)((ng1)));
+    t2 = ((char*)((ng2)));
     t3 = (t0 + 4784);
     xsi_vlogvar_assign_value(t3, t2, 0, 0, 1);
     xsi_set_current_line(116, ng0);

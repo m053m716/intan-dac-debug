@@ -8,20 +8,5 @@
 <msg type="warning" file="HDLCompiler" num="687" delta="unknown" >"C:/Xilinx/14.7/ISE_DS/ISE//verilog/src/glbl.v" Line 5: Illegal redeclaration of module &lt;<arg fmt="%s" index="1">glbl</arg>&gt;.
 </msg>
 
-<msg type="warning" file="HDLCompiler" num="329" delta="unknown" >"C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced.v" Line 110: Target &lt;<arg fmt="%s" index="1">DAC_SYNC</arg>&gt; of concurrent assignment or output port connection should be a net type.
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="329" delta="unknown" >"C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced.v" Line 111: Target &lt;<arg fmt="%s" index="1">DAC_SCLK</arg>&gt; of concurrent assignment or output port connection should be a net type.
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="329" delta="unknown" >"C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced.v" Line 112: Target &lt;<arg fmt="%s" index="1">DAC_DIN</arg>&gt; of concurrent assignment or output port connection should be a net type.
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="189" delta="unknown" >"C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 75: Size mismatch in connection of port &lt;<arg fmt="%s" index="3">DAC_edge_type</arg>&gt;. Formal port size is <arg fmt="%d" index="2">1</arg>-bit while actual signal size is <arg fmt="%d" index="1">8</arg>-bit.
-</msg>
-
-<msg type="warning" file="HDLCompiler" num="189" delta="unknown" >"C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 93: Size mismatch in connection of port &lt;<arg fmt="%s" index="3">fsm_window_state</arg>&gt;. Formal port size is <arg fmt="%d" index="2">32</arg>-bit while actual signal size is <arg fmt="%d" index="1">1</arg>-bit.
-</msg>
-
 </messages>
 

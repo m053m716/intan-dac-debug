@@ -131,6 +131,12 @@ module DAC_modified #(
 	
 	assign DAC_thrsh_out = DAC_en ? (DAC_thrsh_pol ? (DAC_input_offset >= DAC_thrsh) : (DAC_input_offset <= DAC_thrsh)) : 1'b0;
 
+	
+	//DAC_input_twos_comp[15]  Non existent! Looks like the same problem I had before. It's not updating the state probably
+	// DAC_thrsh_pol ok
+	//
+	
+	
 	// Now if the input is positive, subtract noise_suppress from it, limiting at zero.
 	// If the input is negative, add noise_suppress to it, also limiting at zero.  This
 	// has the effect of chopping out the noise between +noise_suppress and -noise_suppress,
@@ -197,7 +203,6 @@ module DAC_modified #(
 	// (See Analog Devices AD5662 datasheet for more information.)
 		
 	always @(posedge dataclk) begin
-		DAC_DIN <= 1'b0; // only for test, It seems that it does not enter this portion of code!!
 		if (reset) begin
 			DAC_SYNC <= 1'b1;
 			DAC_SCLK <= 1'b0;

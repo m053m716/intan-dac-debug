@@ -112,7 +112,7 @@ module DAC_modified_tb;
 
 		// Wait 100 ns for global reset to finish
 		#100;
-        
+      reset=0;  
 		// Add stimulus here
 	end
 	

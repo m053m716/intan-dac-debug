@@ -32,7 +32,7 @@ module main_reduced_tb;
 	reg [15:0] DAC_start_win_1;
 	reg [15:0] DAC_stop_win_1;
 	reg [15:0] DAC_stop_max;
-	reg [7:0] DAC_edge_type;
+	reg DAC_edge_type;
 	reg [15:0] HPF_coefficient;
 	reg HPF_en;
 	reg [15:0] DAC_sequencer_1;
@@ -115,7 +115,7 @@ initial begin
 		DAC_en = 1;
 		DAC_gain = 0;
 		DAC_noise_suppress = 0;
-		DAC_thrsh_1 = 1;
+		DAC_thrsh_1 = 105;
 		DAC_thrsh_pol_1 = 1;
 		DAC_reref_mode = 0;
 		DAC_1_input_is_ref = 0;
@@ -140,7 +140,7 @@ initial begin
 		dataclk =  ! dataclk;
 
 	always @(posedge dataclk) begin
-
+		
 		ampl_to_DAC<=data_stored[count];
 		count=count+1;
 	end

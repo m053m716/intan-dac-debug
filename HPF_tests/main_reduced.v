@@ -38,9 +38,9 @@ module main_reduced(
 	input wire 			DAC_en, 			//this was 8bits in the original main
 	input wire [2:0]  DAC_gain,
 	input wire [6:0]  DAC_noise_suppress,
-	output reg			DAC_SYNC,
-	output reg			DAC_SCLK,
-	output reg			DAC_DIN,
+	output wire			DAC_SYNC,
+	output wire			DAC_SCLK,
+	output wire			DAC_DIN,
 	input wire [15:0]	DAC_thrsh_1,
 	input wire			DAC_thrsh_pol_1,
 	input wire        DAC_reref_mode,
