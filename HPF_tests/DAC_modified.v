@@ -193,11 +193,11 @@ module DAC_modified #(
 	
 	assign DAC_register = (DAC_en | use_sequencer) ? DAC_register_pre : 16'b1000000000000000;
 	
-
 	// AD5662 16-bit DAC SPI output logic
 	// (See Analog Devices AD5662 datasheet for more information.)
 		
 	always @(posedge dataclk) begin
+		DAC_DIN <= 1'b0; // only for test, It seems that it does not enter this portion of code!!
 		if (reset) begin
 			DAC_SYNC <= 1'b1;
 			DAC_SCLK <= 1'b0;

@@ -1,13 +1,47 @@
 ISim log file
-Running: C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\DAC_modified_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/DAC_modified_tb_isim_beh.wdb 
+Running: C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\main_reduced_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb_isim_beh.wdb 
 ISim P.20131013 (signature 0x7708f090)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
 WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
 This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
 Time resolution is 1 ps
 # onerror resume
 # wave add /
+# run 1000 ns
+Simulator is doing circuit initialization process.
+ERROR: In process DAC_modified.vCont_196_25 
+ FATAL ERROR:ISim: This application has discovered an exceptional condition from which it cannot recover. Process will terminate. To search for possible resolutions to this issue, refer to the Xilinx answer database by going to http://www.xilinx.com/support/answers/index.htm and search with keywords 'ISim' and 'FATAL ERROR'. For technical support on this issue, please open a WebCase with this project attached at http://www.xilinx.com/support.
+INFO: Simulator is stopped.
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
@@ -17,114 +51,52 @@ WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
 WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
 This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
+# run 100.00us
 ISim P.20131013 (signature 0x7708f090)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
 WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
 This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
-Current value of DAC_register is 34867
-Current value of DAC_register is 33201
-Current value of DAC_register is 32337
-Current value of DAC_register is 32513
-Current value of DAC_register is 32528
-Current value of DAC_register is 32486
-Current value of DAC_register is 32526
-Current value of DAC_register is 32398
-Current value of DAC_register is 32312
-Current value of DAC_register is 32216
-Current value of DAC_register is 32100
-Current value of DAC_register is 32088
-Current value of DAC_register is 31954
-Current value of DAC_register is 31689
-Current value of DAC_register is 31753
-Current value of DAC_register is 31827
-Current value of DAC_register is 31603
-Current value of DAC_register is 31476
-Current value of DAC_register is 31515
-Current value of DAC_register is 31392
-Current value of DAC_register is 31233
-Current value of DAC_register is 31139
-Current value of DAC_register is 31074
-Current value of DAC_register is 30940
-Current value of DAC_register is 30790
-Current value of DAC_register is 30649
-Current value of DAC_register is 30552
-Current value of DAC_register is 30510
-Current value of DAC_register is 30374
-Current value of DAC_register is 30239
-Current value of DAC_register is 30121
-Current value of DAC_register is 30000
-Current value of DAC_register is 29904
-Current value of DAC_register is 29794
-Current value of DAC_register is 29709
-Current value of DAC_register is 29579
-Current value of DAC_register is 29454
-Current value of DAC_register is 29320
-Current value of DAC_register is 29208
-Current value of DAC_register is 29200
-Current value of DAC_register is 29073
-Current value of DAC_register is 28978
-Current value of DAC_register is 28869
-Current value of DAC_register is 28722
-Current value of DAC_register is 28630
-Current value of DAC_register is 28519
-Current value of DAC_register is 28468
-Current value of DAC_register is 28447
-Current value of DAC_register is 28426
-Current value of DAC_register is 28288
+# run 100.00us
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+# run 100.00us
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
+# run 100.00us
+ISim P.20131013 (signature 0x7708f090)
+WARNING: A WEBPACK license was found.
+WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
+WARNING: ISim will run in Lite mode. Please refer to the ISim documentation for more information on the differences between the Lite and the Full version.
+This is a Lite version of ISim.
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 35.  For instance main_reduced_tb/uut/, width 1 of formal port DAC_edge_type is not equal to width 8 of actual variable DAC_edge_type. 
+WARNING: File "C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb.v" Line 55.  For instance main_reduced_tb/uut/, width 32 of formal port fsm_window_state is not equal to width 1 of actual signal fsm_window_state.
+# run 1000 ns
+Simulator is doing circuit initialization process.
+Finished circuit initialization process.
