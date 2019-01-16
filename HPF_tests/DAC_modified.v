@@ -212,7 +212,7 @@ module DAC_modified #(
 			DAC_SCLK <= 1'b0;
 			DAC_DIN <= 1'b0;
 			state_clk <= 1'b0;
-//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
+			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 		end else begin
 			state_clk <= 1'b0;
 //			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
