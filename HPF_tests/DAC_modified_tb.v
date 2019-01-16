@@ -104,7 +104,7 @@ module DAC_modified_tb;
 		DAC_fsm_start_win_in = 0;
 		DAC_fsm_stop_win_in = 0;
 		DAC_fsm_state_counter_in = 0;
-		HPF_coefficient = 30573; // 3000Hz/30000kS
+		HPF_coefficient = 3343; // 250Hz/30000kS
 		HPF_en = 1;
 		software_reference_mode = 0;
 		software_reference = 0;
@@ -127,19 +127,19 @@ module DAC_modified_tb;
 
 	always @(posedge dataclk) begin
 		case (main_state)
-			99 : main_state <=100;
+			99 : #1 main_state <=100;
 			100: begin
 					DAC_input<=data_stored[count];
 					count=count+1;
-					main_state <=135;
+					#1 main_state <=135;
 					end
-			135:  main_state <=170;
+			135:  #1 main_state <=170;
 			170: begin 
-					main_state <=205;
+					#1 main_state <=205;
 					$fwrite(f,"%b\n",   DAC_register); // write to output_file
 					$display ("Current value of DAC_register is %d", DAC_register);
 					end
-			205:  main_state <=99;
+			205:  #1 main_state <=99;
 		endcase
 	end
 

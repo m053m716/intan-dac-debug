@@ -9,7 +9,7 @@ retrieved_bin_matrix_dec=bin2dec(retrieved_bin_matrix(1:end,:)); % from 5 which 
 
 %% plot comparison
 start_sample=1;
-stop_sample=6e3;
+stop_sample=length(retrieved_bin_matrix_dec);
 figure
 h(1)=subplot(3,1,1);
 plot(retrieved_bin_matrix_dec)

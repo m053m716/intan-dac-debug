@@ -6481,6 +6481,10 @@ LAB9:    xsi_set_current_line(211, ng0);
     t2 = ((char*)((ng4)));
     t3 = (t0 + 9808);
     xsi_vlogvar_wait_assign_value(t3, t2, 0, 0, 1, 0LL);
+    xsi_set_current_line(215, ng0);
+    t2 = ((char*)((ng4)));
+    t3 = (t0 + 9648);
+    xsi_vlogvar_wait_assign_value(t3, t2, 0, 0, 32, 0LL);
     goto LAB8;
 
 LAB12:    xsi_set_current_line(221, ng0);
