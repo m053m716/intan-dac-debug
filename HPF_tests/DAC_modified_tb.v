@@ -127,19 +127,19 @@ module DAC_modified_tb;
 
 	always @(posedge dataclk) begin
 		case (main_state)
-			99 : main_state <=100;
+			99 : #1 main_state <=100;
 			100: begin
 					DAC_input<=data_stored[count];
 					count=count+1;
-					main_state <=135;
+					#1 main_state <=135;
 					end
-			135:  main_state <=170;
+			135:  #1 main_state <=170;
 			170: begin 
-					main_state <=205;
+					#1 main_state <=205;
 					$fwrite(f,"%b\n",   DAC_register); // write to output_file
 					$display ("Current value of DAC_register is %d", DAC_register);
 					end
-			205:  main_state <=99;
+			205:  #1 main_state <=99;
 		endcase
 	end
 
