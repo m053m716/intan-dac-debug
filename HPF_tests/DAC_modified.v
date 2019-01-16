@@ -111,7 +111,7 @@ module DAC_modified #(
 	assign HPF_output = HPF_en ? multiplier_in[17:2] : HPF_input[17:2];
 	
 	always @(posedge state_clk) begin
-		if (reset) begin
+		if (reset) begin		// SB: this can't happen 'cause state_clk is defined only when reset==0
 			HPF_state <= 32'b0;
 		end else begin
 			HPF_state <= HPF_new_state;
@@ -130,11 +130,15 @@ module DAC_modified #(
 	// Implement simple threshold comparator function on unscaled DAC input
 	
 	assign DAC_thrsh_out = DAC_en ? (DAC_thrsh_pol ? (DAC_input_offset >= DAC_thrsh) : (DAC_input_offset <= DAC_thrsh)) : 1'b0;
-
+//	assign DAC_thrsh_out = HPF_input[17];
 	
-	//DAC_input_twos_comp[15]  Non existent! Looks like the same problem I had before. It's not updating the state probably
+	// SB comments on debugging:
+	// DAC_input_twos_comp[15]  Non existent! Looks like the same problem I had before. It's not updating the state probably
 	// DAC_thrsh_pol ok
-	//
+	// DAC_input[15] ok it's changing, so it's receiving it correctly!
+	// HPF_state ci è zero durante reset ma è x quando è fuori perchè HPF_new_state is x
+	// multiplier_in[17] is x
+	// HPF_input is ok
 	
 	
 	// Now if the input is positive, subtract noise_suppress from it, limiting at zero.
@@ -203,14 +207,15 @@ module DAC_modified #(
 	// (See Analog Devices AD5662 datasheet for more information.)
 		
 	always @(posedge dataclk) begin
-		if (reset) begin
+		if (reset) begin       
 			DAC_SYNC <= 1'b1;
 			DAC_SCLK <= 1'b0;
 			DAC_DIN <= 1'b0;
 			state_clk <= 1'b0;
-			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
+//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 		end else begin
 			state_clk <= 1'b0;
+//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 			case (main_state)
 
 				ms_wait: begin

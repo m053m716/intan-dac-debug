@@ -52,11 +52,12 @@ module main_reduced_tb;
 	wire DAC_SYNC;
 	wire DAC_SCLK;
 	wire DAC_DIN;
-	wire fsm_window_state;
+	wire[31:0] fsm_window_state;
 	wire [15:0] DAC_output_register_1;
 	wire  [31:0] main_state;
 	wire sample_CLK_out;
 	wire [5:0]channel;
+	wire [15:0]DAC_register_1;
 	
 	// Additional
 	integer f, count;
@@ -94,7 +95,8 @@ module main_reduced_tb;
 		.DAC_output_register_1(DAC_output_register_1), 
 		.main_state(main_state), 
 		.sample_CLK_out(sample_CLK_out),
-		.channel(channel)
+		.channel(channel),
+		.DAC_register_1(DAC_register_1)
 	);
 
 

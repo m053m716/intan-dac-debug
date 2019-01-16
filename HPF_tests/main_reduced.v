@@ -52,7 +52,8 @@ module main_reduced(
 	output wire[15:0] DAC_output_register_1,
 	output integer		main_state,
 	output reg			sample_CLK_out,
-	output reg [5:0]	channel  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
+	output reg [5:0]	channel,  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
+	output reg[15:0]  DAC_register_1
 	
     );
 
@@ -70,7 +71,7 @@ wire 				DAC_any_enabled;
 //integer 			main_state;
 
 //reg   [5:0]		channel;  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
-reg  [15:0]		DAC_register_1;
+//reg  [15:0]		DAC_register_1;
 
 
 	localparam
