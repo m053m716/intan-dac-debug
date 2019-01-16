@@ -2,9 +2,9 @@ Command line:
    main_reduced_tb_isim_beh.exe
      -simmode  gui
      -simrunnum  1
-     -socket  56296
+     -socket  56499
 
-Wed Jan 16 11:52:59 2019
+Wed Jan 16 12:20:44 2019
 
 
  Elaboration Time: 0.0624 sec

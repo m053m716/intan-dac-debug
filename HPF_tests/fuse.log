@@ -22,5 +22,5 @@ Compiling module glbl
 Time Resolution for simulation is 1ps.
 Compiled 8 Verilog Units
 Built simulation executable C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb_isim_beh.exe
-Fuse Memory Usage: 44568 KB
-Fuse CPU Usage: 763 ms
+Fuse Memory Usage: 44572 KB
+Fuse CPU Usage: 701 ms
