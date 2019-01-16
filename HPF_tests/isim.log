@@ -1,5 +1,6 @@
 ISim log file
-Running: C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\DAC_modified_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/DAC_modified_tb_isim_beh.wdb 
+Running: C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\main_reduced_tb_isim_beh.exe -intstyle ise -gui -tclbatch isim.cmd -wdb C:/Users/BuccelliLab/Documents/GitHub/intan-dac-debug/HPF_tests/main_reduced_tb_isim_beh.wdb 
+INFO: There is another simulation running in the same directory. Using database file name isim1.wdb.
 ISim P.20131013 (signature 0x7708f090)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -11,56 +12,8 @@ Time resolution is 1 ps
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
-Current value of DAC_register is 34867
-Current value of DAC_register is 33201
-Current value of DAC_register is 32337
-Current value of DAC_register is 32513
-Current value of DAC_register is 32528
-Current value of DAC_register is 32598
-Current value of DAC_register is 32759
-Current value of DAC_register is 32637
-Current value of DAC_register is 32644
-Current value of DAC_register is 32637
-Current value of DAC_register is 32614
-Current value of DAC_register is 32712
-Current value of DAC_register is 32618
-Current value of DAC_register is 32460
-Current value of DAC_register is 32744
-Current value of DAC_register is 32835
-Current value of DAC_register is 32563
-Current value of DAC_register is 32582
-Current value of DAC_register is 32754
-Current value of DAC_register is 32641
-Current value of DAC_register is 32573
-Current value of DAC_register is 32618
-Current value of DAC_register is 32660
-Current value of DAC_register is 32603
-Current value of DAC_register is 32571
-Current value of DAC_register is 32571
-Current value of DAC_register is 32615
-Current value of DAC_register is 32682
-Current value of DAC_register is 32607
-Current value of DAC_register is 32587
-Current value of DAC_register is 32598
-Current value of DAC_register is 32598
-Current value of DAC_register is 32623
-Current value of DAC_register is 32617
-Current value of DAC_register is 32640
-Current value of DAC_register is 32601
-Current value of DAC_register is 32595
-Current value of DAC_register is 32585
-Current value of DAC_register is 32604
-Current value of DAC_register is 32713
-Current value of DAC_register is 32625
-Current value of DAC_register is 32632
-Current value of DAC_register is 32620
-Current value of DAC_register is 32579
-Current value of DAC_register is 32622
-Current value of DAC_register is 32615
-Current value of DAC_register is 32673
-Current value of DAC_register is 32720
-Current value of DAC_register is 32733
-Current value of DAC_register is 32620
+# run 100.00us
+INFO: There is another simulation running in the same directory. Using database file name isim1.wdb.
 ISim P.20131013 (signature 0x7708f090)
 WARNING: A WEBPACK license was found.
 WARNING: Please use Xilinx License Configuration Manager to check out a full ISim license.
@@ -69,53 +22,4 @@ This is a Lite version of ISim.
 # run 1000 ns
 Simulator is doing circuit initialization process.
 Finished circuit initialization process.
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
-Current value of DAC_register is     x
+# run 100.00us

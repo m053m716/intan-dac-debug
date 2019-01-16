@@ -110,13 +110,13 @@ module DAC_modified #(
 	// HPF output = sample - state
 	assign HPF_output = HPF_en ? multiplier_in[17:2] : HPF_input[17:2];
 	
-	always @(posedge state_clk) begin
-		if (reset) begin		// SB: this can't happen 'cause state_clk is defined only when reset==0
-			HPF_state <= 32'b0;
-		end else begin
-			HPF_state <= HPF_new_state;
-		end
-	end
+//	always @(posedge state_clk) begin
+//		if (reset) begin		// SB: this can't happen 'cause state_clk is defined only when reset==0
+//			HPF_state <= 32'b0;
+//		end else begin
+//			HPF_state <= HPF_new_state;
+//		end
+//	end
 	
 	// End of high-pass filter
 	
@@ -212,10 +212,10 @@ module DAC_modified #(
 			DAC_SCLK <= 1'b0;
 			DAC_DIN <= 1'b0;
 			state_clk <= 1'b0;
-//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
+			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 		end else begin
 			state_clk <= 1'b0;
-//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
+			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 			case (main_state)
 
 				ms_wait: begin
@@ -232,6 +232,7 @@ module DAC_modified #(
 							DAC_SCLK <= 1'b0;
 							DAC_DIN <= 1'b0;
 							state_clk <= 1'b1;
+							HPF_state <= HPF_new_state;
 						end
 						
 						1: begin
@@ -363,6 +364,7 @@ module DAC_modified #(
 							DAC_SCLK <= 1'b0;
 							DAC_DIN <= 1'b0;
 							state_clk <= 1'b1;
+							HPF_state <= HPF_new_state;
 						end
 						
 						1: begin
