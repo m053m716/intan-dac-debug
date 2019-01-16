@@ -104,7 +104,7 @@ module DAC_modified_tb;
 		DAC_fsm_start_win_in = 0;
 		DAC_fsm_stop_win_in = 0;
 		DAC_fsm_state_counter_in = 0;
-		HPF_coefficient = 30573; // 3000Hz/30000kS
+		HPF_coefficient = 3343; // 250Hz/30000kS
 		HPF_en = 1;
 		software_reference_mode = 0;
 		software_reference = 0;

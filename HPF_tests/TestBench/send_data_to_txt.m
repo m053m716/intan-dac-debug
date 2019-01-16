@@ -6,7 +6,7 @@ read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_record
 
 %% don't forget to modify the filter in Verilog with this number:
 fs=30e3;
-fc=3000;
+fc=250;
 b = 1.0 - exp(-2.0 * 3.1415926535897 * fc / fs); 
 filterCoefficient = floor(65536.0 * b + 0.5);
 

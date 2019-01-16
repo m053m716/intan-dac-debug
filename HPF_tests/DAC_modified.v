@@ -232,7 +232,7 @@ module DAC_modified #(
 							DAC_SCLK <= 1'b0;
 							DAC_DIN <= 1'b0;
 							state_clk <= 1'b1;
-							HPF_state <= HPF_new_state;
+							HPF_state <= HPF_new_state; // SB: added to obtain something as DAC_register
 						end
 						
 						1: begin
@@ -364,7 +364,7 @@ module DAC_modified #(
 							DAC_SCLK <= 1'b0;
 							DAC_DIN <= 1'b0;
 							state_clk <= 1'b1;
-							HPF_state <= HPF_new_state;
+							HPF_state <= HPF_new_state; // SB: added to obtain something as DAC_register
 						end
 						
 						1: begin
