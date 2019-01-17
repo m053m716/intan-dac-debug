@@ -36,9 +36,9 @@ module DAC_modified #(
 	input wire			DAC_en,
 	input wire [2:0]  gain,
 	input wire [6:0]  noise_suppress,
-	output reg			DAC_SYNC,
-	output reg			DAC_SCLK,
-	output reg			DAC_DIN,
+	output reg			DAC_SYNC=0,
+	output reg			DAC_SCLK=0,
+	output reg			DAC_DIN=0,
 	input wire [15:0]	DAC_thrsh,
 	input wire			DAC_thrsh_pol,
 	output wire			DAC_thrsh_out,
@@ -54,14 +54,17 @@ module DAC_modified #(
    );
 
 	wire [15:0]    DAC_input_twos_comp, DAC_input_offset, DAC_register_pre, subtract_result, add_result;
-	reg  [15:0]    DAC_input_suppressed, DAC_input_scaled;
+//	reg  [15:0]    DAC_input_suppressed, DAC_input_scaled;
+	reg  [15:0]    DAC_input_suppressed=16'b0;
+	reg  [15:0]    DAC_input_scaled=16'b0;
+
 	wire [10:0] 	noise_suppress_x_16;
 	wire [17:0] 	HPF_input, multiplier_in;
 	wire [18:0] 	multiplier_in_before_limit;
 	wire [15:0]    HPF_output;
 	wire [31:0]    HPF_new_state;
 	wire [35:0]		multiplier_out;
-	reg  [31:0] 	HPF_state;
+	reg  [31:0] 	HPF_state=32'b0; // SB: initialized!
 	wire 				positive_overflow, negative_overflow;
 	reg				state_clk;
 	wire [15:0]		pre_ref_input_twos_comp, software_reference_twos_comp, input_minus_ref;
@@ -130,7 +133,7 @@ module DAC_modified #(
 	// Implement simple threshold comparator function on unscaled DAC input
 	
 	assign DAC_thrsh_out = DAC_en ? (DAC_thrsh_pol ? (DAC_input_offset >= DAC_thrsh) : (DAC_input_offset <= DAC_thrsh)) : 1'b0;
-//	assign DAC_thrsh_out = HPF_input[17];
+//	assign DAC_thrsh_out = HPF_state[31];
 	
 	// SB comments on debugging:
 	// DAC_input_twos_comp[15]  Non existent! Looks like the same problem I had before. It's not updating the state probably
@@ -212,7 +215,7 @@ module DAC_modified #(
 			DAC_SCLK <= 1'b0;
 			DAC_DIN <= 1'b0;
 			state_clk <= 1'b0;
-			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
+//			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!
 		end else begin
 			state_clk <= 1'b0;
 //			HPF_state <= 32'b0; // SB: added to obtain something as DAC_register. Need to understand how it works!!

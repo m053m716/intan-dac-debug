@@ -1,5 +1,5 @@
 
-fileID = fopen('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\output_4.txt', 'r');
+fileID = fopen('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\output_main_reduced_2.txt', 'r');
 retrieved_bin_vector= fscanf(fileID, '%s');
 retrieved_bin_matrix= reshape(retrieved_bin_vector,16,[])';
 fclose(fileID);

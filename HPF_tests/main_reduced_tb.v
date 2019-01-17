@@ -110,7 +110,7 @@ initial begin
 		DAC_stop_win_1 = 3;
 		DAC_stop_max = 3;
 		DAC_edge_type = 0;
-		HPF_coefficient = 30573; // 3000Hz/30000kS
+		HPF_coefficient = 3343; // 250Hz/30000kS
 		HPF_en = 1;
 		DAC_sequencer_1 = 0;
 		DAC_sequencer_en_1 = 0;
@@ -134,7 +134,7 @@ initial begin
 	
 	initial begin
 		$readmemb("ampl_data_bin.txt", data_stored); // read data from txt in binary format
-		f = $fopen("output_3.txt","w");
+		f = $fopen("output_main_reduced_2.txt","w");
 	end
 	
 	always
@@ -142,9 +142,14 @@ initial begin
 		dataclk =  ! dataclk;
 
 	always @(posedge dataclk) begin
-		
-		ampl_to_DAC<=data_stored[count];
-		count=count+1;
+		if (channel==0 & main_state==100) begin
+			ampl_to_DAC<=data_stored[count];
+			count=count+1;
+			end
+		if (channel==0 & main_state==170) begin //maybe it is correct @ 170 (to check)
+			$fwrite(f,"%b\n",   DAC_output_register_1); // write to output_file
+			$display ("Current value of DAC_register is %d", DAC_output_register_1);
+			end
 	end
 
 endmodule

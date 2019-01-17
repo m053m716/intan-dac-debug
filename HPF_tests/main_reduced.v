@@ -48,30 +48,26 @@ module main_reduced(
 	input wire [15:0]	DAC_reref_register,
 	input wire 			DAC_fsm_mode,
 	
-	output integer 	fsm_window_state,
+	output integer 	fsm_window_state=0,
 	output wire[15:0] DAC_output_register_1,
 	output integer		main_state,
 	output reg			sample_CLK_out,
-	output reg [5:0]	channel,  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
-	output reg[15:0]  DAC_register_1
+	output reg [5:0]	channel=0,  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
+	output reg[15:0]  DAC_register_1=16'b0
 	
     );
 
 
 
-reg [15:0]		DAC_fsm_counter;
+reg [15:0]		DAC_fsm_counter = 16'b0;
 wire 				DAC_in_window;
 wire 			   DAC_state_status;
-reg  [7:0]		DAC_fsm_out;
+reg  [7:0]		DAC_fsm_out = 8'b0;
 wire 				DAC_thresh_int;
 wire 				DAC_in_en;
 wire 				DAC_advance;
 wire 				DAC_check_states;
 wire 				DAC_any_enabled;
-//integer 			main_state;
-
-//reg   [5:0]		channel;  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
-//reg  [15:0]		DAC_register_1;
 
 
 	localparam
