@@ -51,7 +51,7 @@ module main_reduced(
 	output integer 	fsm_window_state=0,
 	output wire[15:0] DAC_output_register_1,
 	output integer		main_state,
-	output reg			sample_CLK_out,
+	output reg			sample_CLK_out=0,
 	output reg [5:0]	channel=0,  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
 	output reg[15:0]  DAC_register_1=16'b0
 	

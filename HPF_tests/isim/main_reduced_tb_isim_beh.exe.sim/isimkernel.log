@@ -2,9 +2,9 @@ Command line:
    main_reduced_tb_isim_beh.exe
      -simmode  gui
      -simrunnum  0
-     -socket  64328
+     -socket  65222
 
-Thu Jan 17 09:15:04 2019
+Thu Jan 17 10:35:10 2019
 
 
  Elaboration Time: 0.0624 sec
@@ -21,9 +21,9 @@ Thu Jan 17 09:15:04 2019
  Total Scalar Nets and Variables : 100116
 Total Line Count : 1189
 
- Total Simulation Time: 0.234001 sec
+ Total Simulation Time: 4.49283 sec
 
  Current Memory Usage: 675.291 Meg
 
-Thu Jan 17 09:15:22 2019
+Thu Jan 17 10:35:28 2019
 

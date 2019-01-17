@@ -20,6 +20,7 @@ online_res=32768+(board_dac_data(1,start_sample:stop_sample)./312.5e-6 );
 plot(online_res)
 title('online board dac output')
 h(3)=subplot(3,1,3);
-plot(retrieved_bin_matrix_dec(1:stop_sample-start_sample)-online_res(2:stop_sample-start_sample+1)')
+% plot(retrieved_bin_matrix_dec(1:stop_sample-start_sample)-online_res(2:stop_sample-start_sample+1)')
+plot(retrieved_bin_matrix_dec(1:stop_sample-start_sample)-online_res(1:stop_sample-start_sample)')
 title('difference testbench - online dac output')
 linkaxes(h,'x')

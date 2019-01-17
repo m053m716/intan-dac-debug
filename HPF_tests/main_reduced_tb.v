@@ -146,7 +146,7 @@ initial begin
 			ampl_to_DAC<=data_stored[count];
 			count=count+1;
 			end
-		if (channel==0 & main_state==170) begin //maybe it is correct @ 170 (to check)
+		if (channel==0 & main_state==205) begin //maybe it is correct @ 170 (to check)
 			$fwrite(f,"%b\n",   DAC_output_register_1); // write to output_file
 			$display ("Current value of DAC_register is %d", DAC_output_register_1);
 			end

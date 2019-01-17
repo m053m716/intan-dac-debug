@@ -31,7 +31,7 @@ static const char *ng6 = "ampl_data_bin.txt";
 static const char *ng7 = "output_main_reduced_2.txt";
 static const char *ng8 = "w";
 static int ng9[] = {100, 0};
-static int ng10[] = {170, 0};
+static int ng10[] = {205, 0};
 static const char *ng11 = "%b\n";
 static const char *ng12 = "Current value of DAC_register is %d";
 

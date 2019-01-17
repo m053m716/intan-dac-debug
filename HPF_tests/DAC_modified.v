@@ -66,7 +66,7 @@ module DAC_modified #(
 	wire [35:0]		multiplier_out;
 	reg  [31:0] 	HPF_state=32'b0; // SB: initialized!
 	wire 				positive_overflow, negative_overflow;
-	reg				state_clk;
+	reg				state_clk=0;
 	wire [15:0]		pre_ref_input_twos_comp, software_reference_twos_comp, input_minus_ref;
 	wire [16:0]		input_minus_ref_before_limit;
 	wire				negative_overflow_ref, positive_overflow_ref;
