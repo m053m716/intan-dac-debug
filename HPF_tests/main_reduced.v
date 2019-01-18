@@ -25,46 +25,54 @@ module main_reduced(
 	input wire			SPI_start,
 	
 	input wire [15:0]	DAC_start_win_1,	
+	input wire [15:0]	DAC_start_win_2,	
 	input wire [15:0]	DAC_stop_win_1,
+	input wire [15:0]	DAC_stop_win_2,
 	input wire [15:0]	DAC_stop_max,
-	input wire 			DAC_edge_type,	
-	output wire			DAC_thresh_out, //this was 8bits in the original main
+	input wire [1:0]	DAC_edge_type,	
+	output wire[1:0]	DAC_thresh_out, //this was 8bits in the original main
 	
 	input wire [15:0] HPF_coefficient,
 	input wire			HPF_en,
 	
 	input wire [15:0] DAC_sequencer_1,
+	input wire [15:0] DAC_sequencer_2,
 	input wire			DAC_sequencer_en_1,
-	input wire 			DAC_en, 			//this was 8bits in the original main
+	input wire			DAC_sequencer_en_2,
+	input wire [1:0]	DAC_en, 			//this was 8bits in the original main
 	input wire [2:0]  DAC_gain,
 	input wire [6:0]  DAC_noise_suppress,
-	output wire			DAC_SYNC,
-	output wire			DAC_SCLK,
-	output wire			DAC_DIN,
+	output wire[1:0]	DAC_SYNC,
+	output wire[1:0]	DAC_SCLK,
+	output wire[1:0]	DAC_DIN,
 	input wire [15:0]	DAC_thrsh_1,
+	input wire [15:0]	DAC_thrsh_2,
 	input wire			DAC_thrsh_pol_1,
+	input wire			DAC_thrsh_pol_2,
 	input wire        DAC_reref_mode,
-	input wire 			DAC_1_input_is_ref,
+	input wire[1:0]	DAC_input_is_ref,
 	input wire [15:0]	DAC_reref_register,
 	input wire 			DAC_fsm_mode,
 	
 	output integer 	fsm_window_state=0,
 	output wire[15:0] DAC_output_register_1,
+	output wire[15:0] DAC_output_register_2,
 	output integer		main_state,
 	output reg			sample_CLK_out=0,
 	output reg [5:0]	channel=0,  // varies from 0-19 (amplfier channels 0-15, plus 4 auxiliary commands)
-	output reg[15:0]  DAC_register_1=16'b0
+	output reg[15:0]  DAC_register_1=16'b0,
+	output reg[15:0]  DAC_register_2=16'b0
 	
     );
 
 
 
 reg [15:0]		DAC_fsm_counter = 16'b0;
-wire 				DAC_in_window;
-wire 			   DAC_state_status;
+wire[1:0] 		DAC_in_window;
+wire [1:0]	   DAC_state_status;
 reg  [7:0]		DAC_fsm_out = 8'b0;
-wire 				DAC_thresh_int;
-wire 				DAC_in_en;
+wire [1:0]		DAC_thresh_int;
+wire [1:0]		DAC_in_en;
 wire 				DAC_advance;
 wire 				DAC_check_states;
 wire 				DAC_any_enabled;
@@ -93,7 +101,7 @@ wire 				DAC_any_enabled;
 	assign DAC_any_enabled = |DAC_en; 				// At least one DAC must be enabled to run the machine (otherwise it will constantly stim.)
 	assign DAC_advance = DAC_check_states && DAC_any_enabled; // If all state criteria are met, advances to next clock cycle iteration.
 
-	DAC_modified uut (
+	DAC_modified DAC_modified_1 (
 		.reset(reset), 
 		.dataclk(dataclk), 
 		.main_state(main_state), 
@@ -101,27 +109,53 @@ wire 				DAC_any_enabled;
 		.DAC_input(DAC_register_1), 
 		.DAC_sequencer_in(DAC_sequencer_1), 
 		.use_sequencer(DAC_sequencer_en_1), 
-		.DAC_en(DAC_en), 
+		.DAC_en(DAC_en[0]), 
 		.gain(DAC_gain), 
 		.noise_suppress(DAC_noise_suppress), 
-		.DAC_SYNC(DAC_SYNC), 
-		.DAC_SCLK(DAC_SCLK), 
-		.DAC_DIN(DAC_DIN), 
+		.DAC_SYNC(DAC_SYNC[0]), 
+		.DAC_SCLK(DAC_SCLK[0]), 
+		.DAC_DIN(DAC_DIN[0]), 
 		.DAC_thrsh(DAC_thrsh_1), 
 		.DAC_thrsh_pol(DAC_thrsh_pol_1), 
-		.DAC_thrsh_out(DAC_thresh_out), 
+		.DAC_thrsh_out(DAC_thresh_out[0]), 
 		.DAC_fsm_start_win_in(DAC_start_win_1), //
 		.DAC_fsm_stop_win_in(DAC_stop_win_1), 
 		.DAC_fsm_state_counter_in(DAC_fsm_counter), 
-		.DAC_fsm_inwin_out(DAC_in_window), //
+		.DAC_fsm_inwin_out(DAC_in_window[0]), //
 		.HPF_coefficient(HPF_coefficient), 
 		.HPF_en(HPF_en), 
-		.software_reference_mode(DAC_reref_mode & ~DAC_1_input_is_ref), 
+		.software_reference_mode(DAC_reref_mode & ~DAC_input_is_ref[0]), 
 		.software_reference(DAC_reref_register), 
 		.DAC_register(DAC_output_register_1)
 	);
 					
-
+	DAC_modified DAC_modified_2 (
+		.reset(reset), 
+		.dataclk(dataclk), 
+		.main_state(main_state), 
+		.channel(channel), 
+		.DAC_input(DAC_register_2), 
+		.DAC_sequencer_in(DAC_sequencer_2), 
+		.use_sequencer(DAC_sequencer_en_2), 
+		.DAC_en(DAC_en[1]), 
+		.gain(DAC_gain), 
+		.noise_suppress(DAC_noise_suppress), 
+		.DAC_SYNC(DAC_SYNC[1]), 
+		.DAC_SCLK(DAC_SCLK[1]), 
+		.DAC_DIN(DAC_DIN[1]), 
+		.DAC_thrsh(DAC_thrsh_2), 
+		.DAC_thrsh_pol(DAC_thrsh_pol_2), 
+		.DAC_thrsh_out(DAC_thresh_out[1]), 
+		.DAC_fsm_start_win_in(DAC_start_win_2), //
+		.DAC_fsm_stop_win_in(DAC_stop_win_2), 
+		.DAC_fsm_state_counter_in(DAC_fsm_counter), 
+		.DAC_fsm_inwin_out(DAC_in_window[1]), //
+		.HPF_coefficient(HPF_coefficient), 
+		.HPF_en(HPF_en), 
+		.software_reference_mode(DAC_reref_mode & ~DAC_input_is_ref[1]), 
+		.software_reference(DAC_reref_register), 
+		.DAC_register(DAC_output_register_2)
+	);
 
 	always @(posedge sample_CLK_out) begin
 		if (reset) begin
@@ -179,9 +213,8 @@ wire 				DAC_any_enabled;
 		
 	// MM 1/22/2018 - FSM DISCRIMINATOR - END
 
-				 	
+		 	
 	// reduced MAIN FSM 
-	
 					 	
 	always @(posedge dataclk) begin
 		if (reset) begin
@@ -215,6 +248,7 @@ wire 				DAC_any_enabled;
 
 					if (channel == 0) begin		// update  DAC registers with the amplifier data
 						DAC_register_1 <= ampl_to_DAC;
+						DAC_register_2 <= ampl_to_DAC;
 					end
 					main_state <= ms_clk9_d;
 				end
