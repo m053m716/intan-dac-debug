@@ -39,7 +39,7 @@ function [fig,x] = plotLongSegment(T,data,dig,th,col,w,varargin)
 %% DEFAULTS
 Q = 32768;
 OFFSET_COMPLETE = 0;
-OFFSET = 2;
+OFFSET = 0;
 OFFSET_START = 7; % samples
 PLOT_TYPE = 'bits';
 
@@ -54,6 +54,10 @@ end
 %% PARSE VARARGIN
 for iV = 1:2:numel(varargin)
    eval([upper(varargin{iV}) '=varargin{iV+1};']);
+end
+
+if strcmpi(PLOT_TYPE,'filt')
+   Q = 0;
 end
 
 %% MAKE FIGURE

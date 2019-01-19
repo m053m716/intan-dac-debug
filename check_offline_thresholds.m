@@ -11,10 +11,15 @@ Q = 32768;                       % Half-max 16-bit value
 if ~get_files_of_interest(BLOCK,[BLOCK REC])
    error('Something went wrong with saving files of interest.');
 end
+addpath('RHS2000_MATLAB_functions_v1_0');
+x = readIntan(fullfile(BLOCK, [BLOCK REC '.rhs']));
 
 %% DATA - NOTE: GET_FILES_OF_INTEREST should be run first
 % Window parameters:
-load(fullfile(BLOCK,[BLOCK REC '-WindowParams.mat']),'W','TH','COL');
+% load(fullfile(BLOCK,[BLOCK REC '-WindowParams.mat']),'W','TH','COL');
+load(fullfile(BLOCK,[BLOCK REC '-WindowParams.mat']),'W','COL');
+TH = [x.spike_triggers(1).voltage_threshold; ...
+   x.spike_triggers(2).voltage_threshold];
 
 % Streams corresponding to FSM state:
 dig = load(fullfile(BLOCK,[BLOCK REC '-DigData.mat']));
@@ -31,14 +36,18 @@ th = convertThresh(TH);  % Obtain threshold bit value
 th_uV = [TH, TH];        % Threshold (uV) for convenience
 
 % amp.filt = dac_HPF(amp.bits,300,fs);
-amp.filt = dac_HPF(amp.bits(1,1:2000),300,amp.fs);
+% amp.filt = dac_HPF(amp.bits(1,1:2000),300,amp.fs);
+
+amp.filt = HPF(x.amplifier_data(1,:),300,amp.fs);
 
 %% IDENTIFY TRIGGERS
 % spikeFig = plotDetectedSpikes(dac,dig,w,th,COL);
 
 %% MAKE FIGURE FOR OVERALL PLOT
 % [segmentFig,x] = plotLongSegment([0.050 0.075],dac,dig,th,COL,w);
-[segmentFig,x] = plotLongSegment([0.050 0.075],amp,dig,th,COL,w,'PLOT_TYPE','filt');
+% [segmentFig,x] = plotLongSegment([0.050 0.075],amp,dig,th,COL,w,'PLOT_TYPE','filt');
+% segmentFig = plotLongSegment([0.050 0.075],dac,dig,th,COL,w,'PLOT_TYPE','bits');
+segmentFig = plotLongSegment([0.050 0.075],amp,dig,th_uV,COL,w,'PLOT_TYPE','filt');
 
 %% MAKE FIGURE FOR STREAM COMPARISON
 % [fig1,fig2] = plotTriggerStreams(amp.t,amp.data(1,:),dac.bits(1,:));

@@ -19,11 +19,11 @@ fig = figure('Name','Detected Spikes',...
 % First row corresponds to FSM complete sample indicator:
 fsm_complete = find(dig.data(1,:));
 
-% Get some number of samples around the event of interest:
-ivec = -2:(n_samples+1);
-
 % Get max sample number for offset
 n_samples = max(max(w));
+
+% Get some number of samples around the event of interest:
+ivec = -2:(n_samples+1);
 
 %% FIND ALL SPIKES AND PLOT
 % Each DAC channel is the same amplifier channel, routed to a different
