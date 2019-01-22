@@ -171,6 +171,8 @@ private slots:
     void setDACWindowStart(int sample);
     void setDACWindowStop(int sample);
     void setDACTriggerType(int triggerType);
+
+    void setCorrectRadioButton(bool clicked, int index);
     // END
 
     void renameChannel();

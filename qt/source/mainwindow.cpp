@@ -897,6 +897,15 @@ void MainWindow::createLayout()
         dacLayout[i]->addWidget(new QLabel(QSTRING_MU_SYMBOL + "V"));
 
         connect(dacVoltageThresholdSpinBox.at(i), SIGNAL(valueChanged(int)),
+                this, SIGNAL(DACChannelChanged(i)));
+        connect(dacWindowStartSpinBox.at(i), SIGNAL(valueChanged(int)),
+                this, SIGNAL(DACChannelChanged(i)));
+        connect(dacWindowStopSpinBox.at(i), SIGNAL(valueChanged(int)),
+                this, SIGNAL(DACChannelChanged(i)));
+        connect(includeExcludeComboBox.at(i), SIGNAL(currentIndexChanged(int)),
+                this, SIGNAL(DACChannelChanged(i)));
+
+        connect(dacVoltageThresholdSpinBox.at(i), SIGNAL(valueChanged(int)),
                 this, SLOT(setDACVoltageThreshold(int)));
         connect(dacWindowStartSpinBox.at(i), SIGNAL(valueChanged(int)),
                 this, SLOT(setDACWindowStart(int)));
@@ -904,6 +913,7 @@ void MainWindow::createLayout()
                 this, SLOT(setDACWindowStop(int)));
         connect(includeExcludeComboBox.at(i), SIGNAL(currentIndexChanged(int)),
                 this, SLOT(setDACTriggerType(int)));
+
 
         dacWindowStartSpinBox[i]->setValue(i);
         dacWindowStopSpinBox[i]->setValue(i+2);
@@ -1678,6 +1688,10 @@ void MainWindow::setDACChannelEnable(bool enable)
     } else {
         setDacChannelLabel(selectedDACChannelIndex, "n/a", "n/a");
     }
+
+    if (currentDACChannelStream) {
+        currentDACChannelStream->voltageTriggerMode = (qint16)enable;
+    }
     wavePlot->setFocus();
     emit(DACChannelEnableChanged(enable));
 }
@@ -1750,7 +1764,7 @@ void MainWindow::setDACWindowStart(int sample)
         return;
     }
     if (!synthMode) evalBoard->setDacWindowStart(selectedDACChannelIndex, 0x0000);
-    if (currentDACChannelStream && dacEnabled[selectedDACChannelIndex]) {
+    if (currentDACChannelStream) {
         currentDACChannelStream->electrodeImpedanceMagnitude = sample;
         dacWindowStartSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
@@ -1768,7 +1782,7 @@ void MainWindow::setDACWindowStop(int sample)
     if (spikeScopeDialog) {
         spikeScopeDialog->setCurrentDACWindowStartOffset(windowMax);
     }
-    if (currentDACChannelStream && dacEnabled[selectedDACChannelIndex]) {
+    if (currentDACChannelStream) {
         currentDACChannelStream->electrodeImpedancePhase = sample;
         dacWindowStopSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
@@ -1782,11 +1796,16 @@ void MainWindow::setDACTriggerType(int triggerType)
         return;
     }
     if (!synthMode) evalBoard->changeThresholdType(selectedDACChannelIndex, triggerType);
-    if (currentDACChannelStream && dacEnabled[selectedDACChannelIndex]) {
+    if (currentDACChannelStream) {
         currentDACChannelStream->digitalEdgePolarity = (qint16)triggerType;
         includeExcludeComboBox[selectedDACChannelIndex]->setCurrentIndex(triggerType);
     }
     emit(DACTriggerTypeChanged(triggerType));
+}
+
+void MainWindow::setCorrectRadioButton(bool clicked, int index)
+{
+
 }
 
 
@@ -3199,6 +3218,7 @@ void MainWindow::spikeScope()
     spikeScopeDialog->setSampleRate(boardSampleRate);
 
     for (int i = 0; i < 8; i++) {
+        setDACChannel(i);
         spikeScopeDialog->setCurrentDACChannel(i);
         spikeScopeDialog->setCurrentDACChannelEnable(dacEnabled[i]);
         spikeScopeDialog->setCurrentDACVoltageThreshold(dacVoltageThresholdSpinBox[i]->value());
@@ -3206,6 +3226,7 @@ void MainWindow::spikeScope()
         spikeScopeDialog->setCurrentDACWindowStart(dacWindowStartSpinBox[i]->value());
         spikeScopeDialog->setCurrentDACWindowStop(dacWindowStopSpinBox[i]->value());
     }
+    setDACChannel(0);
     spikeScopeDialog->setDetectionMode(DetectionMethod);
     spikeScopeDialog->setCurrentDACChannel(selectedDACChannelIndex);
 
@@ -3539,6 +3560,7 @@ void MainWindow::loadSettings()
     wavePlot->refreshScreen();
     statusBar()->clearMessage();
     wavePlot->setFocus();
+    setDACChannel(0);
 }
 
 // Save application settings to *.isf (Intan Settings File) file.
