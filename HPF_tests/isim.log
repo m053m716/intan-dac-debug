@@ -13,7 +13,7 @@ Simulator is doing circuit initialization process.
 Finished circuit initialization process.
 Current value of DAC_register is  5629
 Current value of DAC_register is 48320
-# run 1.00ms
+# run 3.00ms
 Current value of DAC_register is 43557
 Current value of DAC_register is 41743
 Current value of DAC_register is 40145
@@ -2098,7 +2098,6 @@ Current value of DAC_register is 31653
 Current value of DAC_register is 31983
 Current value of DAC_register is 31656
 Current value of DAC_register is 31612
-# run 2.00ms
 Current value of DAC_register is 32023
 Current value of DAC_register is 31723
 Current value of DAC_register is 31648

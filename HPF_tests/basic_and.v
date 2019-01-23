@@ -24,6 +24,6 @@ module basic_and #(parameter WIDTH = 1)(
     output [WIDTH-1:0] out
   );
  
-  assign out = a & b;
+  assign out = a | b;
  
 endmodule

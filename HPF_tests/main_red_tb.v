@@ -126,7 +126,7 @@ module main_red_tb;
 		DAC_stop_win_1 = 2;
 		DAC_stop_win_2 = 8;
 		DAC_stop_max = 8;
-		DAC_edge_type = 2'b01;
+		DAC_edge_type = 2'b10; //
 		HPF_coefficient = 5894; // 3991 is 300Hz/30000kS  //3343 is 250/30000 // 5894 300/2000Hz
 		HPF_en = 1;
 		DAC_sequencer_1 = 0;
@@ -136,9 +136,9 @@ module main_red_tb;
 		DAC_en = 2'b11;
 		DAC_gain = 0;
 		DAC_noise_suppress = 0;
-		DAC_thrsh_1 = 32255;//-100
-		DAC_thrsh_2 = 30973;//-350
-		DAC_thrsh_pol_1 = 1; //DAC_thrsh_pol ? (DAC_input_offset >= DAC_thrsh) : (DAC_input_offset <= DAC_thrsh))
+		DAC_thrsh_2 = 32255;//-100 // WARNING INVERTED
+		DAC_thrsh_1 = 30973;//-350
+		DAC_thrsh_pol_1 = 0; //DAC_thrsh_pol ? (DAC_input_offset >= DAC_thrsh) : (DAC_input_offset <= DAC_thrsh))
 		DAC_thrsh_pol_2 = 1;
 		DAC_reref_mode = 0;
 		DAC_input_is_ref = 0;
