@@ -864,30 +864,32 @@ void MainWindow::createLayout()
     QList<QHBoxLayout*> dacLayout;
     for (int i = 0; i < 8; i++){
         QSpinBox * window_start_box = new QSpinBox();
+        window_start_box->setRange(0x0000,0x003c);
+        window_start_box->setSingleStep(0);
+        connect(window_start_box,SIGNAL(valueChanged(int)),
+                unifyDACAction[i],SLOT(trigger()));
         dacWindowStartSpinBox << window_start_box;
-        dacWindowStartSpinBox[i]->setRange(0x0000,0x003c);
-        dacWindowStartSpinBox[i]->setSingleStep(0);
-        dacWindowStartSpinBox[i]->addAction(unifyDACAction[i]);
 
         QSpinBox * window_stop_box = new QSpinBox();
+        window_stop_box->setRange(0x0000,0x003c);
+        window_stop_box->setSingleStep(1);
+        connect(window_stop_box,SIGNAL(valueChanged(int)),
+                unifyDACAction[i],SLOT(trigger()));
         dacWindowStopSpinBox << window_stop_box;
-        dacWindowStopSpinBox[i]->setRange(0x0000,0x003c);
-        dacWindowStopSpinBox[i]->setSingleStep(1);
-        dacWindowStopSpinBox[i]->addAction(unifyDACAction[i]);
-
 
         QComboBox * ie_box = new QComboBox();
+        ie_box->addItem(tr("Include"));
+        ie_box->addItem(tr("Exclude"));
+        connect(ie_box,SIGNAL(currentIndexChanged(int)),
+                unifyDACAction[i],SLOT(trigger()));
         includeExcludeComboBox << ie_box;
-        includeExcludeComboBox[i]->addItem(tr("Include"));
-        includeExcludeComboBox[i]->addItem(tr("Exclude"));
-        includeExcludeComboBox[i]->addAction(unifyDACAction[i]);
-
 
         QSpinBox * thresh_spin = new QSpinBox();
+        thresh_spin->setRange(-6400, 6400);
+        thresh_spin->setSingleStep(5);
+        connect(thresh_spin,SIGNAL(valueChanged(int)),
+                unifyDACAction[i],SLOT(trigger()));
         dacVoltageThresholdSpinBox << thresh_spin;
-        dacVoltageThresholdSpinBox[i]->setRange(-6400, 6400);
-        dacVoltageThresholdSpinBox[i]->setSingleStep(5);
-        dacVoltageThresholdSpinBox[i]->addAction(unifyDACAction[i]);
 
         QHBoxLayout * dac_layout = new QHBoxLayout;
         dacLayout << dac_layout;
