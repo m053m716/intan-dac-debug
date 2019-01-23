@@ -34,7 +34,7 @@ class QAction;
 class QPushButton;
 class QToolButton;
 class QButtonGroup;
-class QAbstractButton;
+class QSignalMapper;
 class QRadioButton;
 class QCheckBox;
 class QSpinBox;
@@ -171,8 +171,6 @@ private slots:
     void setDACWindowStart(int sample);
     void setDACWindowStop(int sample);
     void setDACTriggerType(int triggerType);
-
-    void setCorrectRadioButton(bool clicked, int index);
     // END
 
     void renameChannel();
@@ -382,6 +380,9 @@ private:
     QAction *ampSettleSettingsAction;
     QAction *chargeRecoverySettingsAction;
 
+    QSignalMapper* signalMapper;
+    QList<QAction*> unifyDACAction;
+
     QMenu *fileMenu;
     QMenu *editMenu;
     QMenu *stimMenu;
@@ -491,6 +492,13 @@ private:
     QLabel *refChannelLabel;
 
     StimParameters copiedStimParameters;
+
+    // MM 2019-01-22 Fix for tracking other GUI elements with radio buttons properly
+    int thisVoltageSpinBoxValue;
+    int thisWindowStartSpinBoxValue;
+    int thisWindowStopSpinBoxValue;
+    int thisWindowTypeComboBoxIndex;
+    // END
 };
 
 

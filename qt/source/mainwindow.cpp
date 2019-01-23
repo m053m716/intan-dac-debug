@@ -589,7 +589,7 @@ void MainWindow::createLayout()
     notchFilterComboBox->addItem(tr("Disabled"));
     notchFilterComboBox->addItem("50 Hz");
     notchFilterComboBox->addItem("60 Hz");
-    notchFilterComboBox->setCurrentIndex(2);
+    notchFilterComboBox->setCurrentIndex(0);
 
     connect(runButton, SIGNAL(clicked()), this, SLOT(runInterfaceBoard()));
     connect(stopButton, SIGNAL(clicked()), this, SLOT(stopInterfaceBoard()));
@@ -867,23 +867,27 @@ void MainWindow::createLayout()
         dacWindowStartSpinBox << window_start_box;
         dacWindowStartSpinBox[i]->setRange(0x0000,0x003c);
         dacWindowStartSpinBox[i]->setSingleStep(0);
+        dacWindowStartSpinBox[i]->addAction(unifyDACAction[i]);
 
         QSpinBox * window_stop_box = new QSpinBox();
         dacWindowStopSpinBox << window_stop_box;
         dacWindowStopSpinBox[i]->setRange(0x0000,0x003c);
         dacWindowStopSpinBox[i]->setSingleStep(1);
+        dacWindowStopSpinBox[i]->addAction(unifyDACAction[i]);
 
 
         QComboBox * ie_box = new QComboBox();
         includeExcludeComboBox << ie_box;
         includeExcludeComboBox[i]->addItem(tr("Include"));
         includeExcludeComboBox[i]->addItem(tr("Exclude"));
+        includeExcludeComboBox[i]->addAction(unifyDACAction[i]);
 
 
         QSpinBox * thresh_spin = new QSpinBox();
         dacVoltageThresholdSpinBox << thresh_spin;
         dacVoltageThresholdSpinBox[i]->setRange(-6400, 6400);
         dacVoltageThresholdSpinBox[i]->setSingleStep(5);
+        dacVoltageThresholdSpinBox[i]->addAction(unifyDACAction[i]);
 
         QHBoxLayout * dac_layout = new QHBoxLayout;
         dacLayout << dac_layout;
@@ -897,15 +901,6 @@ void MainWindow::createLayout()
         dacLayout[i]->addWidget(new QLabel(QSTRING_MU_SYMBOL + "V"));
 
         connect(dacVoltageThresholdSpinBox.at(i), SIGNAL(valueChanged(int)),
-                this, SIGNAL(DACChannelChanged(i)));
-        connect(dacWindowStartSpinBox.at(i), SIGNAL(valueChanged(int)),
-                this, SIGNAL(DACChannelChanged(i)));
-        connect(dacWindowStopSpinBox.at(i), SIGNAL(valueChanged(int)),
-                this, SIGNAL(DACChannelChanged(i)));
-        connect(includeExcludeComboBox.at(i), SIGNAL(currentIndexChanged(int)),
-                this, SIGNAL(DACChannelChanged(i)));
-
-        connect(dacVoltageThresholdSpinBox.at(i), SIGNAL(valueChanged(int)),
                 this, SLOT(setDACVoltageThreshold(int)));
         connect(dacWindowStartSpinBox.at(i), SIGNAL(valueChanged(int)),
                 this, SLOT(setDACWindowStart(int)));
@@ -913,7 +908,6 @@ void MainWindow::createLayout()
                 this, SLOT(setDACWindowStop(int)));
         connect(includeExcludeComboBox.at(i), SIGNAL(currentIndexChanged(int)),
                 this, SLOT(setDACTriggerType(int)));
-
 
         dacWindowStartSpinBox[i]->setValue(i);
         dacWindowStopSpinBox[i]->setValue(i+2);
@@ -1224,6 +1218,19 @@ void MainWindow::createActions()
             new QAction(tr("Charge Recovery Settings"), this);
     connect(chargeRecoverySettingsAction, SIGNAL(triggered()),
             this, SLOT(chargeRecoverySettings()));
+
+    signalMapper = new QSignalMapper(this);
+    // actions for graphical UI elements
+    for (int i = 0; i < 8; i++){
+        QAction *unifyDAC = new QAction(this);
+        connect(unifyDAC,SIGNAL(triggered()),
+                signalMapper, SLOT(map()));
+        signalMapper->setMapping(unifyDAC,i);
+        unifyDACAction << unifyDAC;
+    }
+    connect(signalMapper,SIGNAL(mapped(int)),
+            this, SLOT(setDACChannel(int)));
+
 }
 
 // Create pull-down menus.
@@ -1735,7 +1742,10 @@ void MainWindow::setDACChannel(int index)
     }
 
     selectedDACChannelIndex = index;
+    dacButtonGroup->setExclusive(false);
     dacEnableCheckBox->setChecked(dacEnabled[index]);
+    dacButtonGroup->setExclusive(true);
+    dacRadioButton[index]->setChecked(true);
     emit(DACChannelChanged(index));
 
 }
@@ -1763,9 +1773,9 @@ void MainWindow::setDACWindowStart(int sample)
         cerr << "Error in MainWindow::setDACWindowStart: sample (" << sample << ") out of range." << endl;
         return;
     }
-    if (!synthMode) evalBoard->setDacWindowStart(selectedDACChannelIndex, 0x0000);
+    if (!synthMode) evalBoard->setDacWindowStart(selectedDACChannelIndex, sample);
     if (currentDACChannelStream) {
-        currentDACChannelStream->electrodeImpedanceMagnitude = sample;
+        currentDACChannelStream->electrodeImpedanceMagnitude = (double)sample;
         dacWindowStartSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
     emit(DACWindowStartChanged(sample));
@@ -1783,7 +1793,7 @@ void MainWindow::setDACWindowStop(int sample)
         spikeScopeDialog->setCurrentDACWindowStartOffset(windowMax);
     }
     if (currentDACChannelStream) {
-        currentDACChannelStream->electrodeImpedancePhase = sample;
+        currentDACChannelStream->electrodeImpedancePhase = (double)sample;
         dacWindowStopSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
     emit(DACWindowStopChanged(sample));
@@ -1802,12 +1812,6 @@ void MainWindow::setDACTriggerType(int triggerType)
     }
     emit(DACTriggerTypeChanged(triggerType));
 }
-
-void MainWindow::setCorrectRadioButton(bool clicked, int index)
-{
-
-}
-
 
 
 // Label DAC selection button in GUI with selected amplifier channel.
