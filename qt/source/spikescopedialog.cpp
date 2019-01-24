@@ -37,7 +37,7 @@
 // spikes are superimposed on the display so that users can compare spike shapes.
 
 SpikeScopeDialog::SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSources *inSignalSources,
-                                   SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent) :
+                                   SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent, double fs) :
     QDialog(parent)
 {
     // Set all the passed variables for this class
@@ -49,6 +49,7 @@ SpikeScopeDialog::SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSou
 
     // Initialize all window properties associated with class
     initWindowProperties();
+    setSampleRate(fs);
 
     // Initialize the spikePlot for displaying detected spikes
     spikePlot = initializeSpikePlot();
@@ -67,18 +68,18 @@ SpikeScopeDialog::SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSou
 
 void SpikeScopeDialog::changeYScale(int index)
 {
-    spikePlot->setYScale(yScaleList[index]);
+    emit(yScaleChanged(index));
 }
 
 void SpikeScopeDialog::setYScale(int index)
 {
     yScaleComboBox->setCurrentIndex(index);
-    spikePlot->setYScale(yScaleList[index]);
 }
 
 void SpikeScopeDialog::setSampleRate(double newSampleRate)
 {
-    spikePlot->setSampleRate(newSampleRate);
+    sampleRate = newSampleRate;
+    emit(sampleRateChanged);
 }
 
 // Select a voltage trigger if index == 0.
@@ -375,7 +376,7 @@ void SpikeScopeDialog::setCurrentDACVoltageThreshold(int threshold)
 // initialize Spike Plot and its connections
 SpikePlot* SpikeScopeDialog::initializeSpikePlot()
 {
-    SpikePlot *s = new SpikePlot(signalProcessor, currentChannel, selectedDacChannel, this, this);
+    SpikePlot *s = new SpikePlot(signalProcessor, currentChannel, selectedDacChannel, this, this, sampleRate);
     connect(this,SIGNAL(selectedDACChannelIndexChanged(int)),
             s,SLOT(setCurrentChannel(int)));
     connect(this,SIGNAL(selectedDACWindowStartChanged(int)),
@@ -392,6 +393,15 @@ SpikePlot* SpikeScopeDialog::initializeSpikePlot()
             s,SLOT(setWType(int)));
     connect(s,SIGNAL(currentVoltageThresholdChanged(int)),
             this, SLOT(setVoltageThresholdDisplay(int)));
+    connect(this, SIGNAL(selectedDACChannelEnableChanged(bool)),
+            s,SLOT(setWEnable(bool)));
+
+    connect(this, SIGNAL(sampleRateChanged(double)),
+            s,SLOT(setSampleRate(double)));
+    connect(this, SIGNAL(yScaleChanged(int)),
+            s, SLOT(setYScale(int)));
+    connect(this, SIGNAL(newSignalChannel(SignalChannel*)),
+            s, SLOT(setNewChannel(SignalChannel*)));
 
     return s;
 }

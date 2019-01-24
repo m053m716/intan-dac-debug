@@ -48,9 +48,8 @@ class SpikePlot : public QWidget
     Q_OBJECT
 public:
     explicit SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialChannel, SignalChannel *curDacChannel,
-                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0);
-    void setYScale(int newYScale);
-    void setSampleRate(double newSampleRate);
+                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0, double fs);
+
     void updateWaveform(int numBlocks);
     void setMaxNumSpikeWaveforms(int num);
     void clearScope();
@@ -58,7 +57,7 @@ public:
     void setVoltageThreshold(int threshold);
     void setDigitalTriggerChannel(int channel);
     void setDigitalEdgePolarity(bool risingEdge);
-    void setNewChannel(SignalChannel* newChannel);
+
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
@@ -75,6 +74,11 @@ public slots:
     void setWThresh(int threshold);
     void setWType(int type);
     void setWMode(bool fsmOn);
+
+    // MM 2019-01-24
+    void setSampleRate(double newSampleRate);
+    void setYScale(int newYScale);
+    void setNewChannel(SignalChannel* newChannel);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -134,37 +138,45 @@ private:
     QVector<double> levelStopPoint;
     QVector<double> levelHeight;
 
+    QPixmap pixmap;
+
     QPen penThisInclude;
     QPen penThisExclude;
     QPen penOtherInclude;
     QPen penOtherExclude;
     QPen penIncludeSpike;
     QPen penExcludeSpike;
-
-    double frameX;
-    double frameY;
-    double frameW;
-    double yAxisLength;
-    double yScaleFactor;
     // END UPDATE
-
-    int preTriggerTSteps;
-    int totalTSteps;
-    bool startingNewChannel;
-    int rmsDisplayPeriod;
 
     SignalChannel *selectedChannel;
     SignalChannel *selectedDacChannel;
 
     QRect frame;
+    QVector<QVector<QColor>> scopeColors;
 
-    double tStepMsec;
+    // Plotting parameters
+    int rmsDisplayPeriod;
+    int preTriggerTSteps;
+    int totalTSteps;
     int yScale;
+    double tScale;
+    double tStepMsec;
     double savedRMS;
 
-    QPixmap pixmap;
+    double frameX;
+    double frameY;
+    double frameW;
+    double tAxisLength;
+    double yAxisLength;
 
-    QVector<QVector<QColor>> scopeColors;
+    double tScaleFactor;
+    double yScaleFactor;
+
+    double tOffset;
+    double yOffset;
+    double sampleRate;
+
+    bool startingNewChannel;
     
 };
 

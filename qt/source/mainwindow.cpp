@@ -3265,7 +3265,7 @@ void MainWindow::spikeScope()
 {
     if (!spikeScopeDialog) {
         spikeScopeDialog = new SpikeScopeDialog(signalProcessor, signalSources,
-                                                wavePlot->selectedChannel(),wavePlot->selectedDacChannel(), this);
+                                                wavePlot->selectedChannel(),wavePlot->selectedDacChannel(), this, boardSampleRate);
 
         for (int i = 0; i < MAX_NUM_DAC_CHANNELS; i++) {
             spikeScopeDialog->setCurrentDACChannel(i);
@@ -3325,7 +3325,6 @@ void MainWindow::spikeScope()
     spikeScopeDialog->raise();
     spikeScopeDialog->activateWindow();
     spikeScopeDialog->setYScale(yScaleComboBox->currentIndex());
-    spikeScopeDialog->setSampleRate(boardSampleRate);
     spikeScopeDialog->setCurrentDACChannel(selectedDACChannelIndex);
 
     wavePlot->setFocus();
