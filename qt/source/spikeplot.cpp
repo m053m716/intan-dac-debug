@@ -43,170 +43,31 @@ SpikePlot::SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialC
                      SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent) :
     QWidget(parent)
 {
-    // MM - UPDATE - WINDOW DISCRIMINATOR - 1/23/18
-    // initialize new properties
-    wMode = false;
-    wEnable.resize(8);
-    wEnable.fill(false);
-    wStart.resize(8);
-    wStart.fill(0);
-    wStop.resize(8);
-    wStop.fill(0);
-    wType.resize(8);
-    wType[0] = 0;
-    wType[1] = 1;
-    wType[2] = 0;
-    wType[3] = 1;
-    wType[4] = 0;
-    wType[5] = 1;
-    wType[6] = 0;
-    wType[7] = 1;
-    wMax = 0;
-    wThresh.resize(8);
-    wThresh.fill(0);
-    thisChannel = 0;
-
-    levelStartPoint.resize(8);
-    levelStartPoint.fill(0.0);
-    levelStopPoint.resize(8);
-    levelStopPoint.fill(0.0);
-    levelHeight.resize(8);
-    levelHeight.fill(0.0);
-
-    frameX = 0.0;
-    frameY = 0.0;
-    frameW = 0.0;
-    yAxisLength = 0.0;
-    yScaleFactor = 0.0;
-
-    penThisInclude.setWidth(4);
-    penThisInclude.setBrush(Qt::blue);
-    penThisExclude.setWidth(4);
-    penThisExclude.setBrush(Qt::red);
-
-    penOtherInclude.setWidth(2);
-    penOtherInclude.setBrush(Qt::blue);
-    penOtherExclude.setWidth(2);
-    penOtherExclude.setBrush(Qt::red);
-
-    penIncludeSpike.setWidth(2);
-    penIncludeSpike.setBrush(Qt::darkBlue);
-
-    penExcludeSpike.setWidth(1);
-    penExcludeSpike.setBrush(Qt::lightGray);
-    // END UPDATE
-
+    // Store properties as passed to constructor
     signalProcessor = inSignalProcessor;
     spikeScopeDialog = inSpikeScopeDialog;
-
     selectedDacChannel = curDacChannel;
     selectedChannel = initialChannel;
-    startingNewChannel = true;
-    rmsDisplayPeriod = 0;
-    savedRms = 0.0;
 
-    spikeWaveformIndex = 0;
-    numSpikeWaveforms = 0;
-    maxNumSpikeWaveforms = 20;
-    maxNumSpikeSamples = int(maxNumSpikeWaveforms * SPIKE_WINDOW_T + 1);
+    // Initialize properties associated with the FSM
+    initGenProperties();
 
+    // Initialize pen colors for different types of snippets
+    initPenColors();
 
-    // MM - UPDATE - WINDOW DISCRIMINATOR - 1/23/18 (moved)
-    colorIndex = 1;
+    // Initialize display properties for this window
+    initDisplay();
 
-    switch (maxNumSpikeWaveforms) {
-        case 10: colorIndex = 0; break;
-        case 20: colorIndex = 1; break;
-        case 30: colorIndex = 2; break;
-        case 50: colorIndex = 3; break;
-    }
-    // END
-
-    voltageTriggerMode = true;
-    voltageThreshold = 0;
-    digitalTriggerChannel = 0;
-    digitalEdgePolarity = true;
-
-    setBackgroundRole(QPalette::Window);
-    setAutoFillBackground(true);
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
-    setFocusPolicy(Qt::StrongFocus);
-
-
-
-    // We can plot up to 30 superimposed spike waveforms on the scope.
-    spikeWaveform.resize(maxNumSpikeWaveforms);
-    int i;
-    for (i = 0; i < spikeWaveform.size(); ++i) {
-        // Each waveform is 3 ms in duration.  We need 91 time steps for a 3 ms
-        // waveform with the sample rate is set to its maximum value of 30 kS/s.
-        spikeWaveform[i].resize(maxNumSpikeSamples);
-        spikeWaveform[i].fill(0.0);
-    }
-
-    // Buffers to hold recent history of spike waveform and digital input,
-    // used to find trigger events.
-    spikeWaveformBuffer.resize(BUFFER_SIZE);
-    spikeWaveformBuffer.fill(0.0);
-    digitalInputBuffer.resize(BUFFER_SIZE);
-    digitalInputBuffer.fill(0);
-    fsmTriggerBuffer.resize(BUFFER_SIZE);
-    fsmTriggerBuffer.fill(0);
-    fsmTrackerBuffer.resize(BUFFER_SIZE);
-    fsmTrackerBuffer.fill(0);
-
-    // Set up vectors of varying plot colors so that older waveforms
-    // are plotted in low-contrast gray and new waveforms are plotted
-    // in high-contrast blue.  Older signals fade away, like phosphor
-    // traces on old-school CRT oscilloscopes.
-    scopeColors.resize(4);
-    scopeColors[0].resize(10);
-    scopeColors[1].resize(20);
-    scopeColors[2].resize(30);
-    scopeColors[3].resize(50);
-
-    for (i = 6; i < 10; ++i) scopeColors[0][i] = Qt::black;
-    for (i = 3; i < 6; ++i) scopeColors[0][i] = Qt::darkGray;
-    for (i = 0; i < 3; ++i) scopeColors[0][i] = Qt::lightGray;
-
-    for (i = 12; i < 20; ++i) scopeColors[1][i] = Qt::black;
-    for (i = 6; i < 12; ++i) scopeColors[1][i] = Qt::darkGray;
-    for (i = 0; i < 6; ++i) scopeColors[1][i] = Qt::lightGray;
-
-    for (i = 18; i < 30; ++i) scopeColors[2][i] = Qt::black;
-    for (i = 9; i < 18; ++i) scopeColors[2][i] = Qt::darkGray;
-    for (i = 0; i < 9; ++i) scopeColors[2][i] = Qt::lightGray;
-
-    for (i = 30; i < 50; ++i) scopeColors[3][i] = Qt::black;
-    for (i = 10; i < 30; ++i) scopeColors[3][i] = Qt::darkGray;
-    for (i = 0; i < 10; ++i) scopeColors[3][i] = Qt::lightGray;
-
-    fsmColors.resize(4);
-    fsmColors[0].resize(10);
-    fsmColors[0].fill(false);
-    fsmColors[1].resize(20);
-    fsmColors[1].fill(false);
-    fsmColors[2].resize(30);
-    fsmColors[2].fill(false);
-    fsmColors[3].resize(50);
-    fsmColors[3].fill(false);
-
-
-    // Default values that may be overwritten.
-    yScale = 5000;
-    setSampleRate(30000.0);
-
-    pixmap = QPixmap(size());
-    pixmap.fill();
+    // Initialize buffers for snippets to be plotted from data streams
+    initBuffers();
 }
 
 // Set voltage scale.
 void SpikePlot::setYScale(int newYScale)
 {
     yScale = newYScale;
-    initializeDisplay();
+    initSpikeAxes();
 }
-
 // Set waveform sample rate.
 void SpikePlot::setSampleRate(double newSampleRate)
 {
@@ -224,91 +85,110 @@ void SpikePlot::setSampleRate(double newSampleRate)
     numSpikeWaveforms = 0;
     startingNewChannel = true;
 }
-
-// Draw axis lines on display.
-void SpikePlot::drawAxisLines()
-{
-    QPainter painter(&pixmap);
-    painter.initFrom(this);
-
-    painter.fillRect(frame, Qt::white);
-
-    painter.setPen(Qt::darkGray);
-
-    // Draw box outline.
-    painter.drawRect(frame);
-
-    // Draw horizonal zero voltage line.
-    painter.drawLine(frame.left(), frame.center().y(), frame.right(), frame.center().y());
-
-    // Draw vertical lines
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-
-    yAxisLength = (frame.height() - 2) / 2.0;
-    yScaleFactor = -yAxisLength / yScale;
-    frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
-    frameY = frame.center().y();
-    frameW = frame.width();
-
-    if (wMode) {
-        for (int ii = 0; ii < 8; ++ii) {
-            if (wEnable.at(ii)) {
-                if (ii == thisChannel) {
-                    switch (wType.at(ii)) {
-                        case 0:
-                            painter.setPen(penThisInclude);
-                            break;
-                        case 1:
-                            painter.setPen(penThisExclude);
-                            break;
-                        default:
-                            painter.setPen(Qt::gray);
-                    }
-                } else {
-                    switch (wType.at(ii)) {
-                        case 0:
-                            painter.setPen(penOtherInclude);
-                            break;
-                        case 1:
-                            painter.setPen(penOtherExclude);
-                            break;
-                        default:
-                            painter.setPen(Qt::gray);
-                    }
-                }
-
-                painter.drawLine(levelStartPoint.at(ii), levelHeight.at(ii), levelStopPoint.at(ii), levelHeight.at(ii));
-            }
-        }
-    }
-
-    update();
-}
-
-void SpikePlot::setWMax(int maxWindowStop)
-{
-    wMax = maxWindowStop;
-}
-
-void SpikePlot::updateLevelStartStop()
-{
-    levelStartPoint[thisChannel] = frameX + ((double(wStart.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1;
-    levelStopPoint[thisChannel] = frameX + ((double(wStop.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1.75; // 1 for graphics offset; 0.75 to reflect "<" on this edge
-    levelHeight[thisChannel] = frameY + (yScaleFactor * double(wThresh.at(thisChannel)));
-}
-
+// set current DAC channel
 void SpikePlot::setCurrentChannel(int channel)
 {
+    if (channel < 0 || channel > 7) {
+        cerr << "Error in SpikePlot::setCurrentChannel: channel (" << channel << ") out of range." << endl;
+        return;
+    }
     thisChannel = channel;
+    reDrawFSMLevels(); // re-draw new "thick" line
+}
+// set whether this window is enabled
+void SpikePlot::setWEnable(bool enable)
+{
+    if (thisChannel < 0 || thisChannel > 7) {
+        cerr << "Error in SpikePlot::setWEnable: thisChannel (" << thisChannel << ") out of range." << endl;
+        return;
+    }
+    wEnable[thisChannel] = enable;
+    reDrawFSMLevels(); // some lines may disappear or re-appear
+}
+// set the start sample for this channel's state window
+void SpikePlot::setWStart(int sample)
+{
+    if (thisChannel < 0 || thisChannel > 7) {
+        cerr << "Error in SpikePlot::setWStart: thisChannel (" << thisChannel << ") out of range." << endl;
+        return;
+    }
+
+    if (sample < 0 || sample > 1000) {
+        cerr << "Error in SpikePlot::setWStart: sample (" << sample << ") out of range." << endl;
+        return;
+    }
+    wStart[thisChannel] = sample;
+    updateLevelStartStop(); // offsets may change
+}
+// set the stop sample for this channel's state window
+void SpikePlot::setWStop(int sample)
+{
+    if (thisChannel < 0 || thisChannel > 7) {
+        cerr << "Error in SpikePlot::setWStop: thisChannel (" << thisChannel << ") out of range." << endl;
+        return;
+    }
+
+    if (sample < 0 || sample > 1000) {
+        cerr << "Error in SpikePlot::setWStop: sample (" << sample << ") out of range." << endl;
+        return;
+    }
+    wStop[thisChannel] = sample;
+    updateLevelStartStop(); // offsets may change
+}
+// set full duration of state machine
+void SpikePlot::setWMax(int sample)
+{
+    if (sample < 0 || sample > 1000) {
+        cerr << "Error in SpikePlot::setWMax: sample (" << sample << ") out of range." << endl;
+        return;
+    }
+    wMax = sample;
+    updateLevelStartStop();
+}
+// set threshold for current channel from dropdown combo box of dialog
+void SpikePlot::setWThresh(int threshold)
+{
+    if (thisChannel < 0 || thisChannel > 7) {
+        cerr << "Error in SpikePlot::setWThresh: thisChannel (" << thisChannel << ") out of range." << endl;
+        return;
+    }
+
+    if (threshold < -5000 || threshold > 5000) {
+        cerr << "Error in SpikePlot::setWThresh: threshold (" << threshold << ") out of range." << endl;
+        return;
+    }
+    wThresh[thisChannel] = threshold;
+    updateLevelStartStop();
+}
+// set include or exclude window type
+void SpikePlot::setWType(int type)
+{
+    // check that channel is in range
+    if (thisChannel < 0 || thisChannel > 7) {
+        cerr << "Error in SpikePlot::setWType: thisChannel (" << thisChannel << ") out of range." << endl;
+        return;
+    }
+
+    // check that type index is appropriate
+    if (type < 0 || type > 1) {
+        cerr << "Error in SpikePlot::setWType: type (" << type << ") out of range." << endl;
+        return;
+    }
+
+    wType[thisChannel] = type;
+    reDrawFSMLevels(); // change colors
+}
+// listen for whether state machine is enabled
+void SpikePlot::setWMode(bool fsmOn)
+{
+    fsmModeOn = fsmOn;
+    reDrawFSMLevels(); // toggle the lines on or off
 }
 
+// GRAPHICS: UPDATE LINES DRAWN FOR FSM //
+
 // Draw text around axes.
-void SpikePlot::drawAxisText()
+void SpikePlot::reDrawText()
 {
     QPainter painter(&pixmap);
     painter.initFrom(this);
@@ -372,7 +252,85 @@ void SpikePlot::drawAxisText()
 
     update();
 }
+// Draw axis lines on the spike display
+void SpikePlot::reDrawFSMLevels()
+{
+    QPainter painter(&pixmap);
+    painter.initFrom(this);
 
+    painter.fillRect(frame, Qt::white);
+
+    painter.setPen(Qt::darkGray);
+
+    // Draw box outline.
+    painter.drawRect(frame);
+
+    // Draw horizonal zero voltage line.
+    painter.drawLine(frame.left(), frame.center().y(), frame.right(), frame.center().y());
+
+    // Draw vertical lines
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+
+    yAxisLength = (frame.height() - 2) / 2.0;
+    yScaleFactor = -yAxisLength / yScale;
+    frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
+    frameY = frame.center().y();
+    frameW = frame.width();
+
+    if (fsmModeOn) {
+        for (int ii = 0; ii < 8; ++ii) {
+            if (wEnable.at(ii)) {
+                if (ii == thisChannel) {
+                    switch (wType.at(ii)) {
+                        case 0:
+                            painter.setPen(penThisInclude);
+                            break;
+                        case 1:
+                            painter.setPen(penThisExclude);
+                            break;
+                        default:
+                            painter.setPen(Qt::gray);
+                    }
+                } else {
+                    switch (wType.at(ii)) {
+                        case 0:
+                            painter.setPen(penOtherInclude);
+                            break;
+                        case 1:
+                            painter.setPen(penOtherExclude);
+                            break;
+                        default:
+                            painter.setPen(Qt::gray);
+                    }
+                }
+
+                painter.drawLine(levelStartPoint.at(ii), levelHeight.at(ii), levelStopPoint.at(ii), levelHeight.at(ii));
+            }
+        }
+    }
+
+    update();
+}
+// update the values to be used for drawing threshold lines on the spike plot
+void SpikePlot::updateLevelStartStop()
+{
+    levelStartPoint[thisChannel] = frameX + ((double(wStart.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1;
+    levelStopPoint[thisChannel] = frameX + ((double(wStop.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1.75; // 1 for graphics offset; 0.75 to reflect "<" on this edge
+    levelHeight[thisChannel] = frameY + (yScaleFactor * double(wThresh.at(thisChannel)));
+    reDrawFSMLevels();
+}
+
+// Clear spike display.
+void SpikePlot::clearScope()
+{
+    numSpikeWaveforms = 0;
+    reDrawFSMLevels();
+}
 // This function loads waveform data for the selected channel from the signal processor object,
 // looks for trigger events, captures 4-ms snippets of the waveform after trigger events,
 // measures the rms level of the waveform, and updates the display.
@@ -407,7 +365,7 @@ void SpikePlot::updateWaveform(int numBlocks)
     while (index <= SAMPLES_PER_DATA_BLOCK * numBlocks + totalTSteps - 1 - (totalTSteps - preTriggerTSteps)) {
         triggered = false;
         wTrigType = false;
-        if (wMode) {
+        if (fsmModeOn) {
             // Digital rising edge trigger (for "good spikes")
             if (fsmTriggerBuffer.at(index - 1) == 0 &&
                     fsmTriggerBuffer.at(index) == 1 &&
@@ -455,7 +413,7 @@ void SpikePlot::updateWaveform(int numBlocks)
             }
         }
         // If we found a trigger event, grab waveform snippet.
-        if (wMode) {
+        if (fsmModeOn) {
             if (triggered) {
                 index2 = 0;
                 for (i = index - preTriggerTSteps - SAMPLE_DETECTION_DELAY;
@@ -509,7 +467,6 @@ void SpikePlot::updateWaveform(int numBlocks)
     // Update plot.
     updateSpikePlot(rms);
 }
-
 // Plots spike waveforms and writes RMS value to display.
 void SpikePlot::updateSpikePlot(double rms)
 {
@@ -519,7 +476,7 @@ void SpikePlot::updateSpikePlot(double rms)
     double xScaleFactor;
     const double tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
 
-    drawAxisLines();
+    reDrawFSMLevels();
 
     QPainter painter(&pixmap);
     painter.initFrom(this);
@@ -542,7 +499,7 @@ void SpikePlot::updateSpikePlot(double rms)
     yOffset = frame.center().y();
 
 
-    if (wMode) {
+    if (fsmModeOn) {
         for (j = 0; j < numSpikeWaveforms; ++j) {
             // Build waveform
             for (i = 0; i < totalTSteps; ++i) {
@@ -572,7 +529,7 @@ void SpikePlot::updateSpikePlot(double rms)
     }
 
     // If using a voltage threshold trigger, plot a line at the threshold level.
-    if (voltageTriggerMode && !wMode) {
+    if (voltageTriggerMode && !fsmModeOn) {
         painter.setPen(Qt::red);
         painter.drawLine(xOffset, yScaleFactor * voltageThreshold + yOffset,
                           xScaleFactor * (totalTSteps - 1) +  xOffset, yScaleFactor * voltageThreshold + yOffset);
@@ -602,7 +559,6 @@ void SpikePlot::updateSpikePlot(double rms)
     delete [] polyline;
     update();
 }
-
 // If user clicks inside display, set voltage threshold to that level.
 void SpikePlot::mousePressEvent(QMouseEvent *event)
 {
@@ -618,7 +574,6 @@ void SpikePlot::mousePressEvent(QMouseEvent *event)
         QWidget::mousePressEvent(event);
     }
 }
-
 // If user spins mouse wheel, change voltage scale.
 void SpikePlot::wheelEvent(QWheelEvent *event)
 {
@@ -628,7 +583,6 @@ void SpikePlot::wheelEvent(QWheelEvent *event)
         spikeScopeDialog->expandYScale();
     }
 }
-
 // Keypresses to change voltage scale.
 void SpikePlot::keyPressEvent(QKeyEvent *event)
 {
@@ -645,28 +599,25 @@ void SpikePlot::keyPressEvent(QKeyEvent *event)
         QWidget::keyPressEvent(event);
     }
 }
-
 QSize SpikePlot::minimumSizeHint() const
 {
     return QSize(SPIKEPLOT_X_SIZE, SPIKEPLOT_Y_SIZE);
 }
-
 QSize SpikePlot::sizeHint() const
 {
     return QSize(SPIKEPLOT_X_SIZE, SPIKEPLOT_Y_SIZE);
 }
-
 void SpikePlot::paintEvent(QPaintEvent * /* event */)
 {
     QStylePainter stylePainter(this);
     stylePainter.drawPixmap(0, 0, pixmap);
 }
-
 void SpikePlot::closeEvent(QCloseEvent *event)
 {
     // Perform any clean-up here before application closes.
     event->accept();
 }
+
 
 // Set the number of spikes that are plotted, superimposed, on the
 // display.
@@ -679,17 +630,8 @@ void SpikePlot::setMaxNumSpikeWaveforms(int num)
         case 10: colorIndex = 0; break;
         case 20: colorIndex = 1; break;
         case 30: colorIndex = 2; break;
-        case 100: colorIndex = 3; break;
     }
 }
-
-// Clear spike display.
-void SpikePlot::clearScope()
-{
-    numSpikeWaveforms = 0;
-    drawAxisLines();
-}
-
 // Select voltage threshold trigger mode if voltageMode == true, otherwise
 // select digital input trigger mode.
 void SpikePlot::setVoltageTriggerMode(bool voltageMode)
@@ -711,17 +653,17 @@ void SpikePlot::setVoltageThreshold(int threshold)
         return;
     }
 
-    if (!wMode) {
+    if (!fsmModeOn) {
         voltageThreshold = threshold;
         if (selectedChannel->signalType == AmplifierSignal) {
             selectedChannel->voltageThreshold = threshold;
         }
     } else {
-        wThresh[thisChannel] = threshold;
+
         spikeScopeDialog->setCurrentDACVoltageThreshold(threshold);
         selectedDacChannel->digitalTriggerChannel = thisChannel;
         selectedChannel->voltageThreshold = threshold;
-        drawAxisLines();
+        reDrawFSMLevels();
     }
 }
 
@@ -757,23 +699,187 @@ void SpikePlot::setNewChannel(SignalChannel* newChannel)
     digitalTriggerChannel = selectedChannel->digitalTriggerChannel;
     digitalEdgePolarity = selectedChannel->digitalEdgePolarity;
 
-    initializeDisplay();
+    initSpikeAxes();
 }
 
 void SpikePlot::resizeEvent(QResizeEvent*) {
     // Pixel map used for double buffering.
     pixmap = QPixmap(size());
     pixmap.fill();
-    initializeDisplay();
+    initSpikeAxes();
 }
 
-void SpikePlot::initializeDisplay() {
+// INIT - Functions to collapse other stuff... //
+void SpikePlot::initGenProperties()
+{
+    // initialize new properties
+    fsmModeOn = false;
+    wEnable.resize(8);
+    wEnable.fill(false);
+    wStart.resize(8);
+    wStart.fill(0);
+    wStop.resize(8);
+    wStop.fill(0);
+    wType.resize(8);
+    wType[0] = 0;
+    wType[1] = 1;
+    wType[2] = 0;
+    wType[3] = 1;
+    wType[4] = 0;
+    wType[5] = 1;
+    wType[6] = 0;
+    wType[7] = 1;
+    wMax = 0;
+    wThresh.resize(8);
+    wThresh.fill(0);
+    thisChannel = 0;
+
+    levelStartPoint.resize(8);
+    levelStartPoint.fill(0.0);
+    levelStopPoint.resize(8);
+    levelStopPoint.fill(0.0);
+    levelHeight.resize(8);
+    levelHeight.fill(0.0);
+
+    frameX = 0.0;
+    frameY = 0.0;
+    frameW = 0.0;
+    yAxisLength = 0.0;
+    yScaleFactor = 0.0;
+
+
+    switch (maxNumSpikeWaveforms) {
+        case 10: colorIndex = 0; break;
+        case 20: colorIndex = 1; break;
+        case 30: colorIndex = 2; break;
+        case 50: colorIndex = 3; break;
+    }
+    // END
+
+    voltageTriggerMode = true;
+    voltageThreshold = 0;
+    digitalTriggerChannel = 0;
+    digitalEdgePolarity = true;
+
+}
+// pens for different kinds of spikes, etc.
+void SpikePlot::initPenColors()
+{
+    // These pens are for "good" vs "bad" spikes and for
+    // different types of thresholds
+    // (blue -> include)
+    // (red -> exclude)
+    // (thick -> current channel; thin -> other windows)
+    penThisInclude.setWidth(4);
+    penThisInclude.setBrush(Qt::blue);
+    penThisExclude.setWidth(4);
+    penThisExclude.setBrush(Qt::red);
+
+    penOtherInclude.setWidth(2);
+    penOtherInclude.setBrush(Qt::blue);
+    penOtherExclude.setWidth(2);
+    penOtherExclude.setBrush(Qt::red);
+
+    penIncludeSpike.setWidth(2);
+    penIncludeSpike.setBrush(Qt::darkBlue);
+
+    penExcludeSpike.setWidth(1);
+    penExcludeSpike.setBrush(Qt::lightGray);
+
+    // Set up vectors of varying plot colors so that older waveforms
+    // are plotted in low-contrast gray and new waveforms are plotted
+    // in high-contrast blue.  Older signals fade away, like phosphor
+    // traces on old-school CRT oscilloscopes.
+    scopeColors.resize(4);
+    scopeColors[0].resize(10);
+    scopeColors[1].resize(20);
+    scopeColors[2].resize(30);
+    scopeColors[3].resize(50);
+
+    for (int i = 6; i < 10; ++i) scopeColors[0][i] = Qt::black;
+    for (int i = 3; i < 6; ++i) scopeColors[0][i] = Qt::darkGray;
+    for (int i = 0; i < 3; ++i) scopeColors[0][i] = Qt::lightGray;
+
+    for (int i = 12; i < 20; ++i) scopeColors[1][i] = Qt::black;
+    for (int i = 6; i < 12; ++i) scopeColors[1][i] = Qt::darkGray;
+    for (int i = 0; i < 6; ++i) scopeColors[1][i] = Qt::lightGray;
+
+    for (int i = 18; i < 30; ++i) scopeColors[2][i] = Qt::black;
+    for (int i = 9; i < 18; ++i) scopeColors[2][i] = Qt::darkGray;
+    for (int i = 0; i < 9; ++i) scopeColors[2][i] = Qt::lightGray;
+
+    for (int i = 30; i < 50; ++i) scopeColors[3][i] = Qt::black;
+    for (int i = 10; i < 30; ++i) scopeColors[3][i] = Qt::darkGray;
+    for (int i = 0; i < 10; ++i) scopeColors[3][i] = Qt::lightGray;
+
+    fsmColors.resize(4);
+    fsmColors[0].resize(10);
+    fsmColors[0].fill(false);
+    fsmColors[1].resize(20);
+    fsmColors[1].fill(false);
+    fsmColors[2].resize(30);
+    fsmColors[2].fill(false);
+    fsmColors[3].resize(50);
+    fsmColors[3].fill(false);
+
+    colorIndex = 1;
+}
+// initialize display properties for the spike dialog window
+void SpikePlot::initDisplay()
+{
+    setBackgroundRole(QPalette::Window);
+    setAutoFillBackground(true);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+    setFocusPolicy(Qt::StrongFocus);
+
+    // Default values that may be overwritten.
+    yScale = 5000;
+    setSampleRate(30000.0);
+
+    pixmap = QPixmap(size());
+    pixmap.fill();
+}
+// initialize buffers for plotting snippets
+void SpikePlot::initBuffers()
+{
+    startingNewChannel = true;
+    rmsDisplayPeriod = 0;
+    savedRms = 0.0;
+
+    spikeWaveformIndex = 0;
+    numSpikeWaveforms = 0;
+    maxNumSpikeWaveforms = 20;
+    maxNumSpikeSamples = int(maxNumSpikeWaveforms * SPIKE_WINDOW_T + 1);
+
+    // We can plot up to 30 superimposed spike waveforms on the scope.
+    spikeWaveform.resize(maxNumSpikeWaveforms);
+    int i;
+    for (i = 0; i < spikeWaveform.size(); ++i) {
+        // Each waveform is 3 ms in duration.  We need 91 time steps for a 3 ms
+        // waveform with the sample rate is set to its maximum value of 30 kS/s.
+        spikeWaveform[i].resize(maxNumSpikeSamples);
+        spikeWaveform[i].fill(0.0);
+    }
+
+    // Buffers to hold recent history of spike waveform and digital input,
+    // used to find trigger events.
+    spikeWaveformBuffer.resize(BUFFER_SIZE);
+    spikeWaveformBuffer.fill(0.0);
+    digitalInputBuffer.resize(BUFFER_SIZE);
+    digitalInputBuffer.fill(0);
+    fsmTriggerBuffer.resize(BUFFER_SIZE);
+    fsmTriggerBuffer.fill(0);
+    fsmTrackerBuffer.resize(BUFFER_SIZE);
+    fsmTrackerBuffer.fill(0);
+}
+// set up the axes for plotting spikes
+void SpikePlot::initSpikeAxes() {
     const int textBoxWidth = fontMetrics().width("+" + QString::number(yScale) + " " + QSTRING_MU_SYMBOL + "V");
     const int textBoxHeight = fontMetrics().height();
     frame = rect();
     frame.adjust(textBoxWidth + 5, textBoxHeight + 10, -8, -textBoxHeight - 10);
 
     // Initialize display.
-    drawAxisText();
-    drawAxisLines();
+    reDrawText();
+    reDrawFSMLevels();
 }

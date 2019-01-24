@@ -106,8 +106,6 @@ public:
     int markerChannel();
     bool showV0Axis();
     void setManualStimTrigger(int trigger, bool triggerOn);
-    void setDac1WindowStart();
-    void dacThresholdEnable();
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -118,11 +116,14 @@ signals:
     // MM 2019-01-21
     void DACAmplifierChannelChanged(SignalChannel* newAmpChannel);
     void DACChannelEnableChanged(bool enable);
+    void DACThresholdEnableChanged(bool enable);
     void DACChannelChanged(int index);
     void DACVoltageThresholdChanged(int threshold);
     void DACWindowStartChanged(int sample);
     void DACWindowStopChanged(int sample);
+    void DACWindowMaxChanged(int sample);
     void DACTriggerTypeChanged(int triggerType);
+    void DACDetectionMethodChanged(bool detectionMode);
     // END
 
 public slots:
@@ -166,6 +167,8 @@ private slots:
     // MM 2019-01-21
     void setDACAmplifierChannel();
     void setDACChannelEnable(bool enable);
+    void setDACThresholdEnable(bool enable);
+    void updateDAConThresholdEnable(bool enable);
     void setDACChannel(int index);
     void setDACVoltageThreshold(int threshold);
     void setDACWindowStart(int sample);
@@ -332,7 +335,6 @@ private:
     QVector<double> sampleRateList;
 
     QVector<SignalChannel*> dacSelectedChannel;
-    QVector<bool> dacEnabled;
     QVector<int> chipId;
 
     queue<Rhs2000DataBlock> dataQueue;
@@ -379,9 +381,6 @@ private:
     QAction *pasteStimParametersAction;
     QAction *ampSettleSettingsAction;
     QAction *chargeRecoverySettingsAction;
-
-    QSignalMapper* signalMapper;
-    QList<QAction*> unifyDACAction;
 
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -431,11 +430,11 @@ private:
     QSpinBox *displayMarkerSpinBox;
     QCheckBox *displayTriggerCheckBox;
 
-//    // MM - UPDATE - WINDOW DISCRIMINATOR - 01/16/2018
+    // MM - UPDATE - WINDOW DISCRIMINATOR - 01/16/2018
     QCheckBox *dacDetectionMethodCheckBox;
     bool DetectionMethod;
     int windowMax;
-//    // END UPDATE
+    // END UPDATE
 
     // MM 2019-01-21
     QList<QCheckBox*> thresholdEnableCheckBox;
@@ -444,8 +443,16 @@ private:
     QList<QSpinBox*> dacWindowStopSpinBox;
     QList<QRadioButton*> dacRadioButton;
     QList<QSpinBox*> dacVoltageThresholdSpinBox;
-    int selectedDACChannelIndex;
     SignalChannel* currentDACChannelStream;
+    int selectedDACChannelIndex;
+    // END
+
+    // MM 2019-01-23
+    QSignalMapper* signalMapper;
+    QList<QAction*> unifyDACAction;
+
+    QVector<bool> dacEnabled;
+    QVector<bool> dacThresholdEnabled;
     // END
 
     QRadioButton *displayPortAButton;
@@ -492,13 +499,6 @@ private:
     QLabel *refChannelLabel;
 
     StimParameters copiedStimParameters;
-
-    // MM 2019-01-22 Fix for tracking other GUI elements with radio buttons properly
-    int thisVoltageSpinBoxValue;
-    int thisWindowStartSpinBoxValue;
-    int thisWindowStopSpinBoxValue;
-    int thisWindowTypeComboBoxIndex;
-    // END
 };
 
 

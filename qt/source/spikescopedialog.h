@@ -34,6 +34,7 @@ class SpikePlot;
 class SignalProcessor;
 class SignalSources;
 class SignalChannel;
+class QHBoxLayout;
 
 class SpikeScopeDialog : public QDialog
 {
@@ -48,7 +49,6 @@ public:
     void setNewChannel(SignalChannel* newChannel);
     void expandYScale();
     void contractYScale();
-    void setDetectionMode(bool mode);
 
     // MM - UPDATE - WINDOW DISCRIMINATOR - 1/17/18
     bool detMode;
@@ -60,8 +60,6 @@ public:
     QVector<int> wThresh;
     // END UPDATE
 
-
-
 signals:
     // MM - UPDATE - 2019/01/20
     void selectedDACChannelIndexChanged(int index);
@@ -70,6 +68,8 @@ signals:
     void selectedDACWindowStopChanged(int sample);
     void selectedDACTriggerTypeChanged(int index);
     void selectedDACVoltageThresholdChanged(int threshold);
+    void maxDACWindowStopChanged(int sample);
+    void fsmModeChanged(bool fsmOn);
     // END
     
 public slots:    
@@ -81,16 +81,16 @@ public slots:
     void setCurrentDACTriggerType(int index);
     void setCurrentDACVoltageThreshold(int threshold);
     void setCurrentDACWindowStartOffset(int maxWindowStop);
+    void setDetectionMode(bool mode);
     // END UPDATE
 
 private slots:
     void changeYScale(int index);
-    void setTriggerType(int index);
+    void enableCorrectUIgraphics(int index);
     void resetThresholdToZero();
     void setNumSpikes(int index);
     void clearScope();
     void setDigitalInput(int index);
-    void setVoltageThreshold(int value);
     void setEdgePolarity(int index);
     void applyToAll();
 
@@ -104,6 +104,18 @@ private slots:
     // END
 
 private:
+    SpikePlot* initializeSpikePlot();
+    QHBoxLayout* initializeVoltDigDetectionUI();
+    QHBoxLayout* initializeWindowDetectionUI();
+    QComboBox* initializeDigComboBox();
+    void initWindowProperties();
+    void initializeMainLayout(QHBoxLayout* thresholdSpinBoxLayout,
+                              QHBoxLayout* windowDetectorLayout);
+
+    void enableVoltageTriggerUI(bool voltOn);
+    void enableDigitalTriggerUI(bool digOn);
+    void enableWindowTriggerUI(bool fsmOn);
+
     QVector<int> yScaleList;
 
     SignalProcessor *signalProcessor;

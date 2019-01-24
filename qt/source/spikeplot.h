@@ -63,23 +63,17 @@ public:
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    // MM - UPDATE - WINDOW DISCRIMINATOR - 1/23/18
-    QVector<bool> wEnable;
-    QVector<int> wStart;
-    QVector<int> wStop;
-    QVector<int> wType;
-    QVector<int> wThresh;
-    bool wMode;
-    void drawAxisLines();
-    void setWMax(int maxWindowStop);
-    void updateLevelStartStop();
-    void setCurrentChannel(int channel);
-    // END UPDATE
-
 signals:
     
 public slots:
-
+    void setCurrentChannel(int channel);
+    void setWMax(int sample);
+    void setWEnable(bool enable);
+    void setWStart(int sample);
+    void setWStop(int sample);
+    void setWThresh(int threshold);
+    void setWType(int type);
+    void setWMode(bool fsmOn);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -90,9 +84,16 @@ protected:
     void resizeEvent(QResizeEvent* event);
 
 private:
-    void drawAxisText();
+    void initGenProperties();
+    void initPenColors();
+    void initDisplay();
+    void initBuffers();
+
+    void reDrawText();
+    void reDrawFSMLevels();
+    void updateLevelStartStop();
     void updateSpikePlot(double rms);
-    void initializeDisplay();
+    void initSpikeAxes();
 
     SignalProcessor *signalProcessor;
     SpikeScopeDialog *spikeScopeDialog;
@@ -114,6 +115,12 @@ private:
     int wMax;
     int thisChannel;
     int colorIndex;
+    QVector<bool> wEnable;
+    QVector<int> wStart;
+    QVector<int> wStop;
+    QVector<int> wType;
+    QVector<int> wThresh;
+    bool fsmModeOn;
 
     QVector<int> fsmTriggerBuffer;
     QVector<int> fsmTrackerBuffer;

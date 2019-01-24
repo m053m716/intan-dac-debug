@@ -205,6 +205,8 @@ void Rhs2000EvalBoard::initialize()
 {
     wEnable.resize(8);
     wEnable.fill(false);
+    ttlOutEnable.resize(8);
+    ttlOutEnable.fill(false);
     wStop.resize(8);
     wStop.fill(0);
 
@@ -213,7 +215,7 @@ void Rhs2000EvalBoard::initialize()
 	resetBoard();
     enableAuxCommandsOnAllStreams();
     setGlobalSettlePolicy(false, false, false, false, false);
-    setTtlOutMode(wEnable);
+    setTtlOutMode(ttlOutEnable);
 	setSampleRate(SampleRate30000Hz);
     selectAuxCommandLength(AuxCmd1, 0, 0);
     selectAuxCommandLength(AuxCmd2, 0, 0);
@@ -977,7 +979,12 @@ void Rhs2000EvalBoard::enableDac(int dacChannel, bool enabled)
 		dev->SetWireInValue(WireInDacSource8, (enabled ? 0x0200 : 0x0000), 0x0200);
 		break;
 	}
-	dev->UpdateWireIns();
+    dev->UpdateWireIns();
+}
+
+void Rhs2000EvalBoard::enableFSMWindow(int dacChannel, bool enabled)
+{
+    wEnable[dacChannel] = enabled;
 }
 
 // Set the gain level of all eight DAC channels to 2^gain (gain = 0-7).
@@ -1210,6 +1217,7 @@ int Rhs2000EvalBoard::setMaxWindowStop(int dacChannel, int sample)
     if (dacChannel == maxWindowDAC) {
         if (sample < maxWindowStop) { // need to check if this DAC is still max
             maxWindowStop = 0;
+            maxWindowDAC = 0;
             wStop[dacChannel] = sample;
             for (int i = 0; i < 8; i++){
                 if (wEnable[i]) {
@@ -2163,6 +2171,7 @@ void Rhs2000EvalBoard::setTtlOutMode(QVector<bool> enable)
         value += enable[i] ? mask : 0;
         mask = mask << 1;
     }
+    ttlOutEnable = enable;
 
     dev->SetWireInValue(WireInTtlOutMode, value, 0x000000ff);
     dev->UpdateWireIns();
@@ -2175,7 +2184,7 @@ bool Rhs2000EvalBoard::getTtlOutMode(int channel)
         return(false);
     }
 
-    return(wEnable[channel]);
+    return(ttlOutEnable[channel]);
 }
 
 // Select amp settle mode for all connected chips:

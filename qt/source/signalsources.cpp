@@ -71,7 +71,7 @@ SignalSources::SignalSources(int numPorts)
     // Add 8 board analog output signals
     for (int channel = 0; channel < 8; ++channel) {
         signalPort[numPorts + 1].addBoardDacChannel(channel);
-        signalPort[numPorts + 1].channel[channel].enabled = true;
+        signalPort[numPorts + 1].channel[channel].enabled = false;
     }
     // Add 16 board digital input signals
     for (int channel = 0; channel < 16; ++channel) {
@@ -81,8 +81,15 @@ SignalSources::SignalSources(int numPorts)
     // Add 16 board digital output signals
     for (int channel = 0; channel < 16; ++channel) {
         signalPort[numPorts + 3].addBoardDigOutChannel(channel);
+        signalPort[numPorts + 3].channel[channel].enabled = false;
+    }
+    // MM: 2019-01-23 for convenience...
+    for (int channel = 12; channel < 15; ++channel){
+        signalPort[numPorts + 2].channel[channel].enabled = true;
         signalPort[numPorts + 3].channel[channel].enabled = true;
     }
+    //END
+
     // Amplifier channels on SPI ports A-D are added later, if amplifier
     // boards are found to be connected to these ports.
 }
@@ -166,9 +173,19 @@ void SignalSources::disableAllStim()
     }
 }
 
-int SignalSources::dacPort()
+bool SignalSources::isEnabled(int portIndex, int channelIndex)
 {
-    return numSignalPorts + 1;
+    return signalPort[portIndex].channel[channelIndex].enabled;
+}
+
+const int SignalSources::dacPort()
+{
+    if (numSignalPorts < 0) {
+        return -1;
+    } else {
+        return numSignalPorts + 1;
+    }
+
 }
 
 

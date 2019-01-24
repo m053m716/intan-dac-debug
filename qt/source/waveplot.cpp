@@ -57,8 +57,10 @@ WavePlot::WavePlot(SignalProcessor *inSignalProcessor, SignalSources *inSignalSo
     signalSources = inSignalSources;
     mainWindow = inMainWindow;
 
-    selectedDacChannelIndex = 0;
-
+    selectedDacChannelIndex = -1;
+    selectedFrame.resize(1);
+    selectedFrame.fill(-1);
+    selectedPort = 0;
 
     dragging = false;
     dragToIndex = -1;
@@ -68,6 +70,8 @@ WavePlot::WavePlot(SignalProcessor *inSignalProcessor, SignalSources *inSignalSo
 
     lastMarkerValue = true;
     plotDc = false;
+
+    numSpiPorts = -1;
 }
 
 // Initialize WavePlot object.
@@ -87,7 +91,7 @@ void WavePlot::initialize(int startingPort, int numPorts)
     // Vectors to store the currently selected from (plot window) and the frame
     // in the top left of the screen for all ports (SPI Ports, ADC inputs,
     // digital inputs, and digital outputs).
-
+    selectedFrame.clear();
     selectedFrame.resize(numSpiPorts + 4);
     selectedFrame.fill(0);
     topLeftFrame.resize(numSpiPorts + 4);
@@ -893,7 +897,13 @@ void WavePlot::drawAxes(QPainter &painter, int frameNumber)
 // Return a pointer to the current selected channel.
 SignalChannel* WavePlot::selectedChannel()
 {
-    return selectedChannel(selectedFrame[selectedPort]);
+    if (selectedFrame[selectedPort]==-1){
+       // Not yet initialized in this case.
+       return nullptr;
+    } else {
+       return selectedChannel(selectedFrame[selectedPort]);
+    }
+
 }
 
 // Return a pointer to a particular channel on the currently selected port.
@@ -905,8 +915,16 @@ SignalChannel* WavePlot::selectedChannel(int index)
 // Return a pointer to a particular DAC channel
 SignalChannel* WavePlot::selectedDacChannel()
 {
-    return signalSources->signalPort[signalSources->dacPort()].channelByIndex(selectedDacChannelIndex);
-
+    int portIdx = signalSources->dacPort();
+    if (portIdx < 0) {
+        // Port number has not been set yet
+        return nullptr;
+    } else if (selectedDacChannelIndex < 0) {
+        // DAC channel has not been set yet
+        return nullptr;
+    } else {
+        return signalSources->signalPort[portIdx].channelByIndex(selectedDacChannelIndex);
+    }
 }
 
 // Slot to set current DAC channel index
