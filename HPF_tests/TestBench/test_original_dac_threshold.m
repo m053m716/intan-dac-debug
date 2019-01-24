@@ -5,7 +5,9 @@ clc
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\HPF_250Hz_200uV_A004_190108_151822.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_0_190123_094952.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_1_190123_095040.rhs')
-read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_2_190123_095121.rhs')
+% read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_2_190123_095121.rhs')
+% read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_9_190123_193957.rhs')
+read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_10_190123_193824.rhs')
 
 possible_gains=1.6.*2.^(0:7);
 n_DAC_bits=16;
@@ -18,9 +20,9 @@ board_DAC_V=board_dac_data(1,:);
 board_DAC_uint16=32768+round(board_DAC_V./312.5e-6 ); %uint16
 board_DAC__ADC = 0.195 * (board_DAC_uint16 - 32768);
 
-th_1=round(-413/0.195)*0.195; %uV
+th_1=round(-296/0.195)*0.195; %uV
 th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_2=round(-812/0.195)*0.195; %uV
+th_2=round(-486/0.195)*0.195; %uV
 th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 th_3=round(-1184/0.195)*0.195; %uV
 th_3_to_tb=round(th_3/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
@@ -73,6 +75,6 @@ for curr_shift=0:10
     subplot(1,2,2)
     plot(board_DAC__ADC(fsm_complete_pos_shift))
     hold on
-    plot([0 length(fsm_complete_pos)],[th_2 th_2],'g')
+    plot([0 length(fsm_complete_pos)],[th_1 th_1],'g')
     title(['dac value @ fsm complete - ' num2str(curr_shift) ' samples shift'])
 end

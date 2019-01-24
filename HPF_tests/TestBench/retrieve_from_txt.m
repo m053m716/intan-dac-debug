@@ -19,9 +19,9 @@ tb_DAC_uint16 = bin2dec(retrieved_matrix_DAC_bin(1:end,:)); %uint16 range (0:2^1
 tb_fsm_uint16 = bin2dec(retrieved_matrix_fsm_bin(1:end,:));    %uint16 range (0:2^16-1)=0:65535
 
 %% thresholds used 
-th_1=round(-413/0.195)*0.195; %uV
+th_1=round(-296/0.195)*0.195; %uV
 th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_2=round(-812/0.195)*0.195; %uV
+th_2=round(-486/0.195)*0.195; %uV
 th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 
 %% define limits for plots
