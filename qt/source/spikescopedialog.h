@@ -45,7 +45,6 @@ public:
     void setYScale(int index);
     void setSampleRate(double newSampleRate);
     void updateWaveform(int numBlocks);
-    void setVoltageThresholdDisplay(int value);
     void setNewChannel(SignalChannel* newChannel);
     void expandYScale();
     void contractYScale();
@@ -82,6 +81,7 @@ public slots:
     void setCurrentDACVoltageThreshold(int threshold);
     void setCurrentDACWindowStartOffset(int maxWindowStop);
     void setDetectionMode(bool mode);
+    void setVoltageThresholdDisplay(int value);
     // END UPDATE
 
 private slots:

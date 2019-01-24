@@ -182,6 +182,7 @@ void SpikePlot::setWType(int type)
 void SpikePlot::setWMode(bool fsmOn)
 {
     fsmModeOn = fsmOn;
+    initSpikeAxes();
     reDrawFSMLevels(); // toggle the lines on or off
 }
 
@@ -258,30 +259,6 @@ void SpikePlot::reDrawFSMLevels()
     QPainter painter(&pixmap);
     painter.initFrom(this);
 
-    painter.fillRect(frame, Qt::white);
-
-    painter.setPen(Qt::darkGray);
-
-    // Draw box outline.
-    painter.drawRect(frame);
-
-    // Draw horizonal zero voltage line.
-    painter.drawLine(frame.left(), frame.center().y(), frame.right(), frame.center().y());
-
-    // Draw vertical lines
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-
-    yAxisLength = (frame.height() - 2) / 2.0;
-    yScaleFactor = -yAxisLength / yScale;
-    frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
-    frameY = frame.center().y();
-    frameW = frame.width();
-
     if (fsmModeOn) {
         for (int ii = 0; ii < 8; ++ii) {
             if (wEnable.at(ii)) {
@@ -308,13 +285,42 @@ void SpikePlot::reDrawFSMLevels()
                             painter.setPen(Qt::gray);
                     }
                 }
-
-                painter.drawLine(levelStartPoint.at(ii), levelHeight.at(ii), levelStopPoint.at(ii), levelHeight.at(ii));
+                cout << "Draw line [" << ii << "] --> "
+                     << levelStartPoint.at(ii) << " to " << levelStopPoint.at(ii)
+                     << ": " << levelHeight.at(ii) << "uV" << endl;
+                painter.drawLine(levelStartPoint.at(ii),
+                                 levelHeight.at(ii),
+                                 levelStopPoint.at(ii),
+                                 levelHeight.at(ii));
             }
         }
     }
 
     update();
+}
+
+void SpikePlot::reDrawAxesLines()
+{
+    QPainter painter(&pixmap);
+    painter.initFrom(this);
+
+    painter.fillRect(frame, Qt::white);
+
+    painter.setPen(Qt::darkGray);
+
+    // Draw box outline.
+    painter.drawRect(frame);
+
+    // Draw horizonal zero voltage line.
+    painter.drawLine(frame.left(), frame.center().y(), frame.right(), frame.center().y());
+
+    // Draw vertical lines
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
+                      frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
 }
 // update the values to be used for drawing threshold lines on the spike plot
 void SpikePlot::updateLevelStartStop()
@@ -471,33 +477,17 @@ void SpikePlot::updateWaveform(int numBlocks)
 void SpikePlot::updateSpikePlot(double rms)
 {
     int i, j, xOffset, yOffset, index;
-    double tAxisLength;
     QRect adjustedFrame;
-    double xScaleFactor;
-    const double tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
 
     reDrawFSMLevels();
 
-    QPainter painter(&pixmap);
-    painter.initFrom(this);
-
     // Vector for waveform plot points
     QPointF *polyline = new QPointF[totalTSteps];
-
-    yAxisLength = (frame.height() - 2) / 2.0;
-    tAxisLength = frame.width() - 1;
-
-    xOffset = frame.left() + 1;
 
     // Set clipping region for plotting.
     adjustedFrame = frame;
     adjustedFrame.adjust(0, 1, 0, 0);
     painter.setClipRect(adjustedFrame);
-
-    xScaleFactor = tAxisLength * tStepMsec / tScale;
-    yScaleFactor = -yAxisLength / yScale;
-    yOffset = frame.center().y();
-
 
     if (fsmModeOn) {
         for (j = 0; j < numSpikeWaveforms; ++j) {
@@ -541,7 +531,7 @@ void SpikePlot::updateSpikePlot(double rms)
     // will be hard to read.  Only update once every few times we execute this function.
     if (rmsDisplayPeriod == 0) {
         rmsDisplayPeriod = 5;
-        savedRms = rms;
+        savedRMS = rms;
     } else {
         --rmsDisplayPeriod;
     }
@@ -553,7 +543,7 @@ void SpikePlot::updateSpikePlot(double rms)
     painter.drawText(frame.left() + 6, frame.top() + 5,
                       textBoxWidth, textBoxHeight,
                       Qt::AlignLeft | Qt::AlignTop,
-                      "RMS: " + QString::number(savedRms, 'f', (savedRms < 10.0) ? 1 : 0) +
+                      "RMS: " + QString::number(savedRMS, 'f', (savedRMS < 10.0) ? 1 : 0) +
                       " " + QSTRING_MU_SYMBOL + "V");
 
     delete [] polyline;
@@ -562,17 +552,27 @@ void SpikePlot::updateSpikePlot(double rms)
 // If user clicks inside display, set voltage threshold to that level.
 void SpikePlot::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton) {
-        if (frame.contains(event->pos())) {
-            int yMouse = event->pos().y();
-            double newThreshold = yScale * (frame.center().y() - yMouse) / (frame.height() / 2);
-            setVoltageThreshold(newThreshold);
-            spikeScopeDialog->setVoltageThresholdDisplay(newThreshold);
-            updateSpikePlot(0.0);
-        }
+    if (event->button() == Qt::LeftButton) { // switch to include
+        wType[thisChannel] = 0;
+    } else if (event->button() == Qt::RightButton) { // switch to exclude
+        wType[thisChannel] = 1;
     } else {
         QWidget::mousePressEvent(event);
+        return;
     }
+
+    if (frame.contains(event->pos())) {
+        double newThreshold = getThresholdFromMousePress(event);
+        setVoltageThreshold(newThreshold);
+        updateSpikePlot(savedRMS);
+    }
+}
+// Parse voltage threshold from mouse press event
+double SpikePlot::getThresholdFromMousePress(QMouseEvent *event)
+{
+    int yMouse = event->pos().y();
+    double thresh = yScale * (frame.center().y() - yMouse) / (frame.height() / 2);
+    return thresh;
 }
 // If user spins mouse wheel, change voltage scale.
 void SpikePlot::wheelEvent(QWheelEvent *event)
@@ -654,17 +654,14 @@ void SpikePlot::setVoltageThreshold(int threshold)
     }
 
     if (!fsmModeOn) {
-        voltageThreshold = threshold;
         if (selectedChannel->signalType == AmplifierSignal) {
-            selectedChannel->voltageThreshold = threshold;
+            emit(currentVoltageThresholdChanged(threshold));
         }
     } else {
-
-        spikeScopeDialog->setCurrentDACVoltageThreshold(threshold);
-        selectedDacChannel->digitalTriggerChannel = thisChannel;
-        selectedChannel->voltageThreshold = threshold;
+        emit(currentVoltageThresholdChanged(threshold));
         reDrawFSMLevels();
     }
+
 }
 
 // Select digital input channel for digital input trigger.
@@ -761,6 +758,8 @@ void SpikePlot::initGenProperties()
     digitalTriggerChannel = 0;
     digitalEdgePolarity = true;
 
+    savedRMS = 0;
+
 }
 // pens for different kinds of spikes, etc.
 void SpikePlot::initPenColors()
@@ -838,13 +837,16 @@ void SpikePlot::initDisplay()
 
     pixmap = QPixmap(size());
     pixmap.fill();
+
+    painter = new QPainter(&pixmap);
+    painter.initFrom(this);
 }
 // initialize buffers for plotting snippets
 void SpikePlot::initBuffers()
 {
     startingNewChannel = true;
     rmsDisplayPeriod = 0;
-    savedRms = 0.0;
+    savedRMS = 0.0;
 
     spikeWaveformIndex = 0;
     numSpikeWaveforms = 0;
@@ -879,7 +881,24 @@ void SpikePlot::initSpikeAxes() {
     frame = rect();
     frame.adjust(textBoxWidth + 5, textBoxHeight + 10, -8, -textBoxHeight - 10);
 
+    yAxisLength = (frame.height() - 2) / 2.0;
+    yScaleFactor = -yAxisLength / yScale;
+    frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
+    frameY = frame.center().y();
+    frameW = frame.width();
+
+    tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
+    yAxisLength = (frame.height() - 2) / 2.0;
+    tAxisLength = frame.width() - 1;
+
+    tOffset = frame.left() + 1;
+
+    tScaleFactor = tAxisLength * tStepMsec / tScale;
+    yScaleFactor = -yAxisLength / yScale;
+    yOffset = frame.center().y();
+
     // Initialize display.
     reDrawText();
+    reDrawAxesLines();
     reDrawFSMLevels();
 }

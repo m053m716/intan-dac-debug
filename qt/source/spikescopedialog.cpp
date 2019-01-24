@@ -390,6 +390,9 @@ SpikePlot* SpikeScopeDialog::initializeSpikePlot()
             s,SLOT(setWMode(bool)));
     connect(this,SIGNAL(selectedDACTriggerTypeChanged(int)),
             s,SLOT(setWType(int)));
+    connect(s,SIGNAL(currentVoltageThresholdChanged(int)),
+            this, SLOT(setVoltageThresholdDisplay(int)));
+
     return s;
 }
 // Get the voltage/digital threshold detector layout part

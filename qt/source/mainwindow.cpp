@@ -646,8 +646,6 @@ void MainWindow::createLayout()
     dacDetectionMethodCheckBox = new QCheckBox(tr("Window Discriminator"));
     connect(dacDetectionMethodCheckBox, SIGNAL(clicked(bool)),
             this, SLOT(changeDetectionMethod(bool)));
-    connect(dacDetectionMethodCheckBox, SIGNAL(clicked(bool)),
-            this, SIGNAL(DACDetectionMethodChanged(bool)));
     dacDetectionMethodCheckBox->setChecked(DetectionMethod);
     // END UPDATE
 
@@ -4363,8 +4361,10 @@ void MainWindow::setSaveFormatDialog()
 void MainWindow::changeDetectionMethod(bool enable)
 {
     if (enable) {
+        cout << "FSM window discriminator enabled." << endl;
         spikeScopeButton->setText("Window Scope");
     } else {
+        cout << "FSM window discriminator disabled." << endl;
         spikeScopeButton->setText("Spike Scope");
     }
 
@@ -4372,6 +4372,7 @@ void MainWindow::changeDetectionMethod(bool enable)
         evalBoard->setDetectMode(enable);
     }
     DetectionMethod = enable;
+    emit(DACDetectionMethodChanged(enable));
 }
 
 int MainWindow::getEvalBoardMode()

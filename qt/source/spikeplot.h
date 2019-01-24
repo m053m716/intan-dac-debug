@@ -64,7 +64,8 @@ public:
     QSize sizeHint() const;
 
 signals:
-    
+    void currentVoltageThresholdChanged(int thresh);
+
 public slots:
     void setCurrentChannel(int channel);
     void setWMax(int sample);
@@ -91,9 +92,12 @@ private:
 
     void reDrawText();
     void reDrawFSMLevels();
+    void reDrawAxesLines();
     void updateLevelStartStop();
     void updateSpikePlot(double rms);
     void initSpikeAxes();
+
+    double getThresholdFromMousePress(QMouseEvent *event);
 
     SignalProcessor *signalProcessor;
     SpikeScopeDialog *spikeScopeDialog;
@@ -156,7 +160,7 @@ private:
 
     double tStepMsec;
     int yScale;
-    double savedRms;
+    double savedRMS;
 
     QPixmap pixmap;
 
