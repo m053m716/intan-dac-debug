@@ -19,10 +19,10 @@ tb_DAC_uint16 = bin2dec(retrieved_matrix_DAC_bin(1:end,:)); %uint16 range (0:2^1
 tb_fsm_uint16 = bin2dec(retrieved_matrix_fsm_bin(1:end,:));    %uint16 range (0:2^16-1)=0:65535
 
 %% thresholds used 
-th_1=-100; %uV
-th_2=-350; %uV
-th_1_to_tb=floor(32768+th_1/0.195); %uint16
-th_2_to_tb=floor(32768+th_2/0.195); %uint16
+th_1=round(-413/0.195)*0.195; %uV
+th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
+th_2=round(-812/0.195)*0.195; %uV
+th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 
 %% define limits for plots
 start_sample=1;
@@ -94,10 +94,37 @@ legend({'complete','active','idle'})
 xlabel('time [s]')
 
 h(5)=subplot(5,1,5);
-plot(time_s,board_dig_out_data(:,range_to_plot))
+% plot(time_s,board_dig_out_data(:,range_to_plot))
 title('board_dig_out_data','interpreter','none')
 xlabel('time [s]')
 
 linkaxes([h(1) h(2)],'xy')
 linkaxes([h(3) h(4)],'xy')
+linkaxes(h,'x')
+
+%% programmatically check difference between fsm_state from tb and dig in from recordings
+fsm_state_real=board_dig_in_data(1,range_to_plot).*2;% complete
+fsm_state_real=fsm_state_real+board_dig_in_data(2,range_to_plot).*1;% active
+fsm_state_tb=tb_fsm_uint16(range_to_plot)';
+
+fsm_state_real_cut_shift=fsm_state_real(3:end);
+fsm_state_tb_cut_shift=fsm_state_tb(1:end-2);
+
+figure
+h(1)=subplot(4,1,1);
+plot(fsm_state_tb_cut_shift)
+hold on
+plot(fsm_state_real_cut_shift)
+legend({'tb','real'})
+title('fsm state comparison testbench vs dig in')
+h(2)=subplot(4,1,2);
+plot(fsm_state_real_cut_shift-fsm_state_tb_cut_shift)
+title('difference fsm state from testbench - dig in')
+h(3)=subplot(4,1,3);
+plot(tb_DAC_uint16(range_to_plot)-board_dac_data_u16(range_to_plot)')
+title('difference testbench - online dac output')
+h(4)=subplot(4,1,4);
+plot(board_dac_data(1,range_to_plot)-board_dac_data(5,range_to_plot))
+title('DAC 1 - DAC 5')
+ylabel('DAC difference [V] step 312.5 uV ')
 linkaxes(h,'x')

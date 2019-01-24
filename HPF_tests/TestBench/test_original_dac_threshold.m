@@ -18,11 +18,11 @@ board_DAC_V=board_dac_data(1,:);
 board_DAC_uint16=32768+round(board_DAC_V./312.5e-6 ); %uint16
 board_DAC__ADC = 0.195 * (board_DAC_uint16 - 32768);
 
-th_1=-413; %uV
+th_1=round(-413/0.195)*0.195; %uV
 th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_2=-818; %uV
+th_2=round(-812/0.195)*0.195; %uV
 th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_3=-1184; %uV
+th_3=round(-1184/0.195)*0.195; %uV
 th_3_to_tb=round(th_3/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 
 %% 
@@ -37,6 +37,7 @@ title('board_dac_data and thresholds','interpreter','none')
 ylabel('DAC values [uint16]')
 h(2)=subplot(2,1,2);
 plot(board_dig_in_data(:,:)')
+legend({'complete','active','idle'})
 title('Board Digital In')
 linkaxes(h,'x')
 
@@ -52,5 +53,26 @@ title('board_dac_data and thresholds','interpreter','none')
 ylabel('DAC values [uV]')
 h(2)=subplot(2,1,2);
 plot(board_dig_in_data(:,:)')
+legend({'complete','active','idle'})
 title('Board Digital In')
 linkaxes(h,'x')
+
+%% quantify values when fsm is complete in is high
+fsm_complete_pos=find(board_dig_in_data(1,:));
+for curr_shift=0:10
+    fsm_complete_pos_shift=fsm_complete_pos-curr_shift;
+    figure
+    subplot(1,2,1)
+    plot(board_DAC__ADC)
+    hold on
+    plot(fsm_complete_pos_shift,board_DAC__ADC(fsm_complete_pos_shift),'ro')
+    plot([0 length(board_DAC__ADC)],[th_1 th_1],'g')
+    plot([0 length(board_DAC__ADC)],[th_2 th_2],'g')
+    plot([0 length(board_DAC__ADC)],[th_3 th_3],'r')
+    title('board dac data')
+    subplot(1,2,2)
+    plot(board_DAC__ADC(fsm_complete_pos_shift))
+    hold on
+    plot([0 length(fsm_complete_pos)],[th_2 th_2],'g')
+    title(['dac value @ fsm complete - ' num2str(curr_shift) ' samples shift'])
+end
