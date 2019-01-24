@@ -48,7 +48,7 @@ class SpikePlot : public QWidget
     Q_OBJECT
 public:
     explicit SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialChannel, SignalChannel *curDacChannel,
-                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0, double fs);
+                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0, double fs = 30000.0);
 
     void updateWaveform(int numBlocks);
     void setMaxNumSpikeWaveforms(int num);
@@ -64,6 +64,7 @@ public:
 
 signals:
     void currentVoltageThresholdChanged(int thresh);
+    void windowTypeChanged(int index);
 
 public slots:
     void setCurrentChannel(int channel);

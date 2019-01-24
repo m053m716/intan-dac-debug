@@ -49,13 +49,9 @@ SpikePlot::SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialC
     spikeScopeDialog = inSpikeScopeDialog;
     selectedDacChannel = curDacChannel;
     selectedChannel = initialChannel;
-    setSampleRate(fs);
 
     // Initialize properties associated with the FSM
     initGenProperties();
-
-    // Initialize buffers for snippets to be plotted from data streams
-    initBuffers();
 
     // Initialize pen colors for different types of snippets
     initPenColors();
@@ -64,7 +60,7 @@ SpikePlot::SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialC
     initDisplay();
 
     // Initialize spike axes
-    initSpikeAxes();
+    setSampleRate(fs);
 }
 
 // Set voltage scale.
@@ -89,6 +85,12 @@ void SpikePlot::setSampleRate(double newSampleRate)
     // Clear old waveforms since the sample rate has changed.
     numSpikeWaveforms = 0;
     startingNewChannel = true;
+
+    // Initialize buffers for snippets to be plotted from data streams
+    initBuffers();
+
+    // Initialize graphical axes
+    initSpikeAxes();
 }
 // set current DAC channel
 void SpikePlot::setCurrentChannel(int channel)
@@ -299,10 +301,7 @@ void SpikePlot::reDrawFSMLevels()
                 cout << "Draw line [" << ii << "] --> "
                      << levelStartPoint.at(ii) << " to " << levelStopPoint.at(ii)
                      << ": pixHeight = " << levelHeight.at(ii) << endl;
-                painter.drawLine(levelStartPoint.at(ii),
-                                 levelHeight.at(ii),
-                                 levelStopPoint.at(ii),
-                                 levelHeight.at(ii));
+                painter.drawLine(levelStartPoint.at(ii),levelHeight.at(ii),levelStopPoint.at(ii),levelHeight.at(ii));
             }
         }
     }
@@ -498,6 +497,10 @@ void SpikePlot::updateSpikePlot(double rms)
 {
     int i, j, index;
 
+    reDrawText();
+    reDrawAxesLines();
+    reDrawFSMLevels();
+
     QPainter painter(&pixmap);
     painter.initFrom(this);
 
@@ -577,8 +580,10 @@ void SpikePlot::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) { // switch to include
         wType[thisChannel] = 0;
+        emit(windowTypeChanged(0));
     } else if (event->button() == Qt::RightButton) { // switch to exclude
         wType[thisChannel] = 1;
+        emit(windowTypeChanged(1));
     } else {
         QWidget::mousePressEvent(event);
         return;
@@ -734,31 +739,30 @@ void SpikePlot::initGenProperties()
     // initialize new properties
     fsmModeOn = false;
     wEnable.resize(8);
-    wEnable.fill(false);
     wStart.resize(8);
-    wStart.fill(0);
     wStop.resize(8);
-    wStop.fill(0);
     wType.resize(8);
-    wType[0] = 0;
-    wType[1] = 1;
-    wType[2] = 0;
-    wType[3] = 1;
-    wType[4] = 0;
-    wType[5] = 1;
-    wType[6] = 0;
-    wType[7] = 1;
-    wMax = 0;
     wThresh.resize(8);
     wThresh.fill(0);
-    thisChannel = 0;
 
+    wEnable.fill(false);
+    for (int i = 0; i < 4; i++){
+        wEnable[i] = true;
+    }
+    wMax = 5;
     levelStartPoint.resize(8);
     levelStartPoint.fill(0.0);
     levelStopPoint.resize(8);
     levelStopPoint.fill(0.0);
     levelHeight.resize(8);
     levelHeight.fill(0.0);
+    thisChannel = 0;
+
+    for (int i = 0; i < 8; i++){
+        wStart[i] = i;
+        wStop[i] = i + 2;
+        wType[i] = i % 2;
+    }
 
     frameX = 0.0;
     frameY = 0.0;
@@ -792,7 +796,7 @@ void SpikePlot::initBuffers()
     spikeWaveformIndex = 0;
     numSpikeWaveforms = 0;
     maxNumSpikeWaveforms = 20;
-    maxNumSpikeSamples = int(maxNumSpikeWaveforms * SPIKE_WINDOW_T + 1);
+    maxNumSpikeSamples = int(totalTSteps + 1);
 
     // We can plot up to 30 superimposed spike waveforms on the scope.
     spikeWaveform.resize(maxNumSpikeWaveforms);
@@ -891,25 +895,24 @@ void SpikePlot::initSpikeAxes() {
     frame = rect();
     frame.adjust(tbWidth + 5, tbHeight + 10, -8, -tbHeight - 10);
 
-    yAxisLength = (frame.height() - 2) / 2.0;
-    yScaleFactor = -yAxisLength / yScale;
     frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
     frameY = frame.center().y();
     frameW = frame.width();
 
-    tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
     yAxisLength = (frame.height() - 2) / 2.0;
-    tAxisLength = frame.width() - 1;
-
-    tOffset = frame.left() + 1;
-
-    tScaleFactor = tAxisLength * tStepMsec / tScale;
     yScaleFactor = -yAxisLength / yScale;
     yOffset = frame.center().y();
 
 
+    yAxisLength = (frame.height() - 2) / 2.0;
+    tAxisLength = frame.width() - 1;
+
+    tOffset = frame.left() + 1;
+    tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
+    tScaleFactor = tAxisLength * tStepMsec / tScale;
+
     // Initialize display.
     reDrawText();
     reDrawAxesLines();
-    reDrawFSMLevels();
+    updateLevelStartStop();
 }

@@ -41,7 +41,7 @@ class SpikeScopeDialog : public QDialog
     Q_OBJECT
 public:
     explicit SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSources *inSignalSources,
-                              SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent = 0, double fs);
+                              SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent = 0, double fs = 30000.0);
 
     void updateWaveform(int numBlocks);
     void expandYScale();
@@ -153,6 +153,7 @@ private:
     QSpinBox *thresholdSpinBox;
     SpikePlot *spikePlot = nullptr;
 
+    double sampleRate;
 };
 
 #endif // SPIKESCOPEDIALOG_H

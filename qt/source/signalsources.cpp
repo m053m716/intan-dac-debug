@@ -88,6 +88,10 @@ SignalSources::SignalSources(int numPorts)
         signalPort[numPorts + 2].channel[channel].enabled = true;
         signalPort[numPorts + 3].channel[channel].enabled = true;
     }
+    for (int channel = 0; channel < 4; ++channel){
+        signalPort[numPorts + 1].channel[channel].enabled = true;
+    }
+
     //END
 
     // Amplifier channels on SPI ports A-D are added later, if amplifier

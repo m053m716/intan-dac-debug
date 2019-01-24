@@ -979,12 +979,8 @@ void Rhs2000EvalBoard::enableDac(int dacChannel, bool enabled)
 		dev->SetWireInValue(WireInDacSource8, (enabled ? 0x0200 : 0x0000), 0x0200);
 		break;
 	}
-    dev->UpdateWireIns();
-}
-
-void Rhs2000EvalBoard::enableFSMWindow(int dacChannel, bool enabled)
-{
     wEnable[dacChannel] = enabled;
+    dev->UpdateWireIns();
 }
 
 // Set the gain level of all eight DAC channels to 2^gain (gain = 0-7).

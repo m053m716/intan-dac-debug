@@ -68,7 +68,7 @@ SpikeScopeDialog::SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSou
 
 void SpikeScopeDialog::changeYScale(int index)
 {
-    emit(yScaleChanged(index));
+    emit(yScaleChanged(yScaleList[index]));
 }
 
 void SpikeScopeDialog::setYScale(int index)
@@ -79,7 +79,7 @@ void SpikeScopeDialog::setYScale(int index)
 void SpikeScopeDialog::setSampleRate(double newSampleRate)
 {
     sampleRate = newSampleRate;
-    emit(sampleRateChanged);
+    emit(sampleRateChanged(sampleRate));
 }
 
 // Select a voltage trigger if index == 0.
@@ -170,19 +170,23 @@ void SpikeScopeDialog::setEdgePolarity(int index)
 // Set Spike Scope to a new signal channel source.
 void SpikeScopeDialog::setNewChannel(SignalChannel* newChannel)
 {
-    spikePlot->setNewChannel(newChannel);
     currentChannel = newChannel;
+    emit(newSignalChannel(newChannel));
+
     if (newChannel->voltageTriggerMode) {
         triggerTypeComboBox->setCurrentIndex(0);
     } else {
         triggerTypeComboBox->setCurrentIndex(1);
     }
-    thresholdSpinBox->setValue(newChannel->voltageThreshold);
-    digitalInputComboBox->setCurrentIndex(newChannel->digitalTriggerChannel);
-    if (newChannel->digitalEdgePolarity) {
-        edgePolarityComboBox->setCurrentIndex(0);
-    } else {
-        edgePolarityComboBox->setCurrentIndex(1);
+
+    if (!detMode) {
+        thresholdSpinBox->setValue(newChannel->voltageThreshold);
+        digitalInputComboBox->setCurrentIndex(newChannel->digitalTriggerChannel);
+        if (newChannel->digitalEdgePolarity) {
+            edgePolarityComboBox->setCurrentIndex(0);
+        } else {
+            edgePolarityComboBox->setCurrentIndex(1);
+        }
     }
 }
 
@@ -236,7 +240,7 @@ void SpikeScopeDialog::changeDACWindowStartFromSpikeDialog(int sample)
     }
 
     wStart[currentDACChannel] = sample;
-    emit setCurrentDACWindowStart(sample);
+    emit selectedDACWindowStartChanged(sample);
 }
 // Change the window stop (for current channel) from this dialog
 void SpikeScopeDialog::changeDACWindowStopFromSpikeDialog(int sample)
@@ -248,7 +252,7 @@ void SpikeScopeDialog::changeDACWindowStopFromSpikeDialog(int sample)
     }
 
     wStop[currentDACChannel] = sample;
-    emit setCurrentDACWindowStop(sample);
+    emit selectedDACWindowStopChanged(sample);
 }
 // Change the window type (include vs exclude) from this dialog
 void SpikeScopeDialog::changeDACTriggerTypeFromSpikeDialog(int index)
@@ -377,6 +381,7 @@ void SpikeScopeDialog::setCurrentDACVoltageThreshold(int threshold)
 SpikePlot* SpikeScopeDialog::initializeSpikePlot()
 {
     SpikePlot *s = new SpikePlot(signalProcessor, currentChannel, selectedDacChannel, this, this, sampleRate);
+    // spikescope --> spikePlot
     connect(this,SIGNAL(selectedDACChannelIndexChanged(int)),
             s,SLOT(setCurrentChannel(int)));
     connect(this,SIGNAL(selectedDACWindowStartChanged(int)),
@@ -391,8 +396,7 @@ SpikePlot* SpikeScopeDialog::initializeSpikePlot()
             s,SLOT(setWMode(bool)));
     connect(this,SIGNAL(selectedDACTriggerTypeChanged(int)),
             s,SLOT(setWType(int)));
-    connect(s,SIGNAL(currentVoltageThresholdChanged(int)),
-            this, SLOT(setVoltageThresholdDisplay(int)));
+
     connect(this, SIGNAL(selectedDACChannelEnableChanged(bool)),
             s,SLOT(setWEnable(bool)));
 
@@ -402,6 +406,12 @@ SpikePlot* SpikeScopeDialog::initializeSpikePlot()
             s, SLOT(setYScale(int)));
     connect(this, SIGNAL(newSignalChannel(SignalChannel*)),
             s, SLOT(setNewChannel(SignalChannel*)));
+
+    // spikePlot -> spikescope
+    connect(s,SIGNAL(currentVoltageThresholdChanged(int)),
+            this, SLOT(setVoltageThresholdDisplay(int)));
+    connect(s,SIGNAL(windowTypeChanged(int)),
+            this,SLOT(setCurrentDACTriggerType(int)));
 
     return s;
 }
