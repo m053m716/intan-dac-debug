@@ -1,3 +1,6 @@
+% clear
+% read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_0_190123_094952.rhs')
+
 fs=20e3; % 20kHz sampling rate 
 %% retrieve binary data from txt files (output of testbench main_red_tb.v)
 % 1. DAC_output_register_1
