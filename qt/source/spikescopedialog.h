@@ -71,7 +71,8 @@ signals:
 
     // MM 2019/01/24
     void sampleRateChanged(double fs);
-    void yScaleChanged(int index);
+    void yScaleChanged(int yScaleValue);
+    void yScaleIndexChanged(int index);
     void newSignalChannel(SignalChannel* channel);
     // END
     

@@ -68,12 +68,14 @@ SpikeScopeDialog::SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSou
 
 void SpikeScopeDialog::changeYScale(int index)
 {
+    emit(yScaleIndexChanged(index));
     emit(yScaleChanged(yScaleList[index]));
 }
 
 void SpikeScopeDialog::setYScale(int index)
 {
     yScaleComboBox->setCurrentIndex(index);
+    emit(yScaleChanged(yScaleList[index]));
 }
 
 void SpikeScopeDialog::setSampleRate(double newSampleRate)
@@ -292,7 +294,14 @@ void SpikeScopeDialog::changeDACChannelFromSpikeDialog(int channel)
     emit(selectedDACChannelIndexChanged(channel));
 
     // Update channel enable info check box.
-    enableDacChannelCheckBox->setChecked(wEnable[channel]);
+    setCurrentDACChannelEnable(wEnable[channel]);
+
+    // Update channel start/stop spin boxes and threshold
+    setCurrentDACWindowStart(wStart[channel]);
+    setCurrentDACWindowStop(wStop[channel]);
+
+    // Update channel type
+    setCurrentDACTriggerType(wType[channel]);
 
 }
 

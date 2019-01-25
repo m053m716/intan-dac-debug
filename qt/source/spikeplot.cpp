@@ -298,9 +298,9 @@ void SpikePlot::reDrawFSMLevels()
                             painter.setPen(Qt::gray);
                     }
                 }
-                cout << "Draw line [" << ii << "] --> "
-                     << levelStartPoint.at(ii) << " to " << levelStopPoint.at(ii)
-                     << ": pixHeight = " << levelHeight.at(ii) << endl;
+//                cout << "Draw line [" << ii << "] --> "
+//                     << levelStartPoint.at(ii) << " to " << levelStopPoint.at(ii)
+//                     << ": pixHeight = " << levelHeight.at(ii) << endl;
                 painter.drawLine(levelStartPoint.at(ii),levelHeight.at(ii),levelStopPoint.at(ii),levelHeight.at(ii));
             }
         }
@@ -769,7 +769,7 @@ void SpikePlot::initGenProperties()
     frameW = 0.0;
     yAxisLength = 0.0;
     yScaleFactor = 0.0;
-    yScale = 5000;
+    yScale = 1000;
 
     switch (maxNumSpikeWaveforms) {
         case 10: colorIndex = 0; break;
