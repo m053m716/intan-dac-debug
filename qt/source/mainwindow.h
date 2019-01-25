@@ -149,6 +149,7 @@ private slots:
     void selectBaseFilenameSlot();
     void changeNumFrames(int index);
     void changeYScale(int index);
+    void setYScale(int index);
     void changeYScaleDcAmp(int index);
     void changeYScaleAdc(int index);
     void changeAmpType(int index);
@@ -453,6 +454,7 @@ private:
 
     QVector<bool> dacEnabled;
     QVector<bool> dacThresholdEnabled;
+    QVector<bool> dacThresholdUnset;
     // END
 
     QRadioButton *displayPortAButton;

@@ -141,9 +141,6 @@ public:
     void setSpiLedDisplay(int ledArray[]);
 
 	void enableDac(int dacChannel, bool enabled);
-    // MM - 2019-01-23
-    void enableFSMWindow(int dacChannel, bool enabled);
-    // END
     void setDacGain(int gain);
     void setAudioNoiseSuppress(int noiseSuppress);
 	void selectDacDataStream(int dacChannel, int stream);

@@ -174,6 +174,8 @@ MainWindow::MainWindow(int sampleRateIndex_, int stimStepIndex)
     signalSources = new SignalSources(numSpiPorts);
     dacEnabled.resize(MAX_NUM_DAC_CHANNELS);
     dacThresholdEnabled.resize(MAX_NUM_DAC_CHANNELS);
+    dacThresholdUnset.resize(MAX_NUM_DAC_CHANNELS);
+    dacThresholdUnset.fill(true); // just a flag for if it has been modified yet
     for (int i = 0; i < MAX_NUM_DATA_STREAMS; ++i){
         dacEnabled[i] = signalSources->isEnabled(signalSources->dacPort(),i);
         dacThresholdEnabled[i] = dacEnabled[i];
@@ -646,8 +648,6 @@ void MainWindow::createLayout()
     dacDetectionMethodCheckBox = new QCheckBox(tr("Window Discriminator"));
     connect(dacDetectionMethodCheckBox, SIGNAL(clicked(bool)),
             this, SLOT(changeDetectionMethod(bool)));
-    connect(dacDetectionMethodCheckBox, SIGNAL(clicked(bool)),
-            this, SIGNAL(DACDetectionMethodChanged(bool)));
     dacDetectionMethodCheckBox->setChecked(DetectionMethod);
     // END UPDATE
 
@@ -1457,6 +1457,11 @@ void MainWindow::changeYScale(int index)
     wavePlot->setFocus();
 }
 
+void MainWindow::setYScale(int index)
+{
+    yScaleComboBox->setCurrentIndex(index);
+}
+
 // Change voltage scale of DC amplifier waveform plots.
 void MainWindow::changeYScaleDcAmp(int index)
 {
@@ -1714,11 +1719,12 @@ void MainWindow::setDACChannelEnable(bool enable)
         enable = dacThresholdEnabled[selectedDACChannelIndex] && enable;
     }
     dacEnabled[selectedDACChannelIndex] = enable;
+    dacThresholdEnabled[selectedDACChannelIndex] = enable && dacThresholdEnabled[selectedDACChannelIndex];
 
     if (!synthMode){
         evalBoard->enableDac(selectedDACChannelIndex, enable);
     }
-    evalBoard->enableFSMWindow(selectedDACChannelIndex,enable);
+
     if (dacSelectedChannel[selectedDACChannelIndex]) {
         setDacChannelLabel(selectedDACChannelIndex,
                            dacSelectedChannel[selectedDACChannelIndex]->customChannelName,
@@ -1732,16 +1738,19 @@ void MainWindow::setDACChannelEnable(bool enable)
 
     // should reset max window in case the max stop window DAC was disabled
     windowMax = evalBoard->setMaxWindowStop(selectedDACChannelIndex,
-                                            dacWindowStartSpinBox.at(
-                                                selectedDACChannelIndex)->value());
+                                            dacWindowStartSpinBox.at(selectedDACChannelIndex)->value());
     emit(DACWindowMaxChanged(windowMax));
+
+    if (dacThresholdUnset[selectedDACChannelIndex]){
+        dacThresholdUnset[selectedDACChannelIndex] = false;
+        setDACThresholdEnable(enable);
+    }
 }
 
 // Enable or disable DAC FSM threshold
 void MainWindow::setDACThresholdEnable(bool enable)
 {
-    dacThresholdEnabled[selectedDACChannelIndex] = enable &&
-            dacEnabled[selectedDACChannelIndex];
+    dacThresholdEnabled[selectedDACChannelIndex] = enable;
 
     if (!synthMode){
         evalBoard->enableDac(selectedDACChannelIndex,
@@ -1754,13 +1763,9 @@ void MainWindow::setDACThresholdEnable(bool enable)
                 (qint16)dacThresholdEnabled[selectedDACChannelIndex];
     }
 
-    emit(DACThresholdEnableChanged(
-                dacThresholdEnabled[selectedDACChannelIndex]));
-    evalBoard->enableFSMWindow(selectedDACChannelIndex,
-                               dacThresholdEnabled[selectedDACChannelIndex]);
+    emit(DACThresholdEnableChanged(dacThresholdEnabled[selectedDACChannelIndex]));
     windowMax = evalBoard->setMaxWindowStop(selectedDACChannelIndex,
-                                            dacWindowStartSpinBox.at(
-                                                selectedDACChannelIndex)->value());
+                                            dacWindowStartSpinBox.at(selectedDACChannelIndex)->value());
     emit(DACWindowMaxChanged(windowMax));
 
 }
@@ -1788,19 +1793,12 @@ void MainWindow::setDACAmplifierChannel()
     }
     wavePlot->setSelectedDACChannelIndex(selectedDACChannelIndex);
 
-    // for debug:
-    int tmp = 100;
 
     if (selectedChannel->signalType == AmplifierSignal) {
         // If DAC is not yet enabled, enable it.
         if (!dacEnabled[selectedDACChannelIndex] && !DetectionMethod) {
             dacEnableCheckBox->setChecked(true);
             setDACChannelEnable(true);
-        }
-
-        // for debug:
-        if (dacSelectedChannel[selectedDACChannelIndex]){
-            tmp = dacSelectedChannel[selectedDACChannelIndex]->chipChannel;
         }
 
         // Set DAC to selected channel and label it accordingly.
@@ -1817,8 +1815,7 @@ void MainWindow::setDACAmplifierChannel()
         }
     }
     wavePlot->setFocus();
-    cout << "DAC " << selectedDACChannelIndex << " Amp Channel Changed (MainWindow::setDACChannel)" << endl;
-    cout << "[" << tmp << "] --> [" << selectedChannel->chipChannel << "]" << endl;
+
     emit(DACAmplifierChannelChanged(selectedChannel));
 }
 
@@ -1830,13 +1827,11 @@ void MainWindow::setDACChannel(int index)
         return;
     }
 
-    int tmp = selectedDACChannelIndex;
     selectedDACChannelIndex = index;
     setDACChannelEnable(dacEnabled[index]);
     dacEnableCheckBox->setChecked(dacEnabled[index]);
     dacRadioButton[index]->setChecked(true);
-    cout << "DAC Channel Index Changed (MainWindow::setDACChannel)" << endl;
-    cout << "[" << tmp << "] --> [" << index << "]" << endl;
+
     emit(DACChannelChanged(index));
 
 }
@@ -1855,7 +1850,7 @@ void MainWindow::setDACVoltageThreshold(int threshold)
         currentDACChannelStream->voltageThreshold = (qint16)threshold;
         dacVoltageThresholdSpinBox[selectedDACChannelIndex]->setValue(threshold);
     }
-    cout << "DAC Voltage Threshold Changed emitted (MainWindow::setDACVoltageThreshold)" << endl;
+
     emit(DACVoltageThresholdChanged(threshold));
 }
 
@@ -1871,7 +1866,7 @@ void MainWindow::setDACWindowStart(int sample)
         currentDACChannelStream->electrodeImpedanceMagnitude = startSample;
         dacWindowStartSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
-    cout << "DAC Window Start Changed emitted (MainWindow::setDACWindowStart)" << endl;
+
     emit(DACWindowStartChanged(sample));
 }
 
@@ -1892,9 +1887,7 @@ void MainWindow::setDACWindowStop(int sample)
         currentDACChannelStream->electrodeImpedancePhase = stopSample;
         dacWindowStopSpinBox[selectedDACChannelIndex]->setValue(sample);
     }
-    cout << "DAC Window Stop Changed emitted (MainWindow::setDACWindowStop)" << endl;
     emit(DACWindowStopChanged(sample));
-    cout << "DAC Window Max Changed emitted (MainWindow::setDACWindowStop)" << endl;
     emit(DACWindowMaxChanged(windowMax));
 }
 
@@ -1909,7 +1902,6 @@ void MainWindow::setDACTriggerType(int triggerType)
         currentDACChannelStream->digitalEdgePolarity = (qint16)triggerType;
         includeExcludeComboBox[selectedDACChannelIndex]->setCurrentIndex(triggerType);
     }
-    cout << "DAC Window Type Changed emitted (MainWindow::setDACTriggerType)" << endl;
     emit(DACTriggerTypeChanged(triggerType));
 }
 
@@ -3267,11 +3259,11 @@ void MainWindow::spikeScope()
 {
     if (!spikeScopeDialog) {
         spikeScopeDialog = new SpikeScopeDialog(signalProcessor, signalSources,
-                                                wavePlot->selectedChannel(),wavePlot->selectedDacChannel(), this);
+                                                wavePlot->selectedChannel(),wavePlot->selectedDacChannel(), this, boardSampleRate);
 
         for (int i = 0; i < MAX_NUM_DAC_CHANNELS; i++) {
             spikeScopeDialog->setCurrentDACChannel(i);
-            spikeScopeDialog->setCurrentDACChannelEnable(dacThresholdEnabled[i]);
+            spikeScopeDialog->setCurrentDACChannelEnable(dacEnabled[i]);
             spikeScopeDialog->setCurrentDACVoltageThreshold(dacVoltageThresholdSpinBox[i]->value());
             spikeScopeDialog->setCurrentDACTriggerType(includeExcludeComboBox[i]->currentIndex());
             spikeScopeDialog->setCurrentDACWindowStart(dacWindowStartSpinBox[i]->value());
@@ -3297,6 +3289,8 @@ void MainWindow::spikeScope()
                 this, SLOT(setDACWindowStart(int)));
         connect(spikeScopeDialog, SIGNAL(selectedDACWindowStopChanged(int)),
                 this, SLOT(setDACWindowStop(int)));
+        connect(spikeScopeDialog, SIGNAL(yScaleChanged(int)),
+                this, SLOT(setYScale(int)));
 
         // main -> spike scope
         connect(this, SIGNAL(DACChannelChanged(int)),
@@ -3327,7 +3321,6 @@ void MainWindow::spikeScope()
     spikeScopeDialog->raise();
     spikeScopeDialog->activateWindow();
     spikeScopeDialog->setYScale(yScaleComboBox->currentIndex());
-    spikeScopeDialog->setSampleRate(boardSampleRate);
     spikeScopeDialog->setCurrentDACChannel(selectedDACChannelIndex);
 
     wavePlot->setFocus();
@@ -3753,7 +3746,7 @@ void MainWindow::saveSettings()
     }
 
     for (int i = 0; i < MAX_NUM_DAC_CHANNELS; i++){
-        outStream << (qint16) dacThresholdEnabled[i];
+        outStream << (qint16) dacEnabled[i];
     }
 
     outStream << (qint16) saveTtlOut;
@@ -4363,8 +4356,10 @@ void MainWindow::setSaveFormatDialog()
 void MainWindow::changeDetectionMethod(bool enable)
 {
     if (enable) {
+        cout << "FSM window discriminator enabled." << endl;
         spikeScopeButton->setText("Window Scope");
     } else {
+        cout << "FSM window discriminator disabled." << endl;
         spikeScopeButton->setText("Spike Scope");
     }
 
@@ -4372,6 +4367,7 @@ void MainWindow::changeDetectionMethod(bool enable)
         evalBoard->setDetectMode(enable);
     }
     DetectionMethod = enable;
+    emit(DACDetectionMethodChanged(enable));
 }
 
 int MainWindow::getEvalBoardMode()
