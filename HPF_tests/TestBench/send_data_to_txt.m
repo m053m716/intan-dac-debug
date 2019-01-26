@@ -9,7 +9,7 @@ read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_9_190123_193957.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_10_190123_193824.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-24\R19-00_2019-01-24_12_190124_173310.rhs')
-
+read_Intan_RHS2000_file('/Users/stefanobuccelli/Documents/GitHub/intan-dac-debug/R19-00_2019-01-23/R19-00_2019-01-23_2_190123_095121.rhs')
 %% don't forget to modify the filter in Verilog with this number:
 fs=30e3;
 fc=300;
