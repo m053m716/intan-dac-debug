@@ -54,3 +54,5 @@ CMakeLists.txt.user*
 # ReplayData
 *.txt
 HPF_tests/output_main_reduced_2.txt
+HPF_tests/output_fsm_window_state_1.txt
+HPF_tests/output_main_reduced_2.txt
