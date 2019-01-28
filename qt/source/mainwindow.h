@@ -116,7 +116,6 @@ signals:
     // MM 2019-01-21
     void DACAmplifierChannelChanged(SignalChannel* newAmpChannel);
     void DACChannelEnableChanged(bool enable);
-    void DACThresholdEnableChanged(bool enable);
     void DACChannelChanged(int index);
     void DACVoltageThresholdChanged(int threshold);
     void DACWindowStartChanged(int sample);
@@ -165,15 +164,27 @@ private slots:
     void changeDacNoiseSuppress(int index);
 
 
-    // MM 2019-01-21
+    // MM 2019-01-25
+    void updateCurrentDACParams();
+
     void setDACAmplifierChannel();
-    void setDACChannelEnable(bool enable);
-    void setDACThresholdEnable(bool enable);
-    void updateDAConThresholdEnable(bool enable);
+    void changeDACEnable(bool enable);
+    void setDACEnable(bool enable);
+    void updateCurrentDACChannel(int index);
+    void initAllDACChannels();
+    void changeDACChannel(int index);
     void setDACChannel(int index);
+    void changeDACVoltageThreshold();
+    void changeDACVoltageThreshold(int threshold);
     void setDACVoltageThreshold(int threshold);
+    void changeDACWindowStart();
+    void changeDACWindowStart(int sample);
     void setDACWindowStart(int sample);
+    void changeDACWindowStop();
+    void changeDACWindowStop(int sample);
     void setDACWindowStop(int sample);
+    void changeDACTriggerType();
+    void changeDACTriggerType(int triggerType);
     void setDACTriggerType(int triggerType);
     // END
 
@@ -219,6 +230,8 @@ private:
     void createMenus();
     void createStatusBar();
     void createLayout();
+    int convertSignedThresholdToUnsigned(int thresholdFromSpinBox);
+    void checkMaxWindowStopValue();
 
     int openInterfaceBoard(bool &expanderBoardDetected);
     void initializeInterfaceBoard();
@@ -431,6 +444,13 @@ private:
     QSpinBox *displayMarkerSpinBox;
     QCheckBox *displayTriggerCheckBox;
 
+    // MM - 2019-01-25
+    int curWindowStart;
+    int curWindowStop;
+    int curTriggerType;
+    int curThreshold;
+    // END
+
     // MM - UPDATE - WINDOW DISCRIMINATOR - 01/16/2018
     QCheckBox *dacDetectionMethodCheckBox;
     bool DetectionMethod;
@@ -449,12 +469,12 @@ private:
     // END
 
     // MM 2019-01-23
-    QSignalMapper* signalMapper;
-    QList<QAction*> unifyDACAction;
+    QSignalMapper* dacButtonSignalMapper;
+    QSignalMapper* dacChannelSignalMapper;
+    QList<QAction*> unifyDACButtonAction;
+    QList<QAction*> unifyDACChannelAction;
 
     QVector<bool> dacEnabled;
-    QVector<bool> dacThresholdEnabled;
-    QVector<bool> dacThresholdUnset;
     // END
 
     QRadioButton *displayPortAButton;
