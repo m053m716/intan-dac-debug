@@ -209,7 +209,6 @@ MainWindow::MainWindow(int sampleRateIndex_, int stimStepIndex)
             this, SLOT(newSelectedChannel(SignalChannel*)));
     connect(wavePlot, SIGNAL(selectedDACChannelStreamChanged(SignalChannel*)),
             this, SLOT(newDACChannelStream(SignalChannel*)));
-    wavePlot->setSelectedDACChannelIndex(0);
 
 
     createActions();
@@ -234,7 +233,7 @@ MainWindow::MainWindow(int sampleRateIndex_, int stimStepIndex)
 
     scanPorts();
     setStatusBarReady();
-    initAllDACChannels();
+
 
     if (!synthMode) {
         changeDetectionMethod(DetectionMethod);
@@ -285,6 +284,8 @@ MainWindow::MainWindow(int sampleRateIndex_, int stimStepIndex)
         fileTemp2.close();
     }
     adjustSize();
+
+    initAllDACChannels();
 }
 
 
@@ -1151,7 +1152,7 @@ void MainWindow::checkMaxWindowStopValue()
     int wMaxCur = windowMax;
 
     windowMax = evalBoard->setMaxWindowStop(selectedDACChannelIndex,
-                                            dacWindowStartSpinBox.at(selectedDACChannelIndex)->value());
+                                            dacWindowStopSpinBox.at(selectedDACChannelIndex)->value());
 
     // Only emit the signal if it actually changed
     if (!(wMaxCur == windowMax)){
@@ -1812,7 +1813,10 @@ void MainWindow::updateCurrentDACChannel(int index)
 }
 // Update ALL DAC channels
 void MainWindow::initAllDACChannels(){
+    wavePlot->setSelectedDACChannelIndex(0);
     SignalChannel* selectedChannel = wavePlot->selectedChannel();
+
+
     for (int i = MAX_NUM_DAC_CHANNELS; i > 0; --i) {
         setDACChannel(i - 1);
         setDACWindowStop(i + 1);
@@ -1894,6 +1898,7 @@ void MainWindow::setDACVoltageThreshold(int threshold)
     if (currentDACChannelStream){
         curThreshold = threshold;
         dacVoltageThresholdSpinBox[selectedDACChannelIndex]->setValue(threshold);
+        emit(dacVoltageThresholdSpinBox[selectedDACChannelIndex])->setValue(threshold);
         emit(dacVoltageThresholdSpinBox[selectedDACChannelIndex]->editingFinished());
     } else {
         cerr << "Tried to set DAC voltage threshold before DAC stream was initialized." << endl;
@@ -1938,6 +1943,7 @@ void MainWindow::setDACWindowStart(int sample)
     if (currentDACChannelStream) {
         curWindowStart = sample;
         dacWindowStartSpinBox[selectedDACChannelIndex]->setValue(sample);
+        emit(dacWindowStartSpinBox[selectedDACChannelIndex])->valueChanged(sample);
         emit(dacWindowStartSpinBox[selectedDACChannelIndex]->editingFinished());
     } else {
         cerr << "Tried to set window start before DAC stream was initialized." << endl;
@@ -1982,6 +1988,7 @@ void MainWindow::setDACWindowStop(int sample)
     if (currentDACChannelStream) {
         curWindowStop = sample;
         dacWindowStopSpinBox[selectedDACChannelIndex]->setValue(sample);
+        emit(dacWindowStopSpinBox[selectedDACChannelIndex])->valueChanged(sample);
         emit(dacWindowStopSpinBox[selectedDACChannelIndex]->editingFinished());
     } else {
         cerr << "Tried to set window stop before DAC stream was initialized." << endl;
@@ -2024,6 +2031,7 @@ void MainWindow::setDACTriggerType(int triggerType)
     if (currentDACChannelStream) {
         curTriggerType = triggerType;
         includeExcludeComboBox[selectedDACChannelIndex]->setCurrentIndex(triggerType);
+        emit(includeExcludeComboBox[selectedDACChannelIndex])->currentIndexChanged(triggerType);
         emit(includeExcludeComboBox[selectedDACChannelIndex]->activated(triggerType));
     } else {
         cerr << "Tried to set trigger type before DAC stream was initialized." << endl;
@@ -2368,13 +2376,12 @@ void MainWindow::initializeInterfaceBoard()
 
     // Set default configuration for all eight DACs on interface board.
 
-    for (int i = 0; i < MAX_NUM_DAC_CHANNELS; i++){
-        selectedDACChannelIndex = i;
-        evalBoard->enableDac(i, dacEnabled[i]);
-        evalBoard->selectDacDataStream(i,8);  // initially point DACs to DacManual1 input
-        evalBoard->selectDacDataChannel(i,0); // initially point everything to AMP->0
+    for (int i = MAX_NUM_DAC_CHANNELS; i > 0; --i){
+        selectedDACChannelIndex = i-1;
+        evalBoard->enableDac(i-1, dacEnabled[i-1]);
+        evalBoard->selectDacDataStream(i-1,8);  // initially point DACs to DacManual1 input
+        evalBoard->selectDacDataChannel(i-1,0); // initially point everything to AMP->0
     }
-    selectedDACChannelIndex = 0;
 
     evalBoard->setDacManual(32768);
     evalBoard->setDacGain(0);

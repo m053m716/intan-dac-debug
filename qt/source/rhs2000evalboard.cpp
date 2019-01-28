@@ -1203,9 +1203,9 @@ void Rhs2000EvalBoard::setDacThreshold(int dacChannel, int threshold, bool trigP
 	dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInDacThresh, dacChannel + 8);
     if (trigPolarity){
-        cout << "Set DAC " << dacChannel << ": thresh " << threshold << "(positive)" << endl;
+        cout << "Set DAC-" << dacChannel+1 << ": thresh " << threshold << "(positive)" << endl;
     } else {
-        cout << "Set DAC " << dacChannel << ": thresh " << threshold << "(negative)" << endl;
+        cout << "Set DAC-" << dacChannel+1 << ": thresh " << threshold << "(negative)" << endl;
     }
 
 }
@@ -1227,12 +1227,13 @@ int Rhs2000EvalBoard::setMaxWindowStop(int dacChannel, int sample)
         return maxWindowStop;
     }
 
+    wStop[dacChannel] = sample; // update the window stop for this channel
+
     // If current channel used to set DAC max, must re-check values if it is decreased
     if (dacChannel == maxWindowDAC) {
         if (sample < maxWindowStop) { // need to check if this DAC is still max
             maxWindowStop = 0;
             maxWindowDAC = 0;
-            wStop[dacChannel] = sample;
             for (int i = 0; i < 8; i++){
                 if (wEnable[i]) {
                     if (wStop[i] > maxWindowStop) {
@@ -1244,25 +1245,45 @@ int Rhs2000EvalBoard::setMaxWindowStop(int dacChannel, int sample)
             dev->SetWireInValue(WireInMultiUse, maxWindowStop);
             dev->UpdateWireIns();
             dev->ActivateTriggerIn(TrigInDacDetector,14);
-            cout << "New MAX window sample [" << maxWindowStop << "]: DAC- " << maxWindowDAC << endl;
+            cout << "New MAX window sample [" << maxWindowStop << "]: DAC-" << maxWindowDAC+1 << endl;
         } else {
-            maxWindowStop = sample;
-            maxWindowDAC = dacChannel;
-            dev->SetWireInValue(WireInMultiUse, sample);
-            dev->UpdateWireIns();
-            dev->ActivateTriggerIn(TrigInDacDetector,14);
-            cout << "New MAX window sample [" << maxWindowStop << "]: (same) DAC- " << maxWindowDAC << endl;
+            if (wEnable[dacChannel]){
+                maxWindowStop = sample;
+                maxWindowDAC = dacChannel;
+                dev->SetWireInValue(WireInMultiUse, sample);
+                dev->UpdateWireIns();
+                dev->ActivateTriggerIn(TrigInDacDetector,14);
+                cout << "New MAX window sample [" << maxWindowStop << "]: (same) DAC-" << maxWindowDAC+1 << endl;
+            } else {
+                maxWindowStop = 0;
+                maxWindowDAC = 0;
+                for (int i = 0; i < 8; i++){
+                    if (wEnable[i]) {
+                        if (wStop[i] > maxWindowStop) {
+                            maxWindowStop = wStop[i];
+                            maxWindowDAC = i;
+                        }
+                    }
+                }
+                dev->SetWireInValue(WireInMultiUse, maxWindowStop);
+                dev->UpdateWireIns();
+                dev->ActivateTriggerIn(TrigInDacDetector,14);
+                cout << "New MAX window sample [" << maxWindowStop << "]: DAC-" << maxWindowDAC+1 << endl;
+            }
         }
     } else { // If it's a different channel, just look to see if it's greater
         // Compare to current MAX, if greater, replace
         if (sample >= maxWindowStop) {
-            maxWindowStop = sample;
-            maxWindowDAC = dacChannel;
-            dev->SetWireInValue(WireInMultiUse, sample);
-            dev->UpdateWireIns();
-            dev->ActivateTriggerIn(TrigInDacDetector,14);
-            cout << "New MAX window sample [" << maxWindowStop << "]: (NEW) DAC- " << maxWindowDAC << endl;
-
+            if (wEnable[dacChannel]){
+                maxWindowStop = sample;
+                maxWindowDAC = dacChannel;
+                dev->SetWireInValue(WireInMultiUse, sample);
+                dev->UpdateWireIns();
+                dev->ActivateTriggerIn(TrigInDacDetector,14);
+                cout << "New MAX window sample [" << maxWindowStop << "]: (NEW) DAC-" << maxWindowDAC+1 << endl;
+            } else {
+                cout << "Channel not enabled. MAX window sample [" << maxWindowStop << "]: (same) DAC-" << maxWindowDAC+1 << endl;
+            }
         }
     }
     return maxWindowStop;
@@ -1287,7 +1308,7 @@ void Rhs2000EvalBoard::setDacWindowStart(int dacChannel, int sample)
     dev->SetWireInValue(WireInMultiUse, sample);
     dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInDacWindow, dacChannel);
-    cout << "DAC-" << dacChannel << " window START: " << sample << endl;
+    cout << "DAC-" << dacChannel+1 << " window START: " << sample << endl;
 }
 
 // Set sample index for start of a threshold "window" edge for FSM detector
@@ -1310,7 +1331,7 @@ void Rhs2000EvalBoard::setDacWindowStop(int dacChannel, int sample)
     dev->SetWireInValue(WireInMultiUse, sample);
     dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInDacWindow, dacChannel + 8);
-    cout << "DAC-" << dacChannel << " window STOP: " << sample << endl;
+    cout << "DAC-" << dacChannel+1 << " window STOP: " << sample << endl;
 }
 
 // Set threshold type (i.e. "beginning" (min) or "ending" (max) amplitude discrimination edge of window
@@ -1330,10 +1351,10 @@ void Rhs2000EvalBoard::changeThresholdType(int dacChannel, int typeIndex)
     // Set threshold type.
     if (typeIndex == 0) {
         dev->SetWireInValue(WireInMultiUse,0); // 0 -> "Include"
-        cout << "DAC-" << dacChannel << " set to INCLUDE (0)" << endl;
+        cout << "DAC-" << dacChannel+1 << " set to INCLUDE (0)" << endl;
     } else if (typeIndex == 1) {
         dev->SetWireInValue(WireInMultiUse,1); // 1 -> "Exclude"
-        cout << "DAC-" << dacChannel << " set to EXCLUDE (0)" << endl;
+        cout << "DAC-" << dacChannel+1 << " set to EXCLUDE (1)" << endl;
     }
     dev->UpdateWireIns();
     dev->ActivateTriggerIn(TrigInDacDetector, dacChannel);
