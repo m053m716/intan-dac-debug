@@ -2,9 +2,9 @@ Command line:
    main_mod_tb_isim_beh.exe
      -simmode  gui
      -simrunnum  0
-     -socket  11558
+     -socket  19967
 
-Fri Jan 25 10:18:50 2019
+Sat Jan 26 08:34:10 2019
 
 
  Elaboration Time: 0.0936 sec
@@ -21,9 +21,9 @@ Fri Jan 25 10:18:50 2019
  Total Scalar Nets and Variables : 986982
 Total Line Count : 8639
 
- Total Simulation Time: 21.4033 sec
+ Total Simulation Time: 21.3097 sec
 
  Current Memory Usage: 1014.84 Meg
 
-Fri Jan 25 10:19:28 2019
+Sat Jan 26 08:34:56 2019
 

@@ -10,9 +10,9 @@ clc
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_10_190123_193824.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-24\R19-00_2019-01-24_11_190124_173219.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-24\R19-00_2019-01-24_12_190124_173310.rhs')
-read_Intan_RHS2000_file('/Users/stefanobuccelli/Documents/GitHub/intan-dac-debug/R19-00_2019_01_25/R19-00_2019-01-25_5_190125_165947.rhs')
+% read_Intan_RHS2000_file('/Users/stefanobuccelli/Documents/GitHub/intan-dac-debug/R19-00_2019_01_25/R19-00_2019-01-25_5_190125_165947.rhs')
 % read_Intan_RHS2000_file('/Users/stefanobuccelli/Documents/GitHub/intan-dac-debug/R19-00_2019_01_25/R19-00_2019-01-25_6_190125_170331.rhs')
-
+read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019_01_25\R19-00_2019-01-25_5_190125_165947.rhs')
 possible_gains=1.6.*2.^(0:7);
 n_DAC_bits=16;
 n_DAC_levels=2^n_DAC_bits;
