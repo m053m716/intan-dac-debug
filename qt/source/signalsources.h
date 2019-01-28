@@ -41,7 +41,8 @@ public:
 
     QVector<SignalGroup> signalPort;
     int numSignalPorts;
-    int dacPort();
+    const int dacPort();
+    bool isEnabled(int portIndex, int channelIndex);
 
 private:
 

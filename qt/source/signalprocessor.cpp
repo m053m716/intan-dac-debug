@@ -107,8 +107,8 @@ void SignalProcessor::allocateMemory(int numStreams)
     allocateIntArray3D(stimPol, numStreams, CHANNELS_PER_STREAM, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
     allocateIntArray3D(ampSettle, numStreams, CHANNELS_PER_STREAM, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
     allocateIntArray3D(chargeRecov, numStreams, CHANNELS_PER_STREAM, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
-    allocateDoubleArray2D(boardDac, 8, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
-    allocateDoubleArray2D(boardAdc, 8, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
+    allocateDoubleArray2D(boardDac, MAX_NUM_DAC_CHANNELS, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
+    allocateDoubleArray2D(boardAdc, MAX_NUM_DAC_CHANNELS, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
     allocateIntArray2D(boardDigIn, 16, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
     allocateIntArray2D(boardDigOut, 16, SAMPLES_PER_DATA_BLOCK * MAX_NUM_BLOCKS);
 

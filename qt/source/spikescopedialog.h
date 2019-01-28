@@ -34,21 +34,18 @@ class SpikePlot;
 class SignalProcessor;
 class SignalSources;
 class SignalChannel;
+class QHBoxLayout;
 
 class SpikeScopeDialog : public QDialog
 {
     Q_OBJECT
 public:
     explicit SpikeScopeDialog(SignalProcessor *inSignalProcessor, SignalSources *inSignalSources,
-                              SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent = 0);
-    void setYScale(int index);
-    void setSampleRate(double newSampleRate);
+                              SignalChannel *initialChannel, SignalChannel *curDacChannel, QWidget *parent = 0, double fs = 30000.0);
+
     void updateWaveform(int numBlocks);
-    void setVoltageThresholdDisplay(int value);
-    void setNewChannel(SignalChannel* newChannel);
     void expandYScale();
     void contractYScale();
-    void setDetectionMode(bool mode);
 
     // MM - UPDATE - WINDOW DISCRIMINATOR - 1/17/18
     bool detMode;
@@ -60,8 +57,6 @@ public:
     QVector<int> wThresh;
     // END UPDATE
 
-
-
 signals:
     // MM - UPDATE - 2019/01/20
     void selectedDACChannelIndexChanged(int index);
@@ -70,6 +65,15 @@ signals:
     void selectedDACWindowStopChanged(int sample);
     void selectedDACTriggerTypeChanged(int index);
     void selectedDACVoltageThresholdChanged(int threshold);
+    void maxDACWindowStopChanged(int sample);
+    void fsmModeChanged(bool fsmOn);
+    // END
+
+    // MM 2019/01/24
+    void sampleRateChanged(double fs);
+    void yScaleChanged(int yScaleValue);
+    void yScaleIndexChanged(int index);
+    void newSignalChannel(SignalChannel* channel);
     // END
     
 public slots:    
@@ -81,16 +85,21 @@ public slots:
     void setCurrentDACTriggerType(int index);
     void setCurrentDACVoltageThreshold(int threshold);
     void setCurrentDACWindowStartOffset(int maxWindowStop);
+    void setDetectionMode(bool mode);
+    void setVoltageThresholdDisplay(int value);
     // END UPDATE
+
+    void setNewChannel(SignalChannel* newChannel);
+    void setYScale(int index);
+    void setSampleRate(double newSampleRate);
 
 private slots:
     void changeYScale(int index);
-    void setTriggerType(int index);
+    void enableCorrectUIgraphics(int index);
     void resetThresholdToZero();
     void setNumSpikes(int index);
     void clearScope();
     void setDigitalInput(int index);
-    void setVoltageThreshold(int value);
     void setEdgePolarity(int index);
     void applyToAll();
 
@@ -104,6 +113,18 @@ private slots:
     // END
 
 private:
+    SpikePlot* initializeSpikePlot();
+    QHBoxLayout* initializeVoltDigDetectionUI();
+    QHBoxLayout* initializeWindowDetectionUI();
+    QComboBox* initializeDigComboBox();
+    void initWindowProperties();
+    void initializeMainLayout(QHBoxLayout* thresholdSpinBoxLayout,
+                              QHBoxLayout* windowDetectorLayout);
+
+    void enableVoltageTriggerUI(bool voltOn);
+    void enableDigitalTriggerUI(bool digOn);
+    void enableWindowTriggerUI(bool fsmOn);
+
     QVector<int> yScaleList;
 
     SignalProcessor *signalProcessor;
@@ -131,8 +152,9 @@ private:
     QComboBox *yScaleComboBox;
 
     QSpinBox *thresholdSpinBox;
-    SpikePlot *spikePlot;
+    SpikePlot *spikePlot = nullptr;
 
+    double sampleRate;
 };
 
 #endif // SPIKESCOPEDIALOG_H

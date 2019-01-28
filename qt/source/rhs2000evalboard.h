@@ -25,6 +25,7 @@
 #define USB_BUFFER_SIZE 2400000
 #define RHYTHM_BOARD_ID 850
 #define MAX_NUM_DATA_STREAMS 8
+#define MAX_NUM_DAC_CHANNELS 8
 #define FIFO_CAPACITY_WORDS 67108864
 #define RHS_BOARD_MODE 14
 
@@ -231,16 +232,9 @@ private:
     // MM - UPDATE - WINDOW DISCRIMINATOR - 1/16/18
     int maxWindowStop; // max. duration to run FSM
     int maxWindowDAC; // DAC number with current max. window size
-//    int W1_stop;
-//    int W2_stop;
-//    int W3_stop;
-//    int W4_stop;
-//    int W5_stop;
-//    int W6_stop;
-//    int W7_stop;
-//    int W8_stop;
     QVector<int> wStop;
     QVector<bool> wEnable; // "window enable" -> for each DAC
+    QVector<bool> ttlOutEnable;
     // END UPDATE
 
 	okCFrontPanel *dev;

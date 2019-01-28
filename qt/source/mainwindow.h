@@ -106,8 +106,6 @@ public:
     int markerChannel();
     bool showV0Axis();
     void setManualStimTrigger(int trigger, bool triggerOn);
-    void setDac1WindowStart();
-    void dacThresholdEnable();
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -122,7 +120,9 @@ signals:
     void DACVoltageThresholdChanged(int threshold);
     void DACWindowStartChanged(int sample);
     void DACWindowStopChanged(int sample);
+    void DACWindowMaxChanged(int sample);
     void DACTriggerTypeChanged(int triggerType);
+    void DACDetectionMethodChanged(bool detectionMode);
     // END
 
 public slots:
@@ -148,6 +148,7 @@ private slots:
     void selectBaseFilenameSlot();
     void changeNumFrames(int index);
     void changeYScale(int index);
+    void setYScale(int index);
     void changeYScaleDcAmp(int index);
     void changeYScaleAdc(int index);
     void changeAmpType(int index);
@@ -163,13 +164,27 @@ private slots:
     void changeDacNoiseSuppress(int index);
 
 
-    // MM 2019-01-21
+    // MM 2019-01-25
+    void updateCurrentDACParams();
+
     void setDACAmplifierChannel();
-    void setDACChannelEnable(bool enable);
+    void changeDACEnable(bool enable);
+    void setDACEnable(bool enable);
+    void updateCurrentDACChannel(int index);
+    void initAllDACChannels();
+    void changeDACChannel(int index);
     void setDACChannel(int index);
+    void changeDACVoltageThreshold();
+    void changeDACVoltageThreshold(int threshold);
     void setDACVoltageThreshold(int threshold);
+    void changeDACWindowStart();
+    void changeDACWindowStart(int sample);
     void setDACWindowStart(int sample);
+    void changeDACWindowStop();
+    void changeDACWindowStop(int sample);
     void setDACWindowStop(int sample);
+    void changeDACTriggerType();
+    void changeDACTriggerType(int triggerType);
     void setDACTriggerType(int triggerType);
     // END
 
@@ -215,6 +230,8 @@ private:
     void createMenus();
     void createStatusBar();
     void createLayout();
+    int convertSignedThresholdToUnsigned(int thresholdFromSpinBox);
+    void checkMaxWindowStopValue();
 
     int openInterfaceBoard(bool &expanderBoardDetected);
     void initializeInterfaceBoard();
@@ -332,7 +349,6 @@ private:
     QVector<double> sampleRateList;
 
     QVector<SignalChannel*> dacSelectedChannel;
-    QVector<bool> dacEnabled;
     QVector<int> chipId;
 
     queue<Rhs2000DataBlock> dataQueue;
@@ -379,9 +395,6 @@ private:
     QAction *pasteStimParametersAction;
     QAction *ampSettleSettingsAction;
     QAction *chargeRecoverySettingsAction;
-
-    QSignalMapper* signalMapper;
-    QList<QAction*> unifyDACAction;
 
     QMenu *fileMenu;
     QMenu *editMenu;
@@ -431,11 +444,18 @@ private:
     QSpinBox *displayMarkerSpinBox;
     QCheckBox *displayTriggerCheckBox;
 
-//    // MM - UPDATE - WINDOW DISCRIMINATOR - 01/16/2018
+    // MM - 2019-01-25
+    int curWindowStart;
+    int curWindowStop;
+    int curTriggerType;
+    int curThreshold;
+    // END
+
+    // MM - UPDATE - WINDOW DISCRIMINATOR - 01/16/2018
     QCheckBox *dacDetectionMethodCheckBox;
     bool DetectionMethod;
     int windowMax;
-//    // END UPDATE
+    // END UPDATE
 
     // MM 2019-01-21
     QList<QCheckBox*> thresholdEnableCheckBox;
@@ -444,8 +464,17 @@ private:
     QList<QSpinBox*> dacWindowStopSpinBox;
     QList<QRadioButton*> dacRadioButton;
     QList<QSpinBox*> dacVoltageThresholdSpinBox;
-    int selectedDACChannelIndex;
     SignalChannel* currentDACChannelStream;
+    int selectedDACChannelIndex;
+    // END
+
+    // MM 2019-01-23
+    QSignalMapper* dacButtonSignalMapper;
+    QSignalMapper* dacChannelSignalMapper;
+    QList<QAction*> unifyDACButtonAction;
+    QList<QAction*> unifyDACChannelAction;
+
+    QVector<bool> dacEnabled;
     // END
 
     QRadioButton *displayPortAButton;
@@ -492,13 +521,6 @@ private:
     QLabel *refChannelLabel;
 
     StimParameters copiedStimParameters;
-
-    // MM 2019-01-22 Fix for tracking other GUI elements with radio buttons properly
-    int thisVoltageSpinBoxValue;
-    int thisWindowStartSpinBoxValue;
-    int thisWindowStopSpinBoxValue;
-    int thisWindowTypeComboBoxIndex;
-    // END
 };
 
 

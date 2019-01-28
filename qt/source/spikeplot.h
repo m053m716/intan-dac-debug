@@ -48,9 +48,8 @@ class SpikePlot : public QWidget
     Q_OBJECT
 public:
     explicit SpikePlot(SignalProcessor *inSignalProcessor, SignalChannel *initialChannel, SignalChannel *curDacChannel,
-                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0);
-    void setYScale(int newYScale);
-    void setSampleRate(double newSampleRate);
+                       SpikeScopeDialog *inSpikeScopeDialog, QWidget *parent = 0, double fs = 30000.0);
+
     void updateWaveform(int numBlocks);
     void setMaxNumSpikeWaveforms(int num);
     void clearScope();
@@ -58,28 +57,29 @@ public:
     void setVoltageThreshold(int threshold);
     void setDigitalTriggerChannel(int channel);
     void setDigitalEdgePolarity(bool risingEdge);
-    void setNewChannel(SignalChannel* newChannel);
+
 
     QSize minimumSizeHint() const;
     QSize sizeHint() const;
 
-    // MM - UPDATE - WINDOW DISCRIMINATOR - 1/23/18
-    QVector<bool> wEnable;
-    QVector<int> wStart;
-    QVector<int> wStop;
-    QVector<int> wType;
-    QVector<int> wThresh;
-    bool wMode;
-    void drawAxisLines();
-    void setWMax(int maxWindowStop);
-    void updateLevelStartStop();
-    void setCurrentChannel(int channel);
-    // END UPDATE
-
 signals:
-    
-public slots:
+    void currentVoltageThresholdChanged(int thresh);
+    void windowTypeChanged(int index);
 
+public slots:
+    void setCurrentChannel(int channel);
+    void setWMax(int sample);
+    void setWEnable(bool enable);
+    void setWStart(int sample);
+    void setWStop(int sample);
+    void setWThresh(int threshold);
+    void setWType(int type);
+    void setWMode(bool fsmOn);
+
+    // MM 2019-01-24
+    void setSampleRate(double newSampleRate);
+    void setYScale(int newYScale);
+    void setNewChannel(SignalChannel* newChannel);
 
 protected:
     void paintEvent(QPaintEvent *event);
@@ -90,9 +90,19 @@ protected:
     void resizeEvent(QResizeEvent* event);
 
 private:
-    void drawAxisText();
+    void initGenProperties();
+    void initPenColors();
+    void initDisplay();
+    void initBuffers();
+
+    void reDrawText();
+    void reDrawFSMLevels();
+    void reDrawAxesLines();
+    void updateLevelStartStop();
     void updateSpikePlot(double rms);
-    void initializeDisplay();
+    void initSpikeAxes();
+
+    double getThresholdFromMousePress(QMouseEvent *event);
 
     SignalProcessor *signalProcessor;
     SpikeScopeDialog *spikeScopeDialog;
@@ -114,6 +124,12 @@ private:
     int wMax;
     int thisChannel;
     int colorIndex;
+    QVector<bool> wEnable;
+    QVector<int> wStart;
+    QVector<int> wStop;
+    QVector<int> wType;
+    QVector<int> wThresh;
+    bool fsmModeOn;
 
     QVector<int> fsmTriggerBuffer;
     QVector<int> fsmTrackerBuffer;
@@ -123,37 +139,45 @@ private:
     QVector<double> levelStopPoint;
     QVector<double> levelHeight;
 
+    QPixmap pixmap;
+
     QPen penThisInclude;
     QPen penThisExclude;
     QPen penOtherInclude;
     QPen penOtherExclude;
     QPen penIncludeSpike;
     QPen penExcludeSpike;
-
-    double frameX;
-    double frameY;
-    double frameW;
-    double yAxisLength;
-    double yScaleFactor;
     // END UPDATE
-
-    int preTriggerTSteps;
-    int totalTSteps;
-    bool startingNewChannel;
-    int rmsDisplayPeriod;
 
     SignalChannel *selectedChannel;
     SignalChannel *selectedDacChannel;
 
     QRect frame;
-
-    double tStepMsec;
-    int yScale;
-    double savedRms;
-
-    QPixmap pixmap;
-
     QVector<QVector<QColor>> scopeColors;
+
+    // Plotting parameters
+    int rmsDisplayPeriod;
+    int preTriggerTSteps;
+    int totalTSteps;
+    int yScale;
+    double tScale;
+    double tStepMsec;
+    double savedRMS;
+
+    double frameX;
+    double frameY;
+    double frameW;
+    double tAxisLength;
+    double yAxisLength;
+
+    double tScaleFactor;
+    double yScaleFactor;
+
+    double tOffset;
+    double yOffset;
+    double sampleRate;
+
+    bool startingNewChannel;
     
 };
 
