@@ -159,7 +159,11 @@ void SpikeScopeDialog::setVoltageThresholdDisplay(int value)
     if (detMode) {
         setWindowThresholdSpinBox->setValue(value);
     } else {
+        int curValue = thresholdSpinBox->value();
         thresholdSpinBox->setValue(value);
+        if (curValue != value){
+            emit(thresholdSpinBox->valueChanged(value));
+        }
     }
 
 }
@@ -303,6 +307,9 @@ void SpikeScopeDialog::changeDACChannelFromSpikeDialog(int channel)
     // Update channel type
     setCurrentDACTriggerType(wType[channel]);
 
+    // Update voltage threshold
+    setCurrentDACVoltageThreshold(wThresh[channel]);
+
 }
 
 // SET FUNCTIONS -> FOR EXTERNAL SETTERS //
@@ -331,12 +338,14 @@ void SpikeScopeDialog::setCurrentDACWindowStartOffset(int maxWindowStop)
         cerr << "Error in SpikeScopeDialog::setCurrentDACWindowStartOffset: maxWindowStop (" << maxWindowStop << ") out of range." << endl;
         return;
     }
+
     emit(maxDACWindowStopChanged(maxWindowStop));
 }
 // Set enable from outside the dialog
 void SpikeScopeDialog::setCurrentDACChannelEnable(bool enable)
 {
     enableDacChannelCheckBox->setChecked(enable);
+    emit(currentDACChannelEnableState(enable));
 }
 // Set DAC channel for combo box from outside the dialog
 void SpikeScopeDialog::setCurrentDACChannel(int index)
@@ -345,7 +354,13 @@ void SpikeScopeDialog::setCurrentDACChannel(int index)
         cerr << "Error in SpikeScopeDialog::setCurrentDACChannel: index (" << index << ") out of range." << endl;
         return;
     }
-    selectDacChannelComboBox->setCurrentIndex(index);
+    if (index != currentDACChannel){
+        selectDacChannelComboBox->setCurrentIndex(index);
+        emit(selectedDACChannelIndexChanged(index));
+    } else {
+        selectDacChannelComboBox->setCurrentIndex(index);
+    }
+
 }
 // Set DAC window start from outside the dialog
 void SpikeScopeDialog::setCurrentDACWindowStart(int sample)
@@ -408,6 +423,8 @@ SpikePlot* SpikeScopeDialog::initializeSpikePlot()
 
     connect(this, SIGNAL(selectedDACChannelEnableChanged(bool)),
             s,SLOT(setWEnable(bool)));
+    connect(this, SIGNAL(currentDACChannelEnableState(bool)),
+            s, SLOT(setWEnable(bool)));
 
     connect(this, SIGNAL(sampleRateChanged(double)),
             s,SLOT(setSampleRate(double)));

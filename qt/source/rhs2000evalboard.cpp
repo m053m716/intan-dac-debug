@@ -988,9 +988,9 @@ void Rhs2000EvalBoard::enableDac(int dacChannel, bool enabled)
     wEnable[dacChannel] = enabled;
     dev->UpdateWireIns();
     if (enabled){
-        cout << "DAC-" << dacChannel << " ENABLED" << endl;
+        cout << "DAC-" << dacChannel+1 << " ENABLED" << endl;
     } else {
-        cout << "DAC-" << dacChannel << " DISABLED" << endl;
+        cout << "DAC-" << dacChannel+1 << " DISABLED" << endl;
     }
 
 }

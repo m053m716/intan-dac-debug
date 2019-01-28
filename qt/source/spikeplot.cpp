@@ -338,9 +338,12 @@ void SpikePlot::reDrawAxesLines()
 // update the values to be used for drawing threshold lines on the spike plot
 void SpikePlot::updateLevelStartStop()
 {
-    levelStartPoint[thisChannel] = frameX + ((double(wStart.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1;
-    levelStopPoint[thisChannel] = frameX + ((double(wStop.at(thisChannel)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1.75; // 1 for graphics offset; 0.75 to reflect "<" on this edge
-    levelHeight[thisChannel] = frameY + (yScaleFactor * double(wThresh.at(thisChannel)));
+    for (int i = 0; i < 8; i++){
+        levelStartPoint[i] = frameX + ((double(wStart.at(i)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1;
+        levelStopPoint[i] = frameX + ((double(wStop.at(i)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1.75; // 1 for graphics offset; 0.75 to reflect "<" on this edge
+        levelHeight[i] = frameY + (yScaleFactor * double(wThresh.at(i)));
+    }
+
     reDrawFSMLevels();
 }
 

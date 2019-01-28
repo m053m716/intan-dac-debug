@@ -113,7 +113,7 @@ void WavePlot::initialize(int startingPort, int numPorts)
 
     setSelectedDACChannelIndex(selectedDacChannelIndex);
     setNumFrames(numFramesIndex[selectedPort]);
-    highlightFrame(0,false);
+    changeSelectedFrame(0,false);
 }
 
 void WavePlot::createFrames(unsigned int frameIndex, unsigned int maxX, unsigned int maxY) {

@@ -85,6 +85,7 @@ public:
     void disableAllChannels();
     void setImpedanceLabels(bool enabled);
     void setPointPlotMode(bool enabled);
+    void changeSelectedFrame(int newSelectedFrame, bool pageUpDown);
 
     int setNumFrames(int index);
     int setNumFrames(int index, int port);
@@ -129,7 +130,6 @@ private:
     void drawAxisText(QPainter &painter, int frameNumber);
     void drawWaveforms();
     void highlightFrame(int frameIndex, bool eraseOldFrame);
-    void changeSelectedFrame(int newSelectedFrame, bool pageUpDown);
     int findClosestFrame(QPoint p);
     int distanceSquared(QPoint a, QPoint b);
     void drawDragIndicator(int frameIndex, bool erase);

@@ -1155,7 +1155,7 @@ void MainWindow::checkMaxWindowStopValue()
                                             dacWindowStopSpinBox.at(selectedDACChannelIndex)->value());
 
     // Only emit the signal if it actually changed
-    if (!(wMaxCur == windowMax)){
+    if (wMaxCur != windowMax){
         emit(DACWindowMaxChanged(windowMax));
     }
 }
@@ -1814,6 +1814,7 @@ void MainWindow::updateCurrentDACChannel(int index)
 // Update ALL DAC channels
 void MainWindow::initAllDACChannels(){
     wavePlot->setSelectedDACChannelIndex(0);
+    wavePlot->changeSelectedFrame(0,false);
     SignalChannel* selectedChannel = wavePlot->selectedChannel();
 
 
@@ -1823,10 +1824,14 @@ void MainWindow::initAllDACChannels(){
         setDACWindowStart(i - 1);
         setDACTriggerType((i - 1) % 2);
         setDACVoltageThreshold((-100) * i);
+        wavePlot->setFocus();
+        wavePlot->changeSelectedFrame(0,false);
         if (dacEnabled[(i-1)]){
             setDacChannelLabel(i - 1, selectedChannel->customChannelName, selectedChannel->nativeChannelName);
+            cout << "Init: DAC-" << i << " enabled." << endl;
         } else {
             setDacChannelLabel(i - 1, "n/a", "n/a");
+            cout << "Init: DAC-" << i << " disabled." << endl;
         }
         setDACEnable(dacEnabled[(i-1)]);
     }
@@ -1868,7 +1873,7 @@ void MainWindow::changeDACVoltageThreshold()
         evalBoard->setDacThreshold(selectedDACChannelIndex, threshLevel, curThreshold >= 0);
     }
 
-    if (currentDACChannelStream && dacEnabled[selectedDACChannelIndex]) {
+    if (currentDACChannelStream) {
         currentDACChannelStream->voltageThreshold = (qint16)curThreshold;
         emit(DACVoltageThresholdChanged(curThreshold));
     } else {
@@ -3440,7 +3445,6 @@ void MainWindow::spikeScope()
         connect(this, SIGNAL(DACWindowMaxChanged(int)),
                 spikeScopeDialog, SLOT(setCurrentDACWindowStartOffset(int)));
 
-
         connect(this, SIGNAL(DACTriggerTypeChanged(int)),
                 spikeScopeDialog, SLOT(setCurrentDACTriggerType(int)));
         connect(this, SIGNAL(DACDetectionMethodChanged(bool)),
@@ -3454,6 +3458,7 @@ void MainWindow::spikeScope()
     spikeScopeDialog->setYScale(yScaleComboBox->currentIndex());
     spikeScopeDialog->setCurrentDACChannel(selectedDACChannelIndex);
     spikeScopeDialog->setDetectionMode(DetectionMethod);
+    spikeScopeDialog->setSampleRate(boardSampleRate);
     wavePlot->setFocus();
 
 }

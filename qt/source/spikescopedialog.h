@@ -67,6 +67,7 @@ signals:
     void selectedDACVoltageThresholdChanged(int threshold);
     void maxDACWindowStopChanged(int sample);
     void fsmModeChanged(bool fsmOn);
+    void currentDACChannelEnableState(bool enable);
     // END
 
     // MM 2019/01/24
