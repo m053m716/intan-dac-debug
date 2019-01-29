@@ -190,7 +190,7 @@ void SpikePlot::setWMode(bool fsmOn)
 {
     fsmModeOn = fsmOn;
     initSpikeAxes();
-    reDrawFSMLevels(); // toggle the lines on or off
+    updateLevelStartStop(); // toggle the lines on or off
 }
 
 // GRAPHICS: UPDATE LINES DRAWN FOR FSM //
@@ -298,9 +298,6 @@ void SpikePlot::reDrawFSMLevels()
                             painter.setPen(Qt::gray);
                     }
                 }
-//                cout << "Draw line [" << ii << "] --> "
-//                     << levelStartPoint.at(ii) << " to " << levelStopPoint.at(ii)
-//                     << ": pixHeight = " << levelHeight.at(ii) << endl;
                 painter.drawLine(levelStartPoint.at(ii),levelHeight.at(ii),levelStopPoint.at(ii),levelHeight.at(ii));
             }
         }
@@ -322,15 +319,15 @@ void SpikePlot::reDrawAxesLines()
     painter.drawRect(frame);
 
     // Draw horizonal zero voltage line.
-    painter.drawLine(frame.left(), frame.center().y(), frame.right(), frame.center().y());
+    painter.drawLine(frame.left(), yOffset, frame.right(), yOffset);
 
     // Draw vertical lines
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
-    painter.drawLine(frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.top(),
-                      frame.left() + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1, frame.bottom());
+    painter.drawLine(tOffset + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * tAxisLength, frame.top(),
+                     tOffset + (SPIKE_WINDOW_VLINE_1/SPIKE_WINDOW_T) * tAxisLength, frame.bottom());
+    painter.drawLine(tOffset + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * tAxisLength, frame.top(),
+                     tOffset + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * tAxisLength, frame.bottom());
+    painter.drawLine(tOffset + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * tAxisLength, frame.top(),
+                     tOffset + (SPIKE_WINDOW_VLINE_3/SPIKE_WINDOW_T) * tAxisLength, frame.bottom());
     painter.end();
     update();
 
@@ -338,10 +335,13 @@ void SpikePlot::reDrawAxesLines()
 // update the values to be used for drawing threshold lines on the spike plot
 void SpikePlot::updateLevelStartStop()
 {
+    double intPoint;
     for (int i = 0; i < 8; i++){
-        levelStartPoint[i] = frameX + ((double(wStart.at(i)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1;
-        levelStopPoint[i] = frameX + ((double(wStop.at(i)) - double(wMax))/double(maxNumSpikeSamples)) * frameW - 1.75; // 1 for graphics offset; 0.75 to reflect "<" on this edge
-        levelHeight[i] = frameY + (yScaleFactor * double(wThresh.at(i)));
+        intPoint = double(preTriggerTSteps - (wMax - wStart.at(i)));
+        levelStartPoint[i] = tOffset + intPoint * tScaleFactor;
+        intPoint = double(preTriggerTSteps - (wMax - wStop.at(i) + 1));
+        levelStopPoint[i] = tOffset + intPoint * tScaleFactor;
+        levelHeight[i] = yOffset + yScaleFactor * wThresh.at(i);
     }
 
     reDrawFSMLevels();
@@ -388,24 +388,19 @@ void SpikePlot::updateWaveform(int numBlocks)
 
     // Find trigger events, and then copy waveform snippets to spikeWaveform vector.
     index = startingNewChannel ? (preTriggerTSteps + totalTSteps) : preTriggerTSteps;
-    while (index <= SAMPLES_PER_DATA_BLOCK * numBlocks + totalTSteps - 1 - (totalTSteps - preTriggerTSteps)) {
+    while (index <= SAMPLES_PER_DATA_BLOCK * numBlocks - 1  - preTriggerTSteps) {
         triggered = false;
         wTrigType = false;
         if (fsmModeOn) {
-            // Digital rising edge trigger (for "good spikes")
-            if (fsmTriggerBuffer.at(index - 1) == 0 &&
-                    fsmTriggerBuffer.at(index) == 1 &&
-                    fsmTrackerBuffer.at(index) == 0) {
+
+            if (fsmTriggerBuffer.at(index) == 1) { // Digital rising edge trigger (for "good spikes")
                 triggered = true;
                 wTrigType = true;
-            }
-
-            // Digital falling edge trigger (track "bad spikes" exiting FSM)
-            if (fsmTrackerBuffer.at(index - 1) == 1 &&
-                    fsmTrackerBuffer.at(index) == 0 &&
-                    fsmTriggerBuffer.at(index) == 0) {
-                triggered = true;
-                wTrigType = false;
+            } else if (fsmTrackerBuffer.at(index) == 0) { // Digital falling edge trigger (track "bad spikes" exiting FSM)
+                if (fsmTrackerBuffer.at(index-1) == 1){
+                    triggered = true;
+                    wTrigType = false;
+                }
             }
         } else {
             if (voltageTriggerMode) {
@@ -442,21 +437,41 @@ void SpikePlot::updateWaveform(int numBlocks)
         if (fsmModeOn) {
             if (triggered) {
                 index2 = 0;
-                for (i = index - preTriggerTSteps - SAMPLE_DETECTION_DELAY;
-                     i < index + totalTSteps - preTriggerTSteps - SAMPLE_DETECTION_DELAY; ++i) {
-                    spikeWaveform[spikeWaveformIndex][index2++] = spikeWaveformBuffer.at(i);
-                }
+                if (wTrigType){
+                    for (i = index - preTriggerTSteps;
+                         i < index + totalTSteps - preTriggerTSteps; ++i) {
+                        spikeWaveform[spikeWaveformIndex][index2++] = getSpikeValueFromAmp(spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY));
+                    }
 
-                fsmColors[colorIndex][spikeWaveformIndex] = wTrigType;
+                    fsmColors[colorIndex][spikeWaveformIndex] = 1;
 
-                if (++spikeWaveformIndex == spikeWaveform.size()) {
-                    spikeWaveformIndex = 0;
-                }
-                if (++numSpikeWaveforms > maxNumSpikeWaveforms) {
-                    numSpikeWaveforms = maxNumSpikeWaveforms;
-                }
+                    if (++spikeWaveformIndex == spikeWaveform.size()) {
+                        spikeWaveformIndex = 0;
+                    }
+                    if (++numSpikeWaveforms > maxNumSpikeWaveforms) {
+                        numSpikeWaveforms = maxNumSpikeWaveforms;
+                    }
+                    index += totalTSteps - preTriggerTSteps;
+                } else {
+                    if (++badSpikeCounter == PLOT_BAD_SPIKE_EVERY_N){
+                        badSpikeCounter = 0;
+                        for (i = index - preTriggerTSteps;
+                             i < index + totalTSteps - preTriggerTSteps; ++i) {
+                            spikeWaveform[spikeWaveformIndex][index2++] = getSpikeValueFromAmp(spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY));
+                        }
 
-                index += totalTSteps - preTriggerTSteps - SAMPLE_DETECTION_DELAY;
+                        fsmColors[colorIndex][spikeWaveformIndex] = 0;
+
+                        if (++spikeWaveformIndex == spikeWaveform.size()) {
+                            spikeWaveformIndex = 0;
+                        }
+                        if (++numSpikeWaveforms > maxNumSpikeWaveforms) {
+                            numSpikeWaveforms = maxNumSpikeWaveforms;
+                        }
+                    }
+                    ++index;
+
+                }
             } else {
                 ++index;
             }
@@ -488,7 +503,9 @@ void SpikePlot::updateWaveform(int numBlocks)
         spikeWaveformBuffer[index++] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
     }
 
-    if (startingNewChannel) startingNewChannel = false;
+    if (startingNewChannel) {
+        startingNewChannel = false;
+    };
 
     painter.end();
 
@@ -523,7 +540,7 @@ void SpikePlot::updateSpikePlot(double rms)
         for (j = 0; j < numSpikeWaveforms; ++j) {
             // Build waveform
             for (i = 0; i < totalTSteps; ++i) {
-                polyline[i] = QPointF(tScaleFactor * i + tOffset, yScaleFactor * spikeWaveform.at(j).at(i) + yOffset);
+                polyline[i] = QPointF(tScaleFactor * i + tOffset, spikeWaveform.at(j).at(i));
             }
 
             // Draw waveform
@@ -539,7 +556,7 @@ void SpikePlot::updateSpikePlot(double rms)
         for (j = spikeWaveformIndex - numSpikeWaveforms; j < spikeWaveformIndex; ++j) {
             // Build waveform
             for (i = 0; i < totalTSteps; ++i) {
-                polyline[i] = QPointF(tScaleFactor * i + tOffset, yScaleFactor * spikeWaveform.at((j + 30) % spikeWaveform.size()).at(i) + yOffset);
+                polyline[i] = QPointF(tScaleFactor * i + tOffset, yScaleFactor * spikeWaveform.at((j+30) % spikeWaveform.size()).at(i) + yOffset);
             }
 
             // Draw waveform
@@ -552,7 +569,7 @@ void SpikePlot::updateSpikePlot(double rms)
     if (voltageTriggerMode && !fsmModeOn) {
         painter.setPen(Qt::red);
         painter.drawLine(tOffset, yScaleFactor * voltageThreshold + yOffset,
-                          tScaleFactor * (totalTSteps - 1) +  tOffset, yScaleFactor * voltageThreshold + yOffset);
+                         tScaleFactor * (totalTSteps - 1) +  tOffset, yScaleFactor * voltageThreshold + yOffset);
     }
 
     painter.setClipping(false);
@@ -602,8 +619,22 @@ void SpikePlot::mousePressEvent(QMouseEvent *event)
 double SpikePlot::getThresholdFromMousePress(QMouseEvent *event)
 {
     int yMouse = event->pos().y();
-    double thresh = yScale * (frame.center().y() - yMouse) / (frame.height() / 2);
+    double thresh = (yMouse - yOffset) / yScaleFactor;
     return thresh;
+}
+// Convert the values as they come from the filtered amplifier stream,
+// so that they scale onto the plot correctly.
+double SpikePlot::getSpikeValueFromAmp(double inValue)
+{
+    double intermedValue = inValue * (0.195 / 0.3125);
+    double outValue = intermedValue * yScaleFactor + yOffset;
+//    if (++outputCounter == 1000){
+//        cout << "inValue: " << inValue << endl;
+//        cout << "intermedValue: " << intermedValue << endl;
+//        cout << "outValue: " << outValue << endl;
+//        outputCounter = 0;
+//    }
+    return outValue;
 }
 // If user spins mouse wheel, change voltage scale.
 void SpikePlot::wheelEvent(QWheelEvent *event)
@@ -691,6 +722,7 @@ void SpikePlot::setVoltageThreshold(int threshold)
     } else {
         emit(currentVoltageThresholdChanged(threshold));
     }
+    voltageThreshold = threshold;
 
 }
 
@@ -767,9 +799,9 @@ void SpikePlot::initGenProperties()
         wType[i] = i % 2;
     }
 
-    frameX = 0.0;
+    fsmStart = 0.0;
     frameY = 0.0;
-    frameW = 0.0;
+    tAxisLength = 0.0;
     yAxisLength = 0.0;
     yScaleFactor = 0.0;
     yScale = 1000;
@@ -799,7 +831,6 @@ void SpikePlot::initBuffers()
     spikeWaveformIndex = 0;
     numSpikeWaveforms = 0;
     maxNumSpikeWaveforms = 20;
-    maxNumSpikeSamples = int(totalTSteps + 1);
 
     // We can plot up to 30 superimposed spike waveforms on the scope.
     spikeWaveform.resize(maxNumSpikeWaveforms);
@@ -807,7 +838,7 @@ void SpikePlot::initBuffers()
     for (i = 0; i < spikeWaveform.size(); ++i) {
         // Each waveform is 3 ms in duration.  We need 91 time steps for a 3 ms
         // waveform with the sample rate is set to its maximum value of 30 kS/s.
-        spikeWaveform[i].resize(maxNumSpikeSamples);
+        spikeWaveform[i].resize(totalTSteps);
         spikeWaveform[i].fill(0.0);
     }
 
@@ -894,25 +925,22 @@ void SpikePlot::initSpikeAxes() {
 
     const int tbWidth = fontMetrics().width("+" + QString::number(yScale) + " " + QSTRING_MU_SYMBOL + "V");
     const int tbHeight = fontMetrics().height();
+    const double centerPoint = SPIKE_WINDOW_VLINE_2 / SPIKE_WINDOW_T;
 
     frame = rect();
     frame.adjust(tbWidth + 5, tbHeight + 10, -8, -tbHeight - 10);
 
-    frameX = frame.left() + (SPIKE_WINDOW_VLINE_2/SPIKE_WINDOW_T) * (frame.right() - frame.left()) + 1;
-    frameY = frame.center().y();
-    frameW = frame.width();
+    tOffset = frame.left();
+    fsmStart = tOffset + centerPoint * (tAxisLength);
 
     yAxisLength = (frame.height() - 2) / 2.0;
     yScaleFactor = -yAxisLength / yScale;
     yOffset = frame.center().y();
 
-
-    yAxisLength = (frame.height() - 2) / 2.0;
-    tAxisLength = frame.width() - 1;
-
-    tOffset = frame.left() + 1;
     tScale = SPIKE_WINDOW_T;  // time scale = 3.0 ms
+    tAxisLength = frame.right() - frame.left();
     tScaleFactor = tAxisLength * tStepMsec / tScale;
+
 
     // Initialize display.
     reDrawText();

@@ -32,7 +32,8 @@
 #define SPIKE_WINDOW_VLINE_1 0.5
 #define SPIKE_WINDOW_VLINE_2 1.0
 #define SPIKE_WINDOW_VLINE_3 2.0
-#define SAMPLE_DETECTION_DELAY 1
+#define SAMPLE_DETECTION_DELAY 2
+#define PLOT_BAD_SPIKE_EVERY_N 10
 
 #include <QWidget>
 #include <QPen>
@@ -103,18 +104,18 @@ private:
     void initSpikeAxes();
 
     double getThresholdFromMousePress(QMouseEvent *event);
+    double getSpikeValueFromAmp(double inValue);
 
     SignalProcessor *signalProcessor;
     SpikeScopeDialog *spikeScopeDialog;
 
-    QVector<QVector<double> > spikeWaveform;
+    QVector<QVector<double>> spikeWaveform;
     QVector<double> spikeWaveformBuffer;
     QVector<int> digitalInputBuffer;
 
     int spikeWaveformIndex;
     int numSpikeWaveforms;
     int maxNumSpikeWaveforms;
-    int maxNumSpikeSamples;
     bool voltageTriggerMode;
     int voltageThreshold;
     int digitalTriggerChannel;
@@ -164,9 +165,8 @@ private:
     double tStepMsec;
     double savedRMS;
 
-    double frameX;
+    double fsmStart;
     double frameY;
-    double frameW;
     double tAxisLength;
     double yAxisLength;
 
@@ -178,7 +178,8 @@ private:
     double sampleRate;
 
     bool startingNewChannel;
-    
+    int badSpikeCounter = 0;
+    int outputCounter = 0;
 };
 
 #endif // SPIKEPLOT_H
