@@ -205,7 +205,7 @@ module main_mod_tb;
 		DAC_stop_win_6 = 0;
 		DAC_stop_win_7 = 0;
 		DAC_stop_win_8 = 0;
-		DAC_stop_max = 5;
+		DAC_stop_max = 3;
 		DAC_edge_type = 8'b00001010; // 0 is inclusion, 1 exclusion
 		HPF_coefficient = 3991; // 3991 is 300Hz/30000kS  //3343 is 250/30000 // 5894 300/2000Hz
 		HPF_en = 1;
@@ -218,7 +218,7 @@ module main_mod_tb;
 		DAC_sequencer_7 = 0;
 		DAC_sequencer_8 = 0;
 		DAC_sequencer_en = 0;
-		DAC_en = 8'b00001111;;
+		DAC_en = 8'b00000011;;
 		DAC_gain = 0;
 		DAC_noise_suppress = 0;
 		DAC_thrsh_1 = 32255;//-100
@@ -239,6 +239,7 @@ module main_mod_tb;
 	// Wait 100 ns for global reset to finish
 		#100;
       reset = 0;
+		
 		
 		// Add stimulus here
 	end

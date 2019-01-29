@@ -1,6 +1,7 @@
 % clear
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_0_190123_094952.rhs')
-read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945.rhs')
+% read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945.rhs')
+read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945_190129_103700.rhs')
 
 fs=30e3; % 20kHz sampling rate 
 %% retrieve binary data from txt files (output of testbench main_red_tb.v)

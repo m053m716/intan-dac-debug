@@ -11,7 +11,7 @@ clear
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-24\R19-00_2019-01-24_12_190124_173310.rhs')
 % read_Intan_RHS2000_file('/Users/stefanobuccelli/Documents/GitHub/intan-dac-debug/R19-00_2019-01-23/R19-00_2019-01-23_2_190123_095121.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019_01_25\R19-00_2019-01-25_5_190125_165947.rhs')
-read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945.rhs')
+read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945_190129_103700.rhs')
 
 %% don't forget to modify the filter in Verilog with this number:
 fs=30e3;
