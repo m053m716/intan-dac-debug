@@ -143,7 +143,6 @@ void SpikeScopeDialog::setNumSpikes(int index)
     switch (index) {
         case 0: num = 10; break;
         case 1: num = 20; break;
-        case 2: num = 30; break;
     }
 
     spikePlot->setMaxNumSpikeWaveforms(num);
@@ -503,7 +502,7 @@ QHBoxLayout *SpikeScopeDialog::initializeWindowDetectionUI()
                 this, SLOT(changeDACChannelFromSpikeDialog(int)));
 
     startWindowSpinBox = new QSpinBox();
-    startWindowSpinBox->setRange(0x0000,0x003c);
+    startWindowSpinBox->setRange(0x0000,0x03e8);
     startWindowSpinBox->setSingleStep(1);
     startWindowSpinBox->setValue(0);
 
@@ -511,7 +510,7 @@ QHBoxLayout *SpikeScopeDialog::initializeWindowDetectionUI()
                 this, SLOT(changeDACWindowStartFromSpikeDialog(int)));
 
     stopWindowSpinBox = new QSpinBox();
-    stopWindowSpinBox->setRange(0x0000,0x003c);
+    stopWindowSpinBox->setRange(0x0000,0x03e8);
     stopWindowSpinBox->setSingleStep(1);
     stopWindowSpinBox->setValue(0);
 
@@ -609,7 +608,6 @@ void SpikeScopeDialog::initializeMainLayout(QHBoxLayout *thresholdSpinBoxLayout,
     numSpikesComboBox = new QComboBox();
     numSpikesComboBox->addItem(tr("Show 10 Spikes"));
     numSpikesComboBox->addItem(tr("Show 20 Spikes"));
-    numSpikesComboBox->addItem(tr("Show 30 Spikes"));
     numSpikesComboBox->setCurrentIndex(1);
     connect(numSpikesComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setNumSpikes(int)));

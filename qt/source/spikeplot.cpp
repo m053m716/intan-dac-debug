@@ -690,7 +690,6 @@ void SpikePlot::setMaxNumSpikeWaveforms(int num)
     switch (maxNumSpikeWaveforms) {
         case 10: colorIndex = 0; break;
         case 20: colorIndex = 1; break;
-        case 30: colorIndex = 2; break;
     }
 }
 // Select voltage threshold trigger mode if voltageMode == true, otherwise
@@ -807,8 +806,7 @@ void SpikePlot::initGenProperties()
 
     switch (maxNumSpikeWaveforms) {
         case 10: colorIndex = 0; break;
-        case 20: colorIndex = 1; break;
-        case 30: colorIndex = 2; break;
+        case 20: colorIndex = 1; break;=
     }
     // END
 
@@ -880,10 +878,9 @@ void SpikePlot::initPenColors()
     // are plotted in low-contrast gray and new waveforms are plotted
     // in high-contrast blue.  Older signals fade away, like phosphor
     // traces on old-school CRT oscilloscopes.
-    scopeColors.resize(3);
+    scopeColors.resize(2);
     scopeColors[0].resize(10);
     scopeColors[1].resize(20);
-    scopeColors[2].resize(30);
 
     for (int i = 6; i < 10; ++i) scopeColors[0][i] = Qt::black;
     for (int i = 3; i < 6; ++i) scopeColors[0][i] = Qt::darkGray;
@@ -893,17 +890,11 @@ void SpikePlot::initPenColors()
     for (int i = 6; i < 12; ++i) scopeColors[1][i] = Qt::darkGray;
     for (int i = 0; i < 6; ++i) scopeColors[1][i] = Qt::lightGray;
 
-    for (int i = 18; i < 30; ++i) scopeColors[2][i] = Qt::black;
-    for (int i = 9; i < 18; ++i) scopeColors[2][i] = Qt::darkGray;
-    for (int i = 0; i < 9; ++i) scopeColors[2][i] = Qt::lightGray;
-
-    fsmColors.resize(3);
+    fsmColors.resize(2);
     fsmColors[0].resize(10);
     fsmColors[0].fill(false);
     fsmColors[1].resize(20);
     fsmColors[1].fill(false);
-    fsmColors[2].resize(30);
-    fsmColors[2].fill(false);
 
     colorIndex = 1;
 }
