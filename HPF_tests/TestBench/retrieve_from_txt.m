@@ -1,7 +1,8 @@
 % clear
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_0_190123_094952.rhs')
+read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945.rhs')
 
-fs=20e3; % 20kHz sampling rate 
+fs=30e3; % 20kHz sampling rate 
 %% retrieve binary data from txt files (output of testbench main_red_tb.v)
 % 1. DAC_output_register_1
 fileID_DAC = fopen('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\HPF_tests\output_main_reduced_2.txt', 'r');
@@ -19,13 +20,13 @@ tb_DAC_uint16 = bin2dec(retrieved_matrix_DAC_bin(1:end,:)); %uint16 range (0:2^1
 tb_fsm_uint16 = bin2dec(retrieved_matrix_fsm_bin(1:end,:));    %uint16 range (0:2^16-1)=0:65535
 
 %% thresholds used 
-th_1=round(-234/0.195)*0.195; %uV
+th_1=round(-100/0.195)*0.195; %uV
 th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_2=round(-203/0.195)*0.195; %uV
+th_2=round(-200/0.195)*0.195; %uV
 th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_3=round(-228/0.195)*0.195; %uV
+th_3=round(-300/0.195)*0.195; %uV
 th_3_to_tb=round(th_3/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_4=round(-798/0.195)*0.195; %uV
+th_4=round(-400/0.195)*0.195; %uV
 th_4_to_tb=round(th_4/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 
 %% define limits for plots
@@ -125,7 +126,7 @@ h(3)=subplot(4,1,3);
 plot(tb_DAC_uint16(range_to_plot)-board_dac_data_u16(range_to_plot)')
 title('difference testbench - online dac output')
 h(4)=subplot(4,1,4);
-plot(board_dac_data(1,range_to_plot)-board_dac_data(5,range_to_plot))
+% plot(board_dac_data(1,range_to_plot)-board_dac_data(5,range_to_plot))
 title('DAC 1 - DAC 5')
 ylabel('DAC difference [V] step 312.5 uV ')
 linkaxes(h,'x')
