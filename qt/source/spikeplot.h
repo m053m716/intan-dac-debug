@@ -104,7 +104,7 @@ private:
     void initSpikeAxes();
 
     double getThresholdFromMousePress(QMouseEvent *event);
-    double getSpikeValueFromAmp(double inValue);
+    double convertDac2Scope(double inData);
 
     SignalProcessor *signalProcessor;
     SpikeScopeDialog *spikeScopeDialog;

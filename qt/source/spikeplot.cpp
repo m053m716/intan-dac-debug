@@ -339,7 +339,11 @@ void SpikePlot::updateLevelStartStop()
     for (int i = 0; i < 8; i++){
         intPoint = double(preTriggerTSteps - (wMax - wStart.at(i)));
         levelStartPoint[i] = tOffset + intPoint * tScaleFactor;
-        intPoint = double(preTriggerTSteps - (wMax - wStop.at(i) + 1));
+        // Below, 1 represents transition from ACTIVE to TRIGGER;
+        // 0.9 represents the fact that the leading edge (STOP) is
+        // non-inclusive. However, we don't want to have levels with
+        // ZERO width (need visual indicator) so that's why it is like that.
+        intPoint = double(preTriggerTSteps - (wMax - wStop.at(i) + 1.9));
         levelStopPoint[i] = tOffset + intPoint * tScaleFactor;
         levelHeight[i] = yOffset + yScaleFactor * wThresh.at(i);
     }
@@ -370,16 +374,16 @@ void SpikePlot::updateWaveform(int numBlocks)
     if (!selectedChannel) return;
     if (selectedChannel->signalType != AmplifierSignal) return;
 
-    int stream = selectedChannel->boardStream;
+//    int stream = selectedChannel->boardStream;
     int channel = selectedChannel->chipChannel;
 
     // Load recent waveform data and digital input data into our buffers.  Also, calculate
     // waveform RMS value.
     rms = 0.0;
     for (i = 0; i < SAMPLES_PER_DATA_BLOCK * numBlocks; ++i) {
-        spikeWaveformBuffer[i + totalTSteps - 1] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
-        rms += (signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i) *
-                signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i));
+//        spikeWaveformBuffer[i + totalTSteps - 1] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
+        spikeWaveformBuffer[i + totalTSteps - 1] = convertDac2Scope(signalProcessor->boardDac.at(channel).at(i));
+        rms += (spikeWaveformBuffer[i + totalTSteps - 1] * spikeWaveformBuffer[i + totalTSteps - 1]);
         digitalInputBuffer[i + totalTSteps - 1] =  signalProcessor->boardDigIn.at(digitalTriggerChannel).at(i);
         fsmTriggerBuffer[i + totalTSteps - 1] = signalProcessor->boardDigIn.at(FSM_DIG_TRIGGER_CHANNEL).at(i);
         fsmTrackerBuffer[i + totalTSteps - 1] = signalProcessor->boardDigIn.at(FSM_DIG_TRACKER_CHANNEL).at(i);
@@ -440,7 +444,7 @@ void SpikePlot::updateWaveform(int numBlocks)
                 if (wTrigType){
                     for (i = index - preTriggerTSteps;
                          i < index + totalTSteps - preTriggerTSteps; ++i) {
-                        spikeWaveform[spikeWaveformIndex][index2++] = getSpikeValueFromAmp(spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY));
+                        spikeWaveform[spikeWaveformIndex][index2++] = spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY);
                     }
 
                     fsmColors[colorIndex][spikeWaveformIndex] = 1;
@@ -457,7 +461,7 @@ void SpikePlot::updateWaveform(int numBlocks)
                         badSpikeCounter = 0;
                         for (i = index - preTriggerTSteps;
                              i < index + totalTSteps - preTriggerTSteps; ++i) {
-                            spikeWaveform[spikeWaveformIndex][index2++] = getSpikeValueFromAmp(spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY));
+                            spikeWaveform[spikeWaveformIndex][index2++] = spikeWaveformBuffer.at(i - SAMPLE_DETECTION_DELAY);
                         }
 
                         fsmColors[colorIndex][spikeWaveformIndex] = 0;
@@ -500,7 +504,8 @@ void SpikePlot::updateWaveform(int numBlocks)
     index = 0;
     for (i = SAMPLES_PER_DATA_BLOCK * numBlocks - totalTSteps + 1;
          i < SAMPLES_PER_DATA_BLOCK * numBlocks; ++i) {
-        spikeWaveformBuffer[index++] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
+//        spikeWaveformBuffer[index++] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
+        spikeWaveformBuffer[index++] = convertDac2Scope(signalProcessor->boardDac.at(channel).at(i));
     }
 
     if (startingNewChannel) {
@@ -540,7 +545,7 @@ void SpikePlot::updateSpikePlot(double rms)
         for (j = 0; j < numSpikeWaveforms; ++j) {
             // Build waveform
             for (i = 0; i < totalTSteps; ++i) {
-                polyline[i] = QPointF(tScaleFactor * i + tOffset, spikeWaveform.at(j).at(i));
+                polyline[i] = QPointF(tScaleFactor * i + tOffset, yScaleFactor * spikeWaveform.at(j).at(i) + yOffset);
             }
 
             // Draw waveform
@@ -622,19 +627,13 @@ double SpikePlot::getThresholdFromMousePress(QMouseEvent *event)
     double thresh = (yMouse - yOffset) / yScaleFactor;
     return thresh;
 }
-// Convert the values as they come from the filtered amplifier stream,
-// so that they scale onto the plot correctly.
-double SpikePlot::getSpikeValueFromAmp(double inValue)
+// Convert values from DAC to values on SCOPE
+double SpikePlot::convertDac2Scope(double inData)
 {
-    double intermedValue = inValue * (0.195 / 0.3125);
-    double outValue = intermedValue * yScaleFactor + yOffset;
-//    if (++outputCounter == 1000){
-//        cout << "inValue: " << inValue << endl;
-//        cout << "intermedValue: " << intermedValue << endl;
-//        cout << "outValue: " << outValue << endl;
-//        outputCounter = 0;
-//    }
-    return outValue;
+    // 0.195 uV per bit on AMPLIFIER
+    // 0.0003125 mV per bit on DAC
+    double outData = inData * (0.195/0.0003125);
+    return outData;
 }
 // If user spins mouse wheel, change voltage scale.
 void SpikePlot::wheelEvent(QWheelEvent *event)
