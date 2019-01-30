@@ -143,7 +143,7 @@ void SpikeScopeDialog::setNumSpikes(int index)
     switch (index) {
         case 0: num = 10; break;
         case 1: num = 20; break;
-        case 2: num = 30; break;
+//        case 2: num = 30; break;
     }
 
     spikePlot->setMaxNumSpikeWaveforms(num);
@@ -609,7 +609,7 @@ void SpikeScopeDialog::initializeMainLayout(QHBoxLayout *thresholdSpinBoxLayout,
     numSpikesComboBox = new QComboBox();
     numSpikesComboBox->addItem(tr("Show 10 Spikes"));
     numSpikesComboBox->addItem(tr("Show 20 Spikes"));
-    numSpikesComboBox->addItem(tr("Show 30 Spikes"));
+//    numSpikesComboBox->addItem(tr("Show 30 Spikes"));
     numSpikesComboBox->setCurrentIndex(1);
     connect(numSpikesComboBox, SIGNAL(currentIndexChanged(int)),
             this, SLOT(setNumSpikes(int)));
