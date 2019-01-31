@@ -104,6 +104,8 @@ SOURCES       = main.cpp \
     
 RESOURCES     = IntanStimRecordController.qrc
 
+
+
 macx:{
 LIBS += -L$$PWD/../../../Downloads/ -lokFrontPanel
 INCLUDEPATH += $$PWD/../../../Downloads
