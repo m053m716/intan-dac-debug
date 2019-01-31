@@ -382,7 +382,7 @@ void SpikePlot::updateWaveform(int numBlocks)
     rms = 0.0;
     for (i = 0; i < SAMPLES_PER_DATA_BLOCK * numBlocks; ++i) {
 //        spikeWaveformBuffer[i + totalTSteps - 1] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
-        spikeWaveformBuffer[i + totalTSteps - 1] = convertDac2Scope(signalProcessor->boardDac.at(channel).at(i));
+        spikeWaveformBuffer[i + totalTSteps - 1] = convertDac2Scope(signalProcessor->boardDac.at(thisChannel).at(i));
         rms += (spikeWaveformBuffer[i + totalTSteps - 1] * spikeWaveformBuffer[i + totalTSteps - 1]);
         digitalInputBuffer[i + totalTSteps - 1] =  signalProcessor->boardDigIn.at(digitalTriggerChannel).at(i);
         fsmTriggerBuffer[i + totalTSteps - 1] = signalProcessor->boardDigIn.at(FSM_DIG_TRIGGER_CHANNEL).at(i);
@@ -806,7 +806,7 @@ void SpikePlot::initGenProperties()
 
     switch (maxNumSpikeWaveforms) {
         case 10: colorIndex = 0; break;
-        case 20: colorIndex = 1; break;=
+        case 20: colorIndex = 1; break;
     }
     // END
 
