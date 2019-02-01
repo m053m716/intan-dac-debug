@@ -505,7 +505,7 @@ void SpikePlot::updateWaveform(int numBlocks)
     for (i = SAMPLES_PER_DATA_BLOCK * numBlocks - totalTSteps + 1;
          i < SAMPLES_PER_DATA_BLOCK * numBlocks; ++i) {
 //        spikeWaveformBuffer[index++] = signalProcessor->amplifierPostFilter.at(stream).at(channel).at(i);
-        spikeWaveformBuffer[index++] = convertDac2Scope(signalProcessor->boardDac.at(channel).at(i));
+        spikeWaveformBuffer[index++] = convertDac2Scope(signalProcessor->boardDac.at(thisChannel).at(i));
     }
 
     if (startingNewChannel) {
