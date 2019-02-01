@@ -1,7 +1,7 @@
 % clear
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Documents\GitHub\intan-dac-debug\R19-00_2019-01-23\R19-00_2019-01-23_0_190123_094952.rhs')
 % read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945.rhs')
-read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945_190129_103700.rhs')
+% read_Intan_RHS2000_file('C:\Users\BuccelliLab\Desktop\Prova_intan\Ordered_recordings\prova_29_01_4_DACs_190129_095945_190129_103700.rhs')
 
 fs=30e3; % 20kHz sampling rate 
 %% retrieve binary data from txt files (output of testbench main_red_tb.v)
@@ -21,13 +21,13 @@ tb_DAC_uint16 = bin2dec(retrieved_matrix_DAC_bin(1:end,:)); %uint16 range (0:2^1
 tb_fsm_uint16 = bin2dec(retrieved_matrix_fsm_bin(1:end,:));    %uint16 range (0:2^16-1)=0:65535
 
 %% thresholds used 
-th_1=round(-100/0.195)*0.195; %uV
+th_1=round(-46/0.195)*0.195; %uV
 th_1_to_tb=round(th_1/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_2=round(-200/0.195)*0.195; %uV
+th_2=round(-66/0.195)*0.195; %uV
 th_2_to_tb=round(th_2/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_3=round(-300/0.195)*0.195; %uV
+th_3=round(-13/0.195)*0.195; %uV
 th_3_to_tb=round(th_3/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
-th_4=round(-400/0.195)*0.195; %uV
+th_4=round(39/0.195)*0.195; %uV
 th_4_to_tb=round(th_4/0.195)+ 32768; %uint16 This is as in Qt the threshold is sent to the FPGA
 
 %% define limits for plots
@@ -73,7 +73,7 @@ h(1)=subplot(4,1,1);
 plot(time_s,retrieved_bin_matrix_dec_DAC_uV)
 hold on
 plot(h(1).XLim,[th_1 th_1],'g')
-plot(h(1).XLim,[th_2 th_2],'g')
+plot(h(1).XLim,[th_2 th_2],'r')
 plot(h(1).XLim,[th_3 th_3],'r')
 title('testbench DAC output uV')
 xlabel('time [s]')
@@ -84,7 +84,7 @@ h(2)=subplot(4,1,2);
 plot(time_s,online_res_uV)
 hold on
 plot(h(1).XLim,[th_1 th_1],'g')
-plot(h(1).XLim,[th_2 th_2],'g')
+plot(h(1).XLim,[th_2 th_2],'r')
 plot(h(1).XLim,[th_3 th_3],'r')
 title('online board DAC data uV')
 xlabel('time [s]')
