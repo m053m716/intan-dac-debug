@@ -375,7 +375,7 @@ void SpikePlot::updateWaveform(int numBlocks)
     if (selectedChannel->signalType != AmplifierSignal) return;
 
 //    int stream = selectedChannel->boardStream;
-    int channel = selectedChannel->chipChannel;
+//    int channel = selectedChannel->chipChannel;
 
     // Load recent waveform data and digital input data into our buffers.  Also, calculate
     // waveform RMS value.

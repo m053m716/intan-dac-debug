@@ -87,6 +87,8 @@ MainWindow::MainWindow(int sampleRateIndex_, int stimStepIndex)
     // Start out as simple thresholding method by default
     DetectionMethod = false;
     windowMax = 0;
+    wStop.resize(8);
+    wStop.fill(0);
 
     // Default reference source settings
     referenceSource.channel = 0;
@@ -1150,9 +1152,21 @@ int MainWindow::convertSignedThresholdToUnsigned(int thresholdFromSpinBox)
 void MainWindow::checkMaxWindowStopValue()
 {
     int wMaxCur = windowMax;
+    wStop[selectedDACChannelIndex] = dacWindowStopSpinBox.at(selectedDACChannelIndex)->value();
 
-    windowMax = evalBoard->setMaxWindowStop(selectedDACChannelIndex,
-                                            dacWindowStopSpinBox.at(selectedDACChannelIndex)->value());
+    if (!synthMode) {
+        windowMax = evalBoard->setMaxWindowStop(selectedDACChannelIndex,
+                                            wStop[selectedDACChannelIndex]);
+    } else { // to prevent crash in synth mode
+        windowMax = 0;
+        for (int i = 0; i < 8; i++){
+            if (dacEnabled[i]) {
+                if (wStop[i] > windowMax) {
+                    windowMax = wStop[i];
+                }
+            }
+        }
+    }
 
     // Only emit the signal if it actually changed
     if (wMaxCur != windowMax){

@@ -445,6 +445,7 @@ private:
     QCheckBox *displayTriggerCheckBox;
 
     // MM - 2019-01-25
+    QVector<int> wStop;
     int curWindowStart;
     int curWindowStop;
     int curTriggerType;
