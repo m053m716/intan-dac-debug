@@ -1,8 +1,8 @@
-function getChewingEpochs(filename)
+function fig = getChewingEpochs(filename)
 %% GETCHEWINGEPOCHS     Manually score videos for chewing epochs
 %
 %  GETCHEWINGEPOCHS;
-%  GETCHEWINGEPOCHS(filename);
+%  fig = GETCHEWINGEPOCHS(filename);
 %
 %  --------
 %   INPUTS
@@ -216,6 +216,7 @@ tCur = stem(tAx,V.CurrentTime,0.5,...
       %% SAVESCORING    Save scored data for chewing epochs
       data = struct('chewEpochStart',tStart.XData,...
          'chewEpochStop',tStop.XData,...
+         'currentCursorTime',V.CurrentTime,...
          'syncFrame',tSync.XData);
       save(saveName,'-struct','data','-v7.3');
       disp('Scoring saved.');
