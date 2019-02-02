@@ -177,7 +177,7 @@ tCur = stem(tAx,V.CurrentTime,0.5,...
                  'YData',ones(size(x_new)));
       
       disp('Chew starts:');
-      disp(x);
+      disp(x_new);
       
    end
 
@@ -190,14 +190,18 @@ tCur = stem(tAx,V.CurrentTime,0.5,...
                 'YData',ones(size(x_new)));
       
       disp('Chew stops:');
-      disp(x);
+      disp(x_new);
       
    end
 
    function x_new = updateIndexVector(x,curTime)
       %% UPDATEINDEXVECTOR    Update the time series vector
-      if ismember(x,curTime) % If already in set, remove it
-         x_new = setdiff(x,curTime);
+      
+      % set TOLERANCE here (0.25 sec is fine for chewing)
+      inSet = abs(x - curTime) < 0.25;
+      
+      if any(inSet)
+         x_new = x(~inSet);
       else
          x = [x, curTime];
          x_new = sort(x(~isnan(x)),'ascend');
