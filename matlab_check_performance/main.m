@@ -1,7 +1,9 @@
 %% MAIN  - Script for organizing code to analyze performance of FSM
+clear; clc
+
+%% SET INFO
+NAME = {'R18-159_2019_02_01_2'};
+FS = 30000; % Hz
 
 %% CHARACTERIZE DETECTION ON BOTH RECORDINGS
-roc = cell(size(name));
-for ii = 1:2
-   roc{ii} = getFSMperformance(name{ii});
-end
+roc = getFSMperformance(NAME,FS);

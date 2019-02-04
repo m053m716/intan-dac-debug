@@ -22,7 +22,7 @@ function fig = plotFSMspikes(name,spikes,rejects,params)
 % By: Max Murphy v1.0   2019-02-04  Original version (R2017a)
 
 %% DEFAULTS
-FS = 30000;
+FS = 30000; % Hz
 T = (-7:23) / FS * 1000; % msec
 
 %% USE RECURSION TO ITERATE

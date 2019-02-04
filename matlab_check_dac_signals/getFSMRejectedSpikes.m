@@ -24,7 +24,7 @@ DATA_DIR = 'data';
 SAMPLES_PRIOR = 10;
 SAMPLES_AFTER = 20;
 WLEN = 15;
-DEBUG = true;
+DEBUG = false;
 
 %% GET DATA DIRECTORY
 in_dir = strsplit(pwd,filesep);
@@ -46,35 +46,7 @@ act = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
 trig = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
 
 %% 
-idx = find(act.data);
-idx = reshape(idx,numel(idx),1);
-tmp = idx(100:200); % for debug
-
-idx = idx([true;diff(idx) > 1]); % Want points of "entry"
-idx(trig.data(idx + WLEN)>0) = []; 
-
-% debug
-if (DEBUG)
-   figure('Name','Debug ACTIVE trigger',...
-      'Color','w',...
-      'Units','Normalized',...
-      'Position',[0.1 0.1 0.8 0.8]);
-   subplot(3,1,1);
-   stem(tmp,ones(size(tmp)),'LineWidth',2,'Color','r');
-   title('All ACTIVE samples',...
-      'FontName','Arial','Color','r','FontSize',16);
-   tmp = tmp([true; diff(tmp) > 1]);
-   subplot(3,1,2);
-   stem(tmp,ones(size(tmp)),'LineWidth',2,'Color','k');
-   title('Keep only START of FSM',...
-      'FontName','Arial','Color','k','FontSize',16);
-   tmp(trig.data(tmp + WLEN)>0) = [];
-   subplot(3,1,3);
-   stem(tmp,ones(size(tmp)),'LineWidth',2,'Color','b');
-   title('Remove GOOD spikes',...
-      'FontName','Arial','Color','b','FontSize',16);
-   xlabel('Sample Index');
-end
+idx = getFSMrejectIndices(act.data,trig.data,WLEN,DEBUG);
 
 vec = (-SAMPLES_PRIOR) : SAMPLES_AFTER;
 vec = vec + idx;
