@@ -2,7 +2,7 @@
 Code for troubleshooting offline reconstruction of DAC filtered signals.
 
 ## Current Step ##
-Signal reconstruction looks good now. Need to make sure threshold values and edge polarity are correct. -MM
+FSM has been implemented in real-time to do spike detection online in awake animal. Just need to characterize the results.
 
 ## Next Step ##
 Make spike detection ROC and noise rejection ROC. Publish paper. Celebrate.
