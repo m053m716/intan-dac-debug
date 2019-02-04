@@ -56,3 +56,13 @@ CMakeLists.txt.user*
 HPF_tests/output_main_reduced_2.txt
 HPF_tests/output_fsm_window_state_1.txt
 HPF_tests/output_main_reduced_2.txt
+video_scoring/R18-159_2019_02_01_3_ptrain_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_2_ptrain_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_2_Filt_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_2_Chewing-Refined.mat
+video_scoring/R18-159_2019_02_01_1_ptrain_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_2_sort_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_1_Filt_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_3_Filt_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_1_sort_P1_Ch_004.mat
+video_scoring/R18-159_2019_02_01_3_sort_P1_Ch_004.mat
