@@ -1,7 +1,7 @@
-function spikes = getFSMDetectedSpikes(name)
+function [spikes,idx] = getFSMDetectedSpikes(name)
 %% GETFSMDETECTEDSPIKES    Get spikes detected by state machine on DAC
 %
-%  spikes = GETFSMDETECTEDSPIKES(name);
+%  [spikes,idx] = GETFSMDETECTEDSPIKES(name);
 %
 %  --------
 %   INPUTS
@@ -15,6 +15,8 @@ function spikes = getFSMDetectedSpikes(name)
 %   spikes     :     Cell array same size as name. Each element contains
 %                       spike waveform snippets corresponding to samples
 %                       around the detected spike index.
+%
+%     idx      :     Sample indices corresponding to spikes.
 %
 % By: Max Murphy  v1.0  2019-02-04  Original version (R2017a)
 
@@ -38,7 +40,7 @@ if iscell(name)
 end
 
 %% LOAD DATA
-dac = load(fullfile(in_dir,[name '_ANA_ANALOG-OUT-1.mat']));
+dac = load(fullfile(in_dir,[name '_DAC.mat']));
 trig = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
 
 %% 
@@ -51,5 +53,7 @@ vec = vec + idx;
 exc = (vec < 1) | (vec > numel(dac.data));
 vec(any(exc,2),:) = [];
 spikes = dac.data(vec) * (0.195/0.0003125); % convert to uV
+
+idx(any(exc,2)) = [];
 
 end

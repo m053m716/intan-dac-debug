@@ -1,4 +1,4 @@
-function [t,y] = getFSMperformance(name,fs,tolerance)
+function [t,y,type] = getFSMperformance(name,fs,tolerance,clus)
 %% GETFSMPERFORMANCE    Characterize ROC for FSM detection performance
 %
 %  [t,y] = GETFSMPERFORMANCE(name,fs,tolerance);
@@ -13,6 +13,8 @@ function [t,y] = getFSMperformance(name,fs,tolerance)
 %  tolerance   :     Tolerance (samples) for matching a spike or artifact
 %                       detected offline.
 %
+%    clus      :     Index of cluster that contains spikes to match.
+%
 %  --------
 %   OUTPUT
 %  --------
@@ -20,10 +22,19 @@ function [t,y] = getFSMperformance(name,fs,tolerance)
 %
 %    y         :     Observed (FSM) output class for each spike or artifact
 %
+%   type       :     1 --> True positive (spike)
+%                    2 --> False negative (spike called as artifact)
+%                    3 --> False positive (artifact called as spike)
+%                    4 --> True negative (artifact)
+%
 % By: Max Murphy  v1.0  2019-02-04  Original version (R2017a)
 
 %% DEFAULTS
 W_LEN = 15; % Max. sample stop
+
+if nargin < 4
+   clus = 2; % Default is first non "OUT" cluster
+end
 
 %% USE RECURSION IF CELL INPUT
 if iscell(name)
@@ -47,26 +58,44 @@ fsm.complete = in.data;
 in = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
 fsm.active = in.data;
 
-spk = load(fullfile(in_dir,[name '_ptrain_P1_Ch_004.mat']));
-sorting = load(fullfile(in_dir,[name '_sort_P1_Ch_004.mat']));
+spk = load(fullfile(in_dir,[name '_DAC_spikes.mat']));
+sorting = load(fullfile(in_dir,[name '_DAC_sort.mat']));
 
 %% GET SPIKE TIMES ACCORDING TO FSM
 % Between the online detected times and the reject times, 
 online = struct;
-online.spikes = find(fsm.complete); 
+online.spikes = find(fsm.complete) - W_LEN; 
 online.artifact = find(getFSMrejectIndices(fsm.active,fsm.complete,W_LEN));
 
 %% GET SPIKE TIMES ACCORDING TO OFFLINE SORTING
-all_spikes = find(spk.peak_train);
+if issparse(spk.peak_train)
+   all_spikes = find(spk.peak_train);
+else
+   all_spikes = spk.peak_train;
+end
 
 clu = sorting.class;
 offline = struct;
-offline.spikes = all_spikes(clu > 0);
-offline.artifact = all_spikes(clu == 0);
+offline.spikes = all_spikes(ismember(clu,clus));
+offline.artifact = all_spikes(~ismember(clu,clus));
 
 %% PARSE ALL OBSERVED "EVENTS" AND FORMAT FOR OUTPUT
 [outClass,targClass] = getAllEvents(online,offline,tolerance);
 [y,t] = makeDummyArray(outClass,targClass);
+
+type = nan(numel(outClass),1);
+for ii = 1:numel(outClass)
+   switch num2str([outClass(ii),targClass(ii)])
+      case '1  1' % True positive
+         type(ii) = 2;
+      case '1  2' % False negative
+         type(ii) = 3;
+      case '2  1' % False positive
+         type(ii) = 4;
+      case '2  2' % True negative
+         type(ii) = 1;
+   end
+end
 
 %% FUNCTION TO TRANSLATE ARRAY
    function [outputs,targets] = makeDummyArray(outputClass,targetClass)

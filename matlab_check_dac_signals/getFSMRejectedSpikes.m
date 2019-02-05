@@ -41,7 +41,7 @@ if iscell(name)
 end
 
 %% LOAD DATA
-dac = load(fullfile(in_dir,[name '_ANA_ANALOG-OUT-1.mat']));
+dac = load(fullfile(in_dir,[name '_DAC.mat']));
 act = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
 trig = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
 

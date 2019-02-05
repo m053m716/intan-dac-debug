@@ -33,7 +33,6 @@ tmp = idx(100:200); % for debug
 
 idx = idx([true;diff(idx) > 1]); % Want points of "entry"
 idx(fsmComplete(idx + wlen)>0) = []; 
-idx = idx + wlen; % Set the "endpoint" to be the same as it would be if it had reached finish
 
 %% DEBUGGER
 if (DEBUG)
