@@ -1,24 +1,29 @@
-function [roc,y,t] = getFSMperformance(name,fs)
+function [t,y] = getFSMperformance(name,fs,tolerance)
 %% GETFSMPERFORMANCE    Characterize ROC for FSM detection performance
 %
-%  roc = GETFSMPERFORMANCE(name,fs);
-%  [roc,y,t] = GETFSMPERFORMANCE(name,fs);
+%  [t,y] = GETFSMPERFORMANCE(name,fs,tolerance);
 %
 %  --------
 %   INPUTS
 %  --------
 %    name      :     Name of recording block (e.g. 'R18-159_2019_02_01_2')
 %
+%     fs       :     Sample rate (Hz)
+%
+%  tolerance   :     Tolerance (samples) for matching a spike or artifact
+%                       detected offline.
+%
 %  --------
 %   OUTPUT
 %  --------
-%    roc       :     Struct containing roc data.
+%    t         :     Target (Offline) class for each spike or artifact
+%
+%    y         :     Observed (FSM) output class for each spike or artifact
 %
 % By: Max Murphy  v1.0  2019-02-04  Original version (R2017a)
 
 %% DEFAULTS
-W_LEN = 15;
-TOL = W_LEN;       % Tolerance (samples one direction or another)
+W_LEN = 15; % Max. sample stop
 
 %% USE RECURSION IF CELL INPUT
 if iscell(name)
@@ -26,17 +31,15 @@ if iscell(name)
    y = cell(size(name));
    t = cell(size(name));
    for ii = 1:numel(name)
-      [roc{ii},y{ii},t{ii}] = getFSMperformance(name{ii},fs);
+      [t{ii},y{ii}] = getFSMperformance(name{ii},fs,tolerance);
    end
    return;
 end
-
 
 %% LOAD DATA
 in_dir = strsplit(pwd,filesep);
 in_dir = strjoin(in_dir(1:(end-1)),filesep);
 in_dir = fullfile(in_dir,'data');
-
 
 
 in = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
@@ -48,88 +51,39 @@ spk = load(fullfile(in_dir,[name '_ptrain_P1_Ch_004.mat']));
 sorting = load(fullfile(in_dir,[name '_sort_P1_Ch_004.mat']));
 
 %% GET SPIKE TIMES ACCORDING TO FSM
-idx_online = find(fsm.complete) - W_LEN;
-idx_reject = find(getFSMrejectIndices(fsm.active,fsm.complete,W_LEN));
+% Between the online detected times and the reject times, 
+online = struct;
+online.spikes = find(fsm.complete); 
+online.artifact = find(getFSMrejectIndices(fsm.active,fsm.complete,W_LEN));
 
-%% GET SPIKE TIMES ACCORDING TO SORT
-idx_offline = find(spk.peak_train);
+%% GET SPIKE TIMES ACCORDING TO OFFLINE SORTING
+all_spikes = find(spk.peak_train);
 
 clu = sorting.class;
+offline = struct;
+offline.spikes = all_spikes(clu > 0);
+offline.artifact = all_spikes(clu == 0);
 
-c = getClasses(clu);
+%% PARSE ALL OBSERVED "EVENTS" AND FORMAT FOR OUTPUT
+[outClass,targClass] = getAllEvents(online,offline,tolerance);
+[y,t] = makeDummyArray(outClass,targClass);
 
-roc = struct('tp',cell(numel(c),1),...
-   'fp',cell(numel(c),1),...
-   'tn',cell(numel(c),1),...
-   'fn',cell(numel(c),1));
-
-
-i = 0;
-p_on = cell(numel(c),1);
-p_off = cell(numel(c),1);
-n_on = cell(size(p_on));
-n_off = cell(size(p_off));
-
-y = cell(numel(c),1);
-t = cell(numel(c),1);
-
-for iC = c
-   i = i + 1;
-   idx = reshape(idx_offline(clu==iC),sum(clu==iC),1);
-   p_on{i} = nan(numel(idx_online),1);
-   n_on{i} = nan(numel(idx_reject),1);
-   p_off{i} = nan(size(idx));
-   n_off{i} = nan(size(idx));
-   
-   
-   for ii = 1:numel(idx)
-      p_off{iC}(ii) = min(abs(idx_online - idx(ii)));
-      n_off{iC}(ii) = min(abs(idx_reject - idx(ii)));
-   end
-   
-   for ii = 1:numel(idx_online)
-      p_on{iC}(ii) = min(abs(idx - idx_online(ii)));
+%% FUNCTION TO TRANSLATE ARRAY
+   function [outputs,targets] = makeDummyArray(outputClass,targetClass)
+      % Here, code is: 1 --> spike; 2 --> artifact
+      n = max(numel(unique(outputClass)),numel(unique(targetClass)));
       
+      outputs = zeros(n,numel(outputClass));
+      targets = zeros(n,numel(targetClass));
+      
+      for i = 1:n
+         idxOut = outputClass==i;
+         idxTar = targetClass==i;
+         
+         outputs(i,idxOut) = ones(1,sum(idxOut));
+         targets(i,idxTar) = ones(1,sum(idxTar));
+      end
    end
-   
-   for ii = 1:numel(idx_reject)
-      n_on{iC}(ii) = min(abs(idx - idx_reject(ii)));
-   end
-   
-   
-   roc(i).tp.n = sum(p_off{iC} <= TOL);  % true positive
-   roc(i).tp.tot = numel(p_off{iC});
-   
-   roc(i).fp.n = sum(p_on{iC} > TOL);    % false positive
-   roc(i).fp.tot = numel(p_on{iC});
-   
-   roc(i).fn.n = sum(n_on{iC} <= TOL);   % false negative
-   roc(i).fn.tot = numel(n_on{iC});
-   
-   roc(i).tn.n = sum(n_off{iC} > TOL);     % true negative
-   roc(i).tn.tot = numel(n_off{iC});
-   
-   
-   % Get "targets" first
-   t{iC} = [ones(numel(idx),1), zeros(numel(idx),1)]; 
-   t{iC} = [t{iC}; [ones(numel(p_on{iC}),1), zeros(numel(p_on{iC}),1)]];
-   t{iC} = [t{iC}; [zeros(numel(n_on{iC}),1), ones(numel(n_on{iC}),1)]];
-   
-   % Get "observed" next
-   y{iC} = [p_off{iC} <= TOL, p_off{iC} > TOL];
-   y{iC} = [y{iC}; [p_on{iC} <= TOL, p_on{iC} > TOL]];
-   y{iC} = [y{iC}; [n_on{iC} <= TOL, n_on{iC} > TOL]];  
-   y{iC} = double(y{iC});
-end
-
-   
-   
-
-
-   function c = getClasses(clu)
-      c = unique(clu);
-      c = reshape(c,1,numel(c));
-   end
-
+  
 
 end
