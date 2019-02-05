@@ -1,7 +1,8 @@
-function roc = getFSMperformance(name,fs)
+function [roc,y,t] = getFSMperformance(name,fs)
 %% GETFSMPERFORMANCE    Characterize ROC for FSM detection performance
 %
-%  roc = GETFSMPERFORMANCE(name);
+%  roc = GETFSMPERFORMANCE(name,fs);
+%  [roc,y,t] = GETFSMPERFORMANCE(name,fs);
 %
 %  --------
 %   INPUTS
@@ -22,8 +23,10 @@ TOL = W_LEN;       % Tolerance (samples one direction or another)
 %% USE RECURSION IF CELL INPUT
 if iscell(name)
    roc = cell(size(name));
+   y = cell(size(name));
+   t = cell(size(name));
    for ii = 1:numel(name)
-      roc{ii} = getFSMperformance(name{ii},fs);
+      [roc{ii},y{ii},t{ii}] = getFSMperformance(name{ii},fs);
    end
    return;
 end
@@ -63,16 +66,21 @@ roc = struct('tp',cell(numel(c),1),...
    'tn',cell(numel(c),1),...
    'fn',cell(numel(c),1));
 
+
 i = 0;
 p_on = cell(numel(c),1);
 p_off = cell(numel(c),1);
 n_on = cell(size(p_on));
 n_off = cell(size(p_off));
+
+y = cell(numel(c),1);
+t = cell(numel(c),1);
+
 for iC = c
    i = i + 1;
-   idx = idx_offline(clu==iC);
-   p_on{i} = nan(size(idx_online));
-   n_off{i} = nan(size(idx_reject));
+   idx = reshape(idx_offline(clu==iC),sum(clu==iC),1);
+   p_on{i} = nan(numel(idx_online),1);
+   n_on{i} = nan(numel(idx_reject),1);
    p_off{i} = nan(size(idx));
    n_off{i} = nan(size(idx));
    
@@ -98,13 +106,29 @@ for iC = c
    roc(i).fp.n = sum(p_on{iC} > TOL);    % false positive
    roc(i).fp.tot = numel(p_on{iC});
    
-   roc(i).fn.n = sum(n_off{iC} <= TOL);   % false negative
-   roc(i).fn.tot = numel(n_off{iC});
+   roc(i).fn.n = sum(n_on{iC} <= TOL);   % false negative
+   roc(i).fn.tot = numel(n_on{iC});
    
-   roc(i).tn.n = sum(n_on{iC} > TOL);     % true negative
-   roc(i).tn.tot = numel(n_on{iC});
+   roc(i).tn.n = sum(n_off{iC} > TOL);     % true negative
+   roc(i).tn.tot = numel(n_off{iC});
+   
+   
+   % Get "targets" first
+   t{iC} = [ones(numel(idx),1), zeros(numel(idx),1)]; 
+   t{iC} = [t{iC}; [p_on{iC} <= TOL, p_on{iC} > TOL]];
+   t{iC} = [t{iC}; [n_on{iC} <= TOL, n_on{iC} > TOL]];
+   
+%    t{iC} = [t{iC}; ];numel(idx_offline) + numel(idx_reject),2);
+   
+   % Get "observed" next
+   y{iC} = [p_off{iC} <= TOL, p_off{iC} > TOL];
+   y{iC} = [y{iC}; [ones(numel(p_on{iC}),1), zeros(numel(p_on{iC}),1)]];
+   y{iC} = [y{iC}; [zeros(numel(n_on{iC}),1), ones(numel(n_on{iC}),1)]];  
+   
 end
 
+   
+   
 
 
    function c = getClasses(clu)
