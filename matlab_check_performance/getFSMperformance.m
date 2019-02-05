@@ -49,9 +49,6 @@ sorting = load(fullfile(in_dir,[name '_sort_P1_Ch_004.mat']));
 
 %% GET SPIKE TIMES ACCORDING TO FSM
 idx_online = find(fsm.complete) - W_LEN;
-
-ts = idx_online / fs;
-
 idx_reject = find(getFSMrejectIndices(fsm.active,fsm.complete,W_LEN));
 
 %% GET SPIKE TIMES ACCORDING TO SORT
@@ -115,16 +112,14 @@ for iC = c
    
    % Get "targets" first
    t{iC} = [ones(numel(idx),1), zeros(numel(idx),1)]; 
-   t{iC} = [t{iC}; [p_on{iC} <= TOL, p_on{iC} > TOL]];
-   t{iC} = [t{iC}; [n_on{iC} <= TOL, n_on{iC} > TOL]];
-   
-%    t{iC} = [t{iC}; ];numel(idx_offline) + numel(idx_reject),2);
+   t{iC} = [t{iC}; [ones(numel(p_on{iC}),1), zeros(numel(p_on{iC}),1)]];
+   t{iC} = [t{iC}; [zeros(numel(n_on{iC}),1), ones(numel(n_on{iC}),1)]];
    
    % Get "observed" next
    y{iC} = [p_off{iC} <= TOL, p_off{iC} > TOL];
-   y{iC} = [y{iC}; [ones(numel(p_on{iC}),1), zeros(numel(p_on{iC}),1)]];
-   y{iC} = [y{iC}; [zeros(numel(n_on{iC}),1), ones(numel(n_on{iC}),1)]];  
-   
+   y{iC} = [y{iC}; [p_on{iC} <= TOL, p_on{iC} > TOL]];
+   y{iC} = [y{iC}; [n_on{iC} <= TOL, n_on{iC} > TOL]];  
+   y{iC} = double(y{iC});
 end
 
    
