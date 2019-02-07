@@ -1,13 +1,17 @@
-function rejects = getFSMRejectedSpikes(name)
+function rejects = getFSMRejectedSpikes(name,fsm_window_out)
 %% GETFSMREJECTEDSPIKES    Get spikes rejected by state machine on DAC
 %
 %  rejects = GETFSMREJECTEDSPIKES(name);
+%  rejects = GETFSMREJECTEDSPIKES(name,fsm_window_out);
 %
 %  --------
 %   INPUTS
 %  --------
 %    name      :     Cell array of block names (e.g.
 %                       {'R18-159_2019_02_01_1'})
+%
+%  fsm_window_out :  Simulated FSM state values for duration of recording,
+%                       from matlab_check_performance/SIMULATEFSM
 %
 %  --------
 %   OUTPUT
@@ -35,15 +39,25 @@ in_dir = fullfile(in_dir,'data');
 if iscell(name)
    rejects = cell(size(name));
    for ii = 1:numel(name)
-      rejects{ii} = getFSMRejectedSpikes(name{ii});
+      if nargin > 1
+         rejects{ii} = getFSMRejectedSpikes(name{ii},fsm_window_out);
+      else
+         rejects{ii} = getFSMRejectedSpikes(name{ii});
+      end
    end
    return;
 end
 
 %% LOAD DATA
 dac = load(fullfile(in_dir,[name '_DAC.mat']));
-act = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
-trig = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
+
+if nargin > 1
+   act = struct('data',fsm_window_out == 1);
+   trig = struct('data',fsm_window_out == 2);
+else
+   act = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
+   trig = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
+end
 
 %% 
 idx = getFSMrejectIndices(act.data,trig.data,WLEN,DEBUG);
