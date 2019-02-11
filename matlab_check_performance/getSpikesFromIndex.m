@@ -1,4 +1,4 @@
-function [spikes,detSamples] = getSpikesFromIndex(detSamples,data)
+function [spikes,iRemove] = getSpikesFromIndex(peak_train,data,wlen)
 %% GETSPIKESFROMINDEX   Get spikes from sample indices
 %
 %  spikes = GETSPIKESFROMINDEX(detSamples,data);
@@ -6,7 +6,7 @@ function [spikes,detSamples] = getSpikesFromIndex(detSamples,data)
 %  --------
 %   INPUTS
 %  --------
-%  detSamples  :     Detected spike peak sample indices.
+%  peak_train  :     Detected spike peak sample indices.
 %
 %  data        :     Data vector for spike waveform snippets.
 %
@@ -19,22 +19,22 @@ function [spikes,detSamples] = getSpikesFromIndex(detSamples,data)
 % By: Max Murphy  v1.0  2019-02-05  Original version (R2017a)
 
 %%
-SAMPLES_PRIOR = 12;
-SAMPLES_AFTER = 24;
+if nargin < 3
+   wlen = 24;
+end
+
+samples_prior = wlen + 12;
+samples_after = wlen - 12;
 
 %%
-detSamples = reshape(detSamples,numel(detSamples),1);
-vec = (-SAMPLES_PRIOR) : SAMPLES_AFTER;
+peak_train = reshape(peak_train,numel(peak_train),1);
+vec = (-samples_prior) : samples_after;
 
-vec = vec + detSamples;
+vec = vec + peak_train;
 
 exc = (vec < 1) | (vec > numel(data));
-vec(any(exc,2),:) = [];
-detSamples(any(exc,2)) = [];
+iRemove = any(exc,2);
+vec(iRemove,:) = [];
 spikes = data(vec);
-
-% Make sure all are unique
-[detSamples,idx] = unique(detSamples);
-spikes = spikes(idx,:);
 
 end

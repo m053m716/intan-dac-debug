@@ -30,6 +30,7 @@ DAC_edge_type=[1 1 1 1 1 1 1 0]; % 0==Inclusion, 1==Exclusion
 dac_thresholds=[-140 140 -140 -140 13 -25 -149 -40];
 window_start=[0 2 1 1 3 4 1 0];
 window_stop=[1 5 2 5 15 11 6 1];
+make_spike_fig = true;
 fs = 30000;
 
 %% PARSE INPUT
@@ -66,30 +67,34 @@ fsm_window_state=zeros(1,length(data));
 DAC_fsm_out=zeros(1,length(data));
 
 %% initialize figure with window discriminators
-fig = figure('Name',sprintf('%s: Included and Excluded Spikes',name),...
-   'Units','Normalized',...
-   'Color','w',...
-   'Position',[0.3 0.3 0.4 0.4]);
-time_ms=1e3*(1:45)/fs;
-incl_exc_col={'bo','ro'};
-for curr_dac=1:8
-    if DAC_en(curr_dac)
-        window_samples=window_start(curr_dac):window_stop(curr_dac)-1;
-        window_samples_shifted=window_samples+14;
-        subplot(1,2,1)
-        plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
-        hold on
-        title('detected spikes in the last two samples')
-        subplot(1,2,2)
-        plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
-        hold on
-        title('aborted spikes in the last two samples')
-    end
+if (make_spike_fig)
+   fig = figure('Name',sprintf('%s: Included and Excluded Spikes',name),...
+      'Units','Normalized',...
+      'Color','w',...
+      'Position',[0.3 0.3 0.4 0.4]);
+   time_ms=1e3*(1:45)/fs;
+   incl_exc_col={'bo','ro'};
+   for curr_dac=1:8
+       if DAC_en(curr_dac)
+           window_samples=window_start(curr_dac):window_stop(curr_dac)-1;
+           window_samples_shifted=window_samples+14;
+           subplot(1,2,1)
+           plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
+           hold on
+           title('detected spikes in the last two samples')
+           subplot(1,2,2)
+           plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
+           hold on
+           title('aborted spikes in the last two samples')
+       end
+   end
+else 
+   fig = [];
 end
 
 %% cycle over samples
 tic
-fprintf(1,'Simulating recording...%03g%%\n',0);
+fprintf(1,'Simulating recording (%s)...%03g%%\n',name,0);
 pct = 0;
 for curr_sample=1:length(data)
    %% work done by DAC_output
@@ -129,23 +134,29 @@ for curr_sample=1:length(data)
             else
                 fsm_window_state(curr_sample+1)=0;
                 fsm_counter(curr_sample+1)=0;
-                if fsm_counter(curr_sample)==(DAC_stop_max-1)||fsm_counter(curr_sample)==(DAC_stop_max-2)
-                    %% plotting aborted spikes in different subplot
-                    figure(fig)
-                    subplot(1,2,2)
-                    idx = getSpikeSamples(curr_sample,fsm_counter(curr_sample));
-                    plot(time_ms,data(idx),'k')
-                    hold on
+                if (make_spike_fig)
+                   if fsm_counter(curr_sample)==(DAC_stop_max-1)||fsm_counter(curr_sample)==(DAC_stop_max-2)
+                       %% plotting aborted spikes in different subplot
+                       figure(fig)
+                       subplot(1,2,2)
+                       idx = getSpikeSamples(curr_sample,fsm_counter(curr_sample));
+                       plot(time_ms,data(idx),'k')
+                       hold on
+                   end
                 end
             end
        case 2
             DAC_fsm_out(curr_sample+1)=2;
             fsm_window_state(curr_sample+1)=0;
-            figure(fig);
-            subplot(1,2,1)
-            idx = getSpikeSamples(curr_sample,DAC_stop_max);
-            plot(time_ms,data(idx),'k')
-            hold on
+            if (make_spike_fig)
+               figure(fig);
+               subplot(1,2,1)
+               idx = getSpikeSamples(curr_sample,DAC_stop_max);
+               plot(time_ms,data(idx),'k')
+               hold on
+            end
+      otherwise
+         error('Invalid FSM state (%d).', fsm_window_state(curr_sample));
    end
    cur_pct = floor(100*curr_sample/length(data));
    if (cur_pct > pct)
@@ -153,6 +164,9 @@ for curr_sample=1:length(data)
       fprintf(1,'\b\b\b\b\b%03g%%\n',pct);
    end
 end
+% Account for 2-sample delay
+fsm_window_state = [zeros(1,2), fsm_window_state(1:(end-2))];
+
 toc
 
 %% SUB-FUNCTIONS

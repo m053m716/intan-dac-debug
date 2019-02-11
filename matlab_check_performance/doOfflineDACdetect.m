@@ -1,7 +1,7 @@
-function doOfflineDACdetect(name)
+function doOfflineDACdetect(name,fsm_window_state)
 %% DOOFFLINEDACDETECT   Do simple threshold comparison on DAC
 %
-%  DOOFFLINEDACDETECT(name)
+%  DOOFFLINEDACDETECT(name,fsm_window_state)
 %
 %  --------
 %   INPUTS
@@ -15,14 +15,13 @@ function doOfflineDACdetect(name)
 %  threshold detection results from DAC.
 %
 % By: Max Murphy  v1.0  2019-02-05  Original version (R2017a)
-
-%% DEFAULTS
-THRESH = -39.8;
+%                 v1.1  2019-02-08  Modify how detection is performed (uses
+%                                   fsm_window_state now)
 
 %% PARSE INPUT
 if iscell(name)
    for ii = 1:numel(name)
-      doOfflineDACdetect(name{ii});
+      doOfflineDACdetect(name{ii},fsm_window_state{ii});
    end
    return;
 end
@@ -36,17 +35,12 @@ dac = load(fullfile(in_dir,[name '_DAC.mat']));
 data = dac.data * (0.195/0.0003125);
 
 %% DO DETECTION ON THIS CHANNEL
-detMask = data <= THRESH;
-peak_train = getSpikePeakSamples(detMask,data);
-[spikes,peak_train] = getSpikesFromIndex(peak_train,data);
+[peak_train,class] = getSpikePeakSamples(fsm_window_state);
+[spikes,iRemove] = getSpikesFromIndex(peak_train,data);
+peak_train(iRemove) = [];
+class(iRemove) = [];
 
-[~,score,~] = pca(spikes);
-score = score./max(abs(score),[],1);
-
-features = score(:,1:3);
-
-class = ones(numel(peak_train),1)*2;
-
+features = getSpikeFeatures(spikes);
 pars = struct;
 pars.FS = 30000;
 pars.FEAT_NAMES = {'PC-1','PC-2','PC-3'}; %#ok<STRNU>

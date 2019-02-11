@@ -26,13 +26,20 @@ if nargin < 4
    DEBUG = false;
 end
 
-%%
+%% Get indices of any times state was ACTIVE
 idx = find(fsmActive);
 idx = reshape(idx,numel(idx),1);
-tmp = idx(100:200); % for debug
+tmp = idx(100:200); % (store, for debug)
 
+%% Narrow down to just times the ACTIVE was "entered"
 idx = idx([true;diff(idx) > 1]); % Want points of "entry"
-idx(fsmComplete(idx + wlen)>0) = []; 
+
+% In case ACTIVE was entered and the recording stopped before the FSM could
+% exit ACTIVE or before we can check whether a spike was detected, remove
+% samples near the end of the record:
+idx((idx + wlen) > numel(fsmComplete)) = []; 
+
+idx(fsmComplete(idx + wlen)>0) = [];  % Remove "good" spikes
 
 %% DEBUGGER
 if (DEBUG)

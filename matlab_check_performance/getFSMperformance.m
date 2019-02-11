@@ -1,4 +1,4 @@
-function [t,y,type] = getFSMperformance(name,fs,tolerance,clus)
+function [t,y,type] = getFSMperformance(name,fs,tolerance,clus,sortName)
 %% GETFSMPERFORMANCE    Characterize ROC for FSM detection performance
 %
 %  [t,y] = GETFSMPERFORMANCE(name,fs,tolerance);
@@ -22,18 +22,23 @@ function [t,y,type] = getFSMperformance(name,fs,tolerance,clus)
 %
 %    y         :     Observed (FSM) output class for each spike or artifact
 %
-%   type       :     1 --> True positive (spike)
-%                    2 --> False negative (spike called as artifact)
-%                    3 --> False positive (artifact called as spike)
-%                    4 --> True negative (artifact)
+%   type       :     4 --> True positive (spike)
+%                    3 --> False negative (spike called as artifact)
+%                    2 --> False positive (artifact called as spike)
+%                    1 --> True negative (artifact)
 %
 % By: Max Murphy  v1.0  2019-02-04  Original version (R2017a)
 
 %% DEFAULTS
-W_LEN = 15; % Max. sample stop
+W_LEN = 15;       % Max. sample stop
+PK_OFFSET = -18;  % Sample offset of peak from detected end of FSM
 
 if nargin < 4
-   clus = 2; % Default is first non "OUT" cluster
+   clus = 2; % Spike = 2, Art = 1
+end
+
+if nargin < 5
+   sortName = 'Sorted';
 end
 
 %% USE RECURSION IF CELL INPUT
@@ -48,24 +53,37 @@ if iscell(name)
 end
 
 %% LOAD DATA
-in_dir = strsplit(pwd,filesep);
-in_dir = strjoin(in_dir(1:(end-1)),filesep);
-in_dir = fullfile(in_dir,'data');
+% in_dir = strsplit(pwd,filesep);
+% in_dir = strjoin(in_dir(1:(end-1)),filesep);
+% in_dir = fullfile(in_dir,'data');
 
+% 
+% in = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
+% fsm.complete = in.data;
+% in = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
+% fsm.active = in.data;
 
-in = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
-fsm.complete = in.data;
-in = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
-fsm.active = in.data;
+% spk = load(fullfile(in_dir,[name '_DAC_spikes.mat']));
+% sorting = load(fullfile(in_dir,[name '_DAC_sort.mat']));
 
-spk = load(fullfile(in_dir,[name '_DAC_spikes.mat']));
-sorting = load(fullfile(in_dir,[name '_DAC_sort.mat']));
+spk = load(fullfile(pwd,'old',name,[name '_wav-sneo_CAR_Spikes'],...
+   [name '_ptrain_P0_Ch_000.mat']),'peak_train');
+sorting = load(fullfile(pwd,'old',name,[name '_wav-sneo_SPC_CAR_' sortName],...
+   [name '_sort_P0_Ch_000.mat']),'class');
 
 %% GET SPIKE TIMES ACCORDING TO FSM
 % Between the online detected times and the reject times, 
 online = struct;
-online.spikes = find(fsm.complete) - W_LEN; 
-online.artifact = find(getFSMrejectIndices(fsm.active,fsm.complete,W_LEN));
+
+in = load(fullfile(pwd,name,[name '_wav-sneo_CAR_Spikes'],...
+   [name '_ptrain_P0_Ch_000.mat']),'peak_train');
+ts = in.peak_train;
+in = load(fullfile(pwd,name,[name '_wav-sneo_SPC_CAR_Clusters'],...
+   [name '_clus_P0_Ch_000.mat']),'class');
+clu_online = in.class;
+
+online.spikes = ts(clu_online == 2) + PK_OFFSET;
+online.artifact = ts(clu_online == 1) + PK_OFFSET;
 
 %% GET SPIKE TIMES ACCORDING TO OFFLINE SORTING
 if issparse(spk.peak_train)
@@ -74,10 +92,10 @@ else
    all_spikes = spk.peak_train;
 end
 
-clu = sorting.class;
+clu_offline = sorting.class;
 offline = struct;
-offline.spikes = all_spikes(ismember(clu,clus));
-offline.artifact = all_spikes(~ismember(clu,clus));
+offline.spikes = all_spikes(ismember(clu_offline,clus));
+offline.artifact = all_spikes(~ismember(clu_offline,clus));
 
 %% PARSE ALL OBSERVED "EVENTS" AND FORMAT FOR OUTPUT
 [outClass,targClass] = getAllEvents(online,offline,tolerance);

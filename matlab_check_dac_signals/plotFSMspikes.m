@@ -61,12 +61,25 @@ else
       'Linewidth',1.75);
 end
 
-for iP = 1:numel(params)
-   x = [params(iP).window_start_sample,...
-        params(iP).window_stop_sample - 0.9] / FS * 1000;
-   y = [params(iP).voltage_threshold, ...
-        params(iP).voltage_threshold];
-   ie = params(iP).trigger_window_type;
+if numel(params) > 1
+   n = numel(params);
+else
+   n = numel(params.window_start);
+end
+for iP = 1:n
+   if numel(params) > 1
+      x = [params(iP).window_start_sample,...
+           params(iP).window_stop_sample - 0.9] / FS * 1000;
+      y = [params(iP).voltage_threshold, ...
+           params(iP).voltage_threshold];
+      ie = params(iP).trigger_window_type;
+   else
+      x = [params.window_start(iP),...
+           params.window_stop(iP) - 0.9] / FS * 1000;
+      y = [params.dac_thresholds(iP), ...
+           params.dac_thresholds(iP)];
+      ie = params.DAC_edge_type(iP);
+   end
 
    if ie == 0
       line(x,y,'Color','c','LineWidth',3,...

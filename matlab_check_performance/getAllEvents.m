@@ -47,8 +47,12 @@ while k < numel(offline.spikes)
    i = i + 1;
    k = k + 1;
    
-   [d_art,d_spk] = parseMinDistance(offline.spikes(k),online);
-   outClass(i) = parseClass(d_art,d_spk,tolerance);
+%    [d_art,d_spk] = parseMinDistance(offline.spikes(k),online);
+%    outClass(i) = parseClass(d_art,d_spk,tolerance);
+   
+   d_spk = parseMinDistance(offline.spikes(k),online);
+   outClass(i) = parseClass(d_spk,tolerance);
+
 end
 
 %% LAST, ESTIMATE TARGETS FOR ONLINE OBSERVED ARTIFACT
@@ -57,48 +61,73 @@ while k < numel(offline.artifact)
    i = i + 1;
    k = k + 1;
    
-   [d_art,d_spk] = parseMinDistance(offline.artifact(k),online);
-   outClass(i) = parseClass(d_art,d_spk,tolerance);
+%    [d_art,d_spk] = parseMinDistance(offline.artifact(k),online);
+%    outClass(i) = parseClass(d_art,d_spk,tolerance);
+   
+   d_spk = parseMinDistance(offline.artifact(k),online);
+   outClass(i) = parseClass(d_spk,tolerance);
+   
 end
 
-   function class = parseClass(d_art,d_spk,tolerance)
+%    function class = parseClass(d_art,d_spk,tolerance)
+%       %% PARSECLASS  Get class based on distance to offline spike or art.
+%       if d_spk <= tolerance
+%          class = 1;
+%       else
+%          class = 2;
+%       end
+%       
+% %       if d_art < d_spk % If closest thing is artifact, must be artifact
+% %          class = 2;
+% %       else
+% %          % Otherwise, spike is closer
+% %          if d_spk <= tolerance % If within tolerance, it is a spike
+% %             class = 1;
+% %             
+% %          else % But if it's still far away, this is a "false positive"
+% %             class = 2;
+% %             
+% %          end
+% %       end
+%    end
+   function class = parseClass(d_spk,tolerance)
       %% PARSECLASS  Get class based on distance to offline spike or art.
       if d_spk <= tolerance
          class = 1;
       else
          class = 2;
       end
-      
-%       if d_art < d_spk % If closest thing is artifact, must be artifact
-%          class = 2;
-%       else
-%          % Otherwise, spike is closer
-%          if d_spk <= tolerance % If within tolerance, it is a spike
-%             class = 1;
-%             
-%          else % But if it's still far away, this is a "false positive"
-%             class = 2;
-%             
-%          end
-%       end
    end
 
-   function [d_art,d_spk] = parseMinDistance(offline_sample,online)
+%    function [d_art,d_spk] = parseMinDistance(offline_sample,online)
+%       %% PARSEMINDISTANCE  Get minimum distance to "true" spike or art.
+%       
+%       % Should always be AFTER the OFFLINE spike
+%       tmp = offline_sample - online.spikes;
+% %       d_spk = min(tmp(tmp > 0));
+%       d_spk = min(abs(tmp)); % *should*
+%       if isempty(d_spk)
+%          d_spk = inf;
+%       end
+%       tmp = offline_sample - online.artifact;
+% %       d_art = min(tmp(tmp > 0));
+%       d_art = min(abs(tmp));
+%       if isempty(d_art)
+%          d_art = inf;
+%       end
+%    end
+
+   function d_spk = parseMinDistance(offline_sample,online)
       %% PARSEMINDISTANCE  Get minimum distance to "true" spike or art.
       
       % Should always be AFTER the OFFLINE spike
       tmp = offline_sample - online.spikes;
-%       d_spk = min(tmp(tmp > 0));
+
       d_spk = min(abs(tmp)); % *should*
       if isempty(d_spk)
          d_spk = inf;
       end
-      tmp = offline_sample - online.artifact;
-%       d_art = min(tmp(tmp > 0));
-      d_art = min(abs(tmp));
-      if isempty(d_art)
-         d_art = inf;
-      end
+
    end
 
 end
