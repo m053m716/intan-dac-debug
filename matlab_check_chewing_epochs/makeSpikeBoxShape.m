@@ -19,12 +19,22 @@ if nargin < 3
 end
     
 %%
-tStart = spikeStruct.ts - BOX_START_OFFSET;
-tStop = spikeStruct.ts + BOX_STOP_OFFSET;
-t = getBoxTimeValues(reshape(tStart,1,numel(tStart)),...
-   reshape(tStop,1,numel(tStop)));
 
 
+if isfield(spikeStruct,'wMax')
+   tStart = spikeStruct.ts - (spikeStruct.wMax / dac.fs);
+   tStop = spikeStruct.ts;
+   
+   t = getBoxTimeValues(reshape(tStart,1,numel(tStart)),...
+      reshape(tStop,1,numel(tStop)));
+   
+else
+   tStart = spikeStruct.ts - BOX_START_OFFSET;
+   tStop = spikeStruct.ts + BOX_STOP_OFFSET;
+   t = getBoxTimeValues(reshape(tStart,1,numel(tStart)),...
+      reshape(tStop,1,numel(tStop)));
+   
+end
 y = getBoxAmplitudes(round(spikeStruct.ts * dac.fs)-dac.startIdx,dac.data);
 
 %%

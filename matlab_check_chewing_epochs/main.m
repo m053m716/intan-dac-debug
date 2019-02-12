@@ -26,27 +26,16 @@ load(fullfile(in_dir,'R18-159_2019_02_01_2_DAC-Thresh_spikes.mat'),...
 load(fullfile(in_dir,'R18-159_2019_02_01_2_DAC-Thresh_sort.mat'),...
    'class');
 threshSpk.ts = peak_train/dac.fs;
-threshSpk.class = ones(size(class)) * 2; % They are all counted as spike
-threshSpk.sort = class;
+threshSpk.sort = class; % They are all counted as spike
 
 fsmSpk = struct;
-load(fullfile(in_dir,'R18-159_2019_02_01_2_DIG_fsm-complete.mat'),...
-   'data');
-fsmSpk.ts = find(data > 0);
-fsmSpk.class = ones(size(fsmSpk.ts)) * 2;
-
-load(fullfile(in_dir,'R18-159_2019_02_01_2_DIG_fsm-active.mat'),...
-   'data');
-art = find(diff(data)==1)+1;
-art = setdiff(art,fsmSpk.ts);
-cl = ones(size(art));
-[fsmSpk.ts,iSort] = sort([fsmSpk.ts,art],'ascend');
-fsmSpk.class = [fsmSpk.class,cl];
-fsmSpk.class = fsmSpk.class(iSort);
-fsmSpk.ts = fsmSpk.ts/dac.fs;
-
-fsmSpk.sort = fsmSpk.class;
-
+load(fullfile(in_dir,'R18-159_2019_02_01_2_DAC-FSM_spikes.mat'),...
+   'peak_train');
+load(fullfile(in_dir,'R18-159_2019_02_01_2_DAC-FSM_sort.mat'),...
+   'class');
+fsmSpk.ts = peak_train/dac.fs;
+fsmSpk.sort = class;
+fsmSpk.wMax = 24;
 
 %% GET INDEXING VARIABLES AND SHAPE FOR BURSTS
 dac = updateDacStructData(dac,T_START,T_STOP);

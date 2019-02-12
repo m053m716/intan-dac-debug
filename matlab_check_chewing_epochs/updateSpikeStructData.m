@@ -7,8 +7,8 @@ spikeStruct.minVal = min(dac.data);
 
 idx = (spikeStruct.ts > min(dac.t)) & (spikeStruct.ts < max(dac.t));
 spikeStruct.ts = reshape(spikeStruct.ts(idx),1,sum(idx));
-spikeStruct.class = reshape(spikeStruct.class(idx),1,sum(idx));
-spikeStruct.class = min(spikeStruct.class,ones(size(spikeStruct.class))*2);
 spikeStruct.sort = reshape(spikeStruct.sort(idx),1,sum(idx));
+spikeStruct.sort = min(spikeStruct.sort,ones(size(spikeStruct.sort))*2);
+spikeStruct.class = ones(size(spikeStruct.sort)) * 2; % They are all counted as spike
 
 end

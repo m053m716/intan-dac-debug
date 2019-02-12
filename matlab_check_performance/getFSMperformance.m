@@ -53,19 +53,6 @@ if iscell(name)
 end
 
 %% LOAD DATA
-% in_dir = strsplit(pwd,filesep);
-% in_dir = strjoin(in_dir(1:(end-1)),filesep);
-% in_dir = fullfile(in_dir,'data');
-
-% 
-% in = load(fullfile(in_dir,[name '_DIG_fsm-complete.mat']));
-% fsm.complete = in.data;
-% in = load(fullfile(in_dir,[name '_DIG_fsm-active.mat']));
-% fsm.active = in.data;
-
-% spk = load(fullfile(in_dir,[name '_DAC_spikes.mat']));
-% sorting = load(fullfile(in_dir,[name '_DAC_sort.mat']));
-
 spk = load(fullfile(pwd,'old',name,[name '_wav-sneo_CAR_Spikes'],...
    [name '_ptrain_P0_Ch_000.mat']),'peak_train');
 sorting = load(fullfile(pwd,'old',name,[name '_wav-sneo_SPC_CAR_' sortName],...
@@ -75,10 +62,10 @@ sorting = load(fullfile(pwd,'old',name,[name '_wav-sneo_SPC_CAR_' sortName],...
 % Between the online detected times and the reject times, 
 online = struct;
 
-in = load(fullfile(pwd,name,[name '_wav-sneo_CAR_Spikes'],...
+in = load(fullfile(pwd,'window-spikes-art',name,[name '_wav-sneo_CAR_Spikes'],...
    [name '_ptrain_P0_Ch_000.mat']),'peak_train');
 ts = in.peak_train;
-in = load(fullfile(pwd,name,[name '_wav-sneo_SPC_CAR_Clusters'],...
+in = load(fullfile(pwd,'window-spikes-art',name,[name '_wav-sneo_SPC_CAR_Clusters'],...
    [name '_clus_P0_Ch_000.mat']),'class');
 clu_online = in.class;
 
