@@ -18,6 +18,9 @@ function doOfflineDACdetect(name,fsm_window_state)
 %                 v1.1  2019-02-08  Modify how detection is performed (uses
 %                                   fsm_window_state now)
 
+%% DEFAULTS
+COUNT_ARTIFACT = true;
+
 %% PARSE INPUT
 if iscell(name)
    for ii = 1:numel(name)
@@ -35,7 +38,7 @@ dac = load(fullfile(in_dir,[name '_DAC.mat']));
 data = dac.data * (0.195/0.0003125);
 
 %% DO DETECTION ON THIS CHANNEL
-[peak_train,class] = getSpikePeakSamples(fsm_window_state);
+[peak_train,class] = getSpikePeakSamples(fsm_window_state,COUNT_ARTIFACT);
 [spikes,iRemove] = getSpikesFromIndex(peak_train,data);
 peak_train(iRemove) = [];
 class(iRemove) = [];

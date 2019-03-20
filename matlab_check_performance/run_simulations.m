@@ -9,18 +9,23 @@ clear; clc; close all force;
 NAME = 'R18-159_2019_02_01_2';
 
 %% DEFINE WINDOW PARAMETERS
+% For window state machine:
 params = struct;
 params.DAC_en         = [  1  1   1   1   1   1    1   1];
 params.DAC_edge_type  = [  1  1   0   1   0   1    1   0]; % 0==Inc, 1==Exc
 params.dac_thresholds = [-25 60 -30  -5  15 -45 -110 -40];
 params.window_start   = [  0 19   7  18  22  13    4   6];
 params.window_stop    = [  3 24   8  21  24  15   24   7];
+params.refractory_period     = 0; % samples
 
-% params.DAC_en         = [  0  0   1    1    1   1    1   1];
-% params.DAC_edge_type  = [  1  1   1    0    0   1    1   0]; % 0==Inc, 1==Exc
-% params.dac_thresholds = [-25 60 -25  -15  -35 -40  -35 -20];
-% params.window_start   = [  0 19  20   14   10   4    0   0];
-% params.window_stop    = [  3 24  24   24   13   9    3   4];
+% For monopolar threshold:
+% params = struct;
+% params.DAC_en         = [  0  0   0   0   0   0    0   1];
+% params.DAC_edge_type  = [  1  1   0   1   0   1    1   0]; % 0==Inc, 1==Exc
+% params.dac_thresholds = [-25 60 -30  -5  15 -45 -110 -40];
+% params.window_start   = [  0 19   7  18  22  13    4   0];
+% params.window_stop    = [  3 24   8  21  24  15   24   1];
+% params.refractory_period     = 60; % samples --> 2 ms
 
 params.fs = 30000;
 params.make_spike_fig = false;

@@ -10,10 +10,10 @@ function [fsm_window_state,fig] = simulateFSM(name,params)
 %    name      :     String of block name or cell array of strings.
 %
 %   params     :     Struct containing following fields:
-%                    -> 'DAC_en' 
-%                    -> 'DAC_edge_type' 
-%                    -> 'dac_thresholds' 
-%                    -> 'window_start' 
+%                    -> 'DAC_en'
+%                    -> 'DAC_edge_type'
+%                    -> 'dac_thresholds'
+%                    -> 'window_start'
 %                    -> 'window_stop'
 %
 %  --------
@@ -31,6 +31,7 @@ dac_thresholds=[-140 140 -140 -140 13 -25 -149 -40];
 window_start=[0 2 1 1 3 4 1 0];
 window_stop=[1 5 2 5 15 11 6 1];
 make_spike_fig = true;
+refractory_period = 0;
 fs = 30000;
 
 %% PARSE INPUT
@@ -38,13 +39,13 @@ if nargin > 1
    f = fieldnames(params);
    for iF = 1:numel(f)
       eval([f{iF} ' = params.(f{iF});']);
-   end   
+   end
 end
 dac_thresholds_0195=get_safe(dac_thresholds);
 pos_th=dac_thresholds>=0;
 DAC_stop_max=max(window_stop.*DAC_en);
 
-%% USE RECURSION FOR CELL ARRAY WITH MULTIPLE "NAME" 
+%% USE RECURSION FOR CELL ARRAY WITH MULTIPLE "NAME"
 if iscell(name)
    fsm_window_state = cell(size(name));
    fig = cell(size(fsm_window_state));
@@ -75,20 +76,20 @@ if (make_spike_fig)
    time_ms=1e3*(1:45)/fs;
    incl_exc_col={'bo','ro'};
    for curr_dac=1:8
-       if DAC_en(curr_dac)
-           window_samples=window_start(curr_dac):window_stop(curr_dac)-1;
-           window_samples_shifted=window_samples+14;
-           subplot(1,2,1)
-           plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
-           hold on
-           title('detected spikes in the last two samples')
-           subplot(1,2,2)
-           plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
-           hold on
-           title('aborted spikes in the last two samples')
-       end
+      if DAC_en(curr_dac)
+         window_samples=window_start(curr_dac):window_stop(curr_dac)-1;
+         window_samples_shifted=window_samples+14;
+         subplot(1,2,1)
+         plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
+         hold on
+         title('detected spikes in the last two samples')
+         subplot(1,2,2)
+         plot(time_ms(window_samples_shifted),dac_thresholds_0195(curr_dac),incl_exc_col{DAC_edge_type(curr_dac)+1})
+         hold on
+         title('aborted spikes in the last two samples')
+      end
    end
-else 
+else
    fig = [];
 end
 
@@ -96,6 +97,7 @@ end
 tic
 fprintf(1,'Simulating recording (%s)...%03g%%\n',name,0);
 pct = 0;
+refractory_counter = inf;
 for curr_sample=1:length(data)
    %% work done by DAC_output
    DAC_thresh_out=zeros(1,8);
@@ -111,53 +113,59 @@ for curr_sample=1:length(data)
    DAC_state_status = DAC_thresh_int | DAC_in_en; % The thresholding does not matter outside the window, or if DAC is disabled.
    DAC_check_states = all(DAC_state_status); % Reduce the state status to a logical value (all conditions must be met)
    DAC_any_enabled = any(DAC_en); 				% At least one DAC must be enabled to run the machine (otherwise it will constantly stim.)
-   DAC_advance = DAC_check_states && DAC_any_enabled; % If all state criteria are met, advances to next clock cycle iteration.   
-
+   DAC_advance = DAC_check_states && DAC_any_enabled; % If all state criteria are met, advances to next clock cycle iteration.
+   
    %% fsm
    switch fsm_window_state(curr_sample)
-       case 0
-           DAC_fsm_out(curr_sample+1)=0;
-           if DAC_advance
+      case 0
+         DAC_fsm_out(curr_sample+1)=0;
+         fsm_window_state(curr_sample+1) = 0;
+         if (DAC_advance)
+            if (refractory_counter > refractory_period)
                fsm_window_state(curr_sample+1)=1;
                fsm_counter(curr_sample+1)=fsm_counter(curr_sample)+1;
-           end
-       case 1
-            DAC_fsm_out(curr_sample+1)=1;
-            if DAC_advance
-                if fsm_counter(curr_sample)==DAC_stop_max
-                    fsm_window_state(curr_sample+1)=2;
-                    fsm_counter(curr_sample+1)=0;
-                else
-                    fsm_window_state(curr_sample+1)=1;
-                    fsm_counter(curr_sample+1)=fsm_counter(curr_sample)+1;
-                end
+            end
+         end
+      case 1
+         DAC_fsm_out(curr_sample+1)=1;
+         if DAC_advance
+            if fsm_counter(curr_sample)==DAC_stop_max
+               fsm_window_state(curr_sample+1)=2;
+               fsm_counter(curr_sample+1)=0;
             else
-                fsm_window_state(curr_sample+1)=0;
-                fsm_counter(curr_sample+1)=0;
-                if (make_spike_fig)
-                   if fsm_counter(curr_sample)==(DAC_stop_max-1)||fsm_counter(curr_sample)==(DAC_stop_max-2)
-                       %% plotting aborted spikes in different subplot
-                       figure(fig)
-                       subplot(1,2,2)
-                       idx = getSpikeSamples(curr_sample,fsm_counter(curr_sample));
-                       plot(time_ms,data(idx),'k')
-                       hold on
-                   end
-                end
+               fsm_window_state(curr_sample+1)=1;
+               fsm_counter(curr_sample+1)=fsm_counter(curr_sample)+1;
             end
-       case 2
-            DAC_fsm_out(curr_sample+1)=2;
+         else
             fsm_window_state(curr_sample+1)=0;
+            fsm_counter(curr_sample+1)=0;
             if (make_spike_fig)
-               figure(fig);
-               subplot(1,2,1)
-               idx = getSpikeSamples(curr_sample,DAC_stop_max);
-               plot(time_ms,data(idx),'k')
-               hold on
+               if fsm_counter(curr_sample)==(DAC_stop_max-1)||fsm_counter(curr_sample)==(DAC_stop_max-2)
+                  %% plotting aborted spikes in different subplot
+                  figure(fig)
+                  subplot(1,2,2)
+                  idx = getSpikeSamples(curr_sample,fsm_counter(curr_sample));
+                  plot(time_ms,data(idx),'k')
+                  hold on
+               end
             end
+         end
+      case 2
+         DAC_fsm_out(curr_sample+1)=2;
+         fsm_window_state(curr_sample+1)=0;
+         refractory_counter = 0;
+         if (make_spike_fig)
+            figure(fig);
+            subplot(1,2,1)
+            idx = getSpikeSamples(curr_sample,DAC_stop_max);
+            plot(time_ms,data(idx),'k')
+            hold on
+         end
       otherwise
          error('Invalid FSM state (%d).', fsm_window_state(curr_sample));
    end
+   
+   refractory_counter = refractory_counter + 1;
    cur_pct = floor(100*curr_sample/length(data));
    if (cur_pct > pct)
       pct = cur_pct;
@@ -174,9 +182,9 @@ toc
       %% GET_SAFE  Get correct threshold based on DAC quantization
       % if negative put +, if positive put -
       if threshold>=0
-          safe_th=round(threshold/0.195)*0.195-0.195/2;
+         safe_th=round(threshold/0.195)*0.195-0.195/2;
       else
-          safe_th=round(threshold/0.195)*0.195+0.195/2;
+         safe_th=round(threshold/0.195)*0.195+0.195/2;
       end
    end
 

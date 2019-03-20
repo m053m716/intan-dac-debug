@@ -1,4 +1,4 @@
-function read_Intan_RHS_ts
+function t = read_Intan_RHS_ts(path,file)
 
 % read_Intan_RHS2000_file
 %
@@ -17,11 +17,13 @@ function read_Intan_RHS_ts
 % >> amplifier_channels(1)
 % >> plot(t, amplifier_data(1,:))
 
-[file, path, filterindex] = ...
-    uigetfile('*.rhs', ...
-              'Select an RHS2000 Data File', ...
-              'R:\Rat\Intan', ...
-              'MultiSelect', 'off');
+if nargin < 2
+   [file, path, filterindex] = ...
+       uigetfile('*.rhs', ...
+                 'Select an RHS2000 Data File', ...
+                 'R:\Rat\Intan', ...
+                 'MultiSelect', 'off');
+end
 
 if (file == 0)
     return;
@@ -33,7 +35,7 @@ end
 % file = d(end).name;
 
 tic;
-filename = [path,file];
+filename = fullfile(path,file);
 fid = fopen(filename, 'r');
 
 s = dir(filename);
@@ -386,7 +388,7 @@ if (data_present)
 end
 
 % Move variables to base workspace.
-move_to_base_workspace(t);
+% move_to_base_workspace(t);
 
 return
 
